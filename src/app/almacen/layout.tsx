@@ -83,7 +83,7 @@ export default function AlmacenLayout({
       <aside className="w-64 bg-neutral-900 text-white flex-shrink-0 flex flex-col print:hidden">
         {/* Logo */}
         <div className="p-6 border-b border-neutral-800">
-          <Logo size="md" textColor="light" href="/almacen" />
+          <Logo size="md" href="/almacen" />
           <p className="text-xs text-neutral-500 mt-1">Panel de Almacén</p>
         </div>
 

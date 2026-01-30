@@ -219,7 +219,7 @@ export default function HomePage() {
               {/* Logo y descripción */}
               <div className="col-span-2">
                 <div className="mb-6">
-                  <Logo size="lg" href={undefined} textColor="light" />
+                  <Logo size="lg" href={undefined} />
                 </div>
                 <p className="text-neutral-400 max-w-md">
                   Líder en distribución de cerámica de alta calidad para profesionales.

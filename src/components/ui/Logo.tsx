@@ -3,10 +3,8 @@ import Link from 'next/link'
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
-  showText?: boolean
   href?: string
   className?: string
-  textColor?: 'dark' | 'light'
 }
 
 const sizeConfig = {
@@ -18,23 +16,13 @@ const sizeConfig = {
 
 export function Logo({
   size = 'md',
-  showText = false,
   href = '/',
   className = '',
-  textColor = 'dark',
 }: LogoProps) {
   const config = sizeConfig[size]
 
-  const textColorClass = textColor === 'light'
-    ? 'text-white'
-    : 'text-primary-600'
-
-  const secondaryTextClass = textColor === 'light'
-    ? 'text-primary-300'
-    : 'text-primary-800'
-
   const content = (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center ${className}`}>
       <Image
         src="/logo-sphera.webp"
         alt="SPHERA TILE"
@@ -43,11 +31,6 @@ export function Logo({
         className="object-contain"
         priority
       />
-      {showText && (
-        <span className={`font-bold ${config.text} tracking-tight ${textColorClass}`}>
-          SPHERA<span className={secondaryTextClass}>TILE</span>
-        </span>
-      )}
     </div>
   )
 

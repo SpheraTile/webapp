@@ -38,7 +38,7 @@ export function DesktopNav({ transparent = false }: DesktopNavProps) {
     >
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
-        <Logo size="lg" textColor={transparent ? 'light' : 'dark'} />
+        <Logo size="lg" />
 
         {/* Links de navegación */}
         <div className="flex items-center gap-8">

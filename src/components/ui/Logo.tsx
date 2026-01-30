@@ -24,7 +24,7 @@ export function Logo({
   const content = (
     <div className={`flex items-center ${className}`}>
       <Image
-        src="/logo-sphera.webp"
+        src="/logo-sphera.png"
         alt="SPHERA TILE"
         width={config.width}
         height={config.height}

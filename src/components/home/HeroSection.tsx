@@ -35,8 +35,8 @@ export function HeroSectionMobile() {
   const isVideo = config?.tipo === 'video'
 
   return (
-    <section className="relative h-[calc(100dvh-4rem)] w-full">
-      {/* Fondo fijo */}
+    <section className="relative h-[calc(100dvh-4rem)] w-full overflow-hidden">
+      {/* Fondo fijo - ocupa toda la pantalla menos el menú inferior */}
       {isVideo ? (
         <video
           autoPlay
@@ -44,20 +44,20 @@ export function HeroSectionMobile() {
           loop
           playsInline
           preload="auto"
-          className="fixed inset-0 w-full h-full object-cover -z-10"
+          className="fixed top-0 left-0 right-0 h-[calc(100dvh-4rem)] w-full object-cover"
           poster={DEFAULT_IMAGE}
         >
           <source src={backgroundUrl} type="video/mp4" />
         </video>
       ) : (
         <div
-          className="fixed inset-0 w-full h-full bg-cover bg-center -z-10"
+          className="fixed top-0 left-0 right-0 h-[calc(100dvh-4rem)] w-full bg-cover bg-center"
           style={{ backgroundImage: `url('${backgroundUrl}')` }}
         />
       )}
 
       {/* Overlay oscuro fijo */}
-      <div className="fixed inset-0 bg-black/50 -z-10" />
+      <div className="fixed top-0 left-0 right-0 h-[calc(100dvh-4rem)] bg-black/50" />
 
       {/* Header con logo y selector de idioma */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 pt-6">

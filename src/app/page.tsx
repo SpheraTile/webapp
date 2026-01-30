@@ -279,7 +279,7 @@ export default async function HomePage() {
             </div>
 
             <div className="border-t border-neutral-800 mt-12 pt-8 text-center text-neutral-500">
-              <p>© 2024 SPHERA TILE. {tFooter('rights')}</p>
+              <p>© 2026 SPHERA TILE. {tFooter('rights')}</p>
             </div>
           </div>
         </footer>

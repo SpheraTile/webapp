@@ -65,7 +65,7 @@ export function HeroSectionMobile() {
           <div className="w-10" />
           <Logo size="lg" href={undefined} />
           <div className="text-white">
-            <LanguageSwitch />
+            <LanguageSwitch variant="light" />
           </div>
         </div>
       </div>

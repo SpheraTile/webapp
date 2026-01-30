@@ -143,7 +143,13 @@
     "share": "مشاركة",
     "quantity": "الكمية",
     "boxes": "صناديق",
-    "subtotal": "المجموع الفرعي"
+    "subtotal": "المجموع الفرعي",
+    "packagingInfo": "معلومات التغليف",
+    "packagingAndOrder": "التغليف والطلب",
+    "characteristics": "الخصائص",
+    "pricePerM2Note": "السعر للمتر المربع. لا يشمل ضريبة القيمة المضافة.",
+    "deliveryTitle": "التوصيل خلال 24-48 ساعة",
+    "deliveryNote": "للطلبات المقدمة قبل الساعة 2:00 مساءً"
   },
   "cart": {
     "title": "السلة",

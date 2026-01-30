@@ -92,7 +92,7 @@ export function DesktopNav({ transparent = false }: DesktopNavProps) {
               {t('warehouse')}
             </Link>
           )}
-          <LanguageSwitch />
+          <LanguageSwitch variant={transparent ? 'light' : 'dark'} />
           <Link
             href="/cesta"
             className={`

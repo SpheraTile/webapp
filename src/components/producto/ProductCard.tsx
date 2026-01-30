@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { Producto, LABELS_TIPO_PIEZA, LABELS_USO } from '@/types'
+import { useTranslations } from 'next-intl'
+import { Producto } from '@/types'
 import { StockBadge } from '@/components/ui/StockBadge'
 import { PriceTag } from '@/components/ui/PriceTag'
 import { ProductImage } from '@/components/ui/ProductImage'
@@ -12,15 +13,48 @@ interface ProductCardProps {
   variant?: 'grid' | 'list'
 }
 
-function EstadoBadge({ estado }: { estado: string }) {
+// Translation keys for product attributes
+const MATERIA_PRIMA_KEYS: Record<string, string> = {
+  'Porcelánico': 'porcelain',
+  'Gres': 'stoneware',
+  'Azulejo': 'tile',
+}
+
+const ACABADO_KEYS: Record<string, string> = {
+  'Mate': 'matte',
+  'Pulido': 'polished',
+  'Satinado': 'satin',
+  'Texturizado': 'textured',
+}
+
+const TIPO_PIEZA_KEYS: Record<string, string> = {
+  'base': 'base',
+  'decorado': 'decorated',
+  'multistep': 'multistep',
+}
+
+const USO_KEYS: Record<string, string> = {
+  'pavimento': 'floor',
+  'revestimiento': 'wall',
+  'pavimento_revestimiento': 'floorWall',
+}
+
+const ESTADO_KEYS: Record<string, string> = {
+  'oferta': 'offer',
+  'novedad': 'new',
+}
+
+function EstadoBadge({ estado, t }: { estado: string; t: (key: string) => string }) {
   if (estado === 'normal') return null
 
   const config = {
-    oferta: { bg: 'bg-red-500', text: 'OFERTA' },
-    novedad: { bg: 'bg-primary-600', text: 'NOVEDAD' },
+    oferta: { bg: 'bg-red-500' },
+    novedad: { bg: 'bg-primary-600' },
   }
 
-  const { bg, text } = config[estado as keyof typeof config] || { bg: 'bg-neutral-500', text: estado }
+  const { bg } = config[estado as keyof typeof config] || { bg: 'bg-neutral-500' }
+  const translationKey = ESTADO_KEYS[estado]
+  const text = translationKey ? t(translationKey).toUpperCase() : estado.toUpperCase()
 
   return (
     <span className={`absolute top-2 left-2 ${bg} text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm z-10`}>
@@ -30,8 +64,20 @@ function EstadoBadge({ estado }: { estado: string }) {
 }
 
 export function ProductCard({ producto, className = '', variant = 'grid' }: ProductCardProps) {
-  const tipoPiezaLabel = producto.tipo_pieza ? LABELS_TIPO_PIEZA[producto.tipo_pieza] : ''
-  const usoLabel = producto.uso ? LABELS_USO[producto.uso] : ''
+  const t = useTranslations('filters')
+
+  // Get translated labels
+  const tipoPiezaKey = producto.tipo_pieza ? TIPO_PIEZA_KEYS[producto.tipo_pieza] : null
+  const tipoPiezaLabel = tipoPiezaKey ? t(tipoPiezaKey) : ''
+
+  const usoKey = producto.uso ? USO_KEYS[producto.uso] : null
+  const usoLabel = usoKey ? t(usoKey) : ''
+
+  const materiaPrimaKey = producto.materia_prima ? MATERIA_PRIMA_KEYS[producto.materia_prima] : null
+  const materiaPrimaLabel = materiaPrimaKey ? t(materiaPrimaKey) : producto.materia_prima
+
+  const acabadoKey = producto.acabado ? ACABADO_KEYS[producto.acabado] : null
+  const acabadoLabel = acabadoKey ? t(acabadoKey) : producto.acabado
 
   if (variant === 'list') {
     return (
@@ -41,7 +87,7 @@ export function ProductCard({ producto, className = '', variant = 'grid' }: Prod
       >
         {/* Imagen del producto - ancho completo */}
         <div className="relative w-full aspect-[16/9] bg-neutral-100">
-          <EstadoBadge estado={producto.estado_producto || 'normal'} />
+          <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
           <ProductImage
             src={producto.imagen}
             alt={producto.nombre}
@@ -60,15 +106,15 @@ export function ProductCard({ producto, className = '', variant = 'grid' }: Prod
 
           {/* Referencia */}
           <p className="text-sm text-neutral-500 mb-3">
-            Ref: {producto.referencia || producto.id} · {producto.materia_prima}
+            Ref: {producto.referencia || producto.id} · {materiaPrimaLabel}
           </p>
 
           {/* Formato y características */}
           <div className="flex flex-wrap gap-2 text-sm text-neutral-600 mb-3">
             <span className="px-2 py-1 bg-neutral-100 rounded">{producto.formato}</span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{producto.calidad}</span>
-            <span className="px-2 py-1 bg-neutral-100 rounded">{producto.acabado}</span>
-            {tipoPiezaLabel && tipoPiezaLabel !== 'Base' && (
+            <span className="px-2 py-1 bg-neutral-100 rounded">{acabadoLabel}</span>
+            {tipoPiezaLabel && tipoPiezaKey !== 'base' && (
               <span className="px-2 py-1 bg-primary-100 text-primary-700 rounded">{tipoPiezaLabel}</span>
             )}
             {usoLabel && (
@@ -95,7 +141,7 @@ export function ProductCard({ producto, className = '', variant = 'grid' }: Prod
     >
       {/* Imagen del producto */}
       <div className="relative aspect-product bg-neutral-100 overflow-hidden">
-        <EstadoBadge estado={producto.estado_producto || 'normal'} />
+        <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
         <ProductImage
           src={producto.imagen}
           alt={producto.nombre}
@@ -115,7 +161,7 @@ export function ProductCard({ producto, className = '', variant = 'grid' }: Prod
         {/* Formato y tipo */}
         <div className="flex items-center gap-2 text-sm text-neutral-500">
           <span>{producto.formato}</span>
-          {tipoPiezaLabel && tipoPiezaLabel !== 'Base' && (
+          {tipoPiezaLabel && tipoPiezaKey !== 'base' && (
             <span className="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded">
               {tipoPiezaLabel}
             </span>

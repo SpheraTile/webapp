@@ -10,7 +10,11 @@ const languages = [
   { code: 'ar', flag: '🇸🇦', name: 'العربية' },
 ]
 
-export function LanguageSwitch() {
+interface LanguageSwitchProps {
+  variant?: 'light' | 'dark'
+}
+
+export function LanguageSwitch({ variant = 'dark' }: LanguageSwitchProps) {
   const locale = useLocale()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -54,13 +58,17 @@ export function LanguageSwitch() {
     }
   }
 
+  const buttonStyles = variant === 'light'
+    ? 'bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20'
+    : 'bg-neutral-100 border-neutral-200 text-neutral-700 hover:bg-neutral-200'
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Current language button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={loading}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-50 hover:scale-105 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-50 rounded-full border ${buttonStyles}`}
       >
         <span className="text-lg">{currentLang.flag}</span>
         <span className="uppercase">{locale}</span>
@@ -76,7 +84,7 @@ export function LanguageSwitch() {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200 overflow-hidden min-w-[140px] z-50">
+        <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden min-w-[140px] z-50">
           {otherLanguages.map((lang) => (
             <button
               key={lang.code}

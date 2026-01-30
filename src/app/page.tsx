@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 import { Logo } from '@/components/ui/Logo'
+import { LanguageSwitch } from '@/components/ui/LanguageSwitch'
 import { HeroSectionMobile, HeroSectionDesktop } from '@/components/home/HeroSection'
 
 // Datos de ambientes/habitaciones con cerámica (keys for translation)
@@ -107,6 +108,7 @@ export default async function HomePage() {
               >
                 {tNav('account')}
               </Link>
+              <LanguageSwitch variant="dark" />
               <Link
                 href="/cesta"
                 className="flex items-center gap-2 bg-primary-600 text-white px-5 py-2.5 rounded-full hover:bg-primary-700 transition-colors font-medium"

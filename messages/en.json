@@ -143,7 +143,13 @@
     "share": "Share",
     "quantity": "Quantity",
     "boxes": "boxes",
-    "subtotal": "Subtotal"
+    "subtotal": "Subtotal",
+    "packagingInfo": "Packaging Information",
+    "packagingAndOrder": "Packaging and Order",
+    "characteristics": "Characteristics",
+    "pricePerM2Note": "Price per square meter. VAT not included.",
+    "deliveryTitle": "Delivery in 24-48h",
+    "deliveryNote": "for orders placed before 2:00 PM"
   },
   "cart": {
     "title": "Cart",

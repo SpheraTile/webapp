@@ -143,7 +143,13 @@
     "share": "Compartir",
     "quantity": "Cantidad",
     "boxes": "cajas",
-    "subtotal": "Subtotal"
+    "subtotal": "Subtotal",
+    "packagingInfo": "Información de Empaquetado",
+    "packagingAndOrder": "Empaquetado y Pedido",
+    "characteristics": "Características",
+    "pricePerM2Note": "Precio por metro cuadrado. IVA no incluido.",
+    "deliveryTitle": "Entrega en 24-48h",
+    "deliveryNote": "para pedidos realizados antes de las 14:00h"
   },
   "cart": {
     "title": "Cesta",

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Header } from '@/components/layout/Header'
 import { DesktopNav } from '@/components/layout/DesktopNav'
 import { StockBadge } from '@/components/ui/StockBadge'
@@ -9,6 +10,30 @@ import { PriceTag } from '@/components/ui/PriceTag'
 import { ProductImage } from '@/components/ui/ProductImage'
 import { AddToCartButton } from '@/components/producto/AddToCartButton'
 import { Producto } from '@/types'
+
+// Translation keys for product attributes
+const MATERIA_PRIMA_KEYS: Record<string, string> = {
+  'Porcelánico': 'porcelain',
+  'Gres': 'stoneware',
+  'Azulejo': 'tile',
+}
+
+const ASPECTO_KEYS: Record<string, string> = {
+  'Blanco': 'white',
+  'Cemento': 'cement',
+  'Colores': 'colors',
+  'Madera': 'wood',
+  'Mármol': 'marble',
+  'Piedra': 'stone',
+  'Terracota': 'terracotta',
+}
+
+const ACABADO_KEYS: Record<string, string> = {
+  'Mate': 'matte',
+  'Pulido': 'polished',
+  'Satinado': 'satin',
+  'Texturizado': 'textured',
+}
 
 function ProductGallery({ images, productName }: { images: string[]; productName: string }) {
   const [selectedIndex, setSelectedIndex] = useState(0)
@@ -109,8 +134,22 @@ interface ProductDetailClientProps {
 }
 
 export function ProductDetailClient({ producto }: ProductDetailClientProps) {
+  const t = useTranslations('products')
+  const tFilters = useTranslations('filters')
+  const tNav = useTranslations('nav')
+
   // Combinar imagen principal con galería
   const allImages = [producto.imagen, ...producto.galeria]
+
+  // Translate attribute values
+  const materiaPrimaKey = producto.materia_prima ? MATERIA_PRIMA_KEYS[producto.materia_prima] : null
+  const materiaPrimaLabel = materiaPrimaKey ? tFilters(materiaPrimaKey) : producto.materia_prima
+
+  const aspectoKey = producto.aspecto ? ASPECTO_KEYS[producto.aspecto] : null
+  const aspectoLabel = aspectoKey ? tFilters(aspectoKey) : producto.aspecto
+
+  const acabadoKey = producto.acabado ? ACABADO_KEYS[producto.acabado] : null
+  const acabadoLabel = acabadoKey ? tFilters(acabadoKey) : producto.acabado
 
   return (
     <div className="min-h-screen bg-white lg:bg-neutral-50">
@@ -119,9 +158,9 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
         <Header showBack backHref="/productos" />
         {/* Migas de pan móvil */}
         <nav className="flex items-center gap-2 text-sm px-4 py-2 bg-neutral-50 border-b border-neutral-100">
-          <Link href="/" className="text-neutral-500 hover:text-primary-600">Inicio</Link>
+          <Link href="/" className="text-neutral-500 hover:text-primary-600">{tNav('home')}</Link>
           <span className="text-neutral-300">/</span>
-          <Link href="/productos" className="text-neutral-500 hover:text-primary-600">Catálogo</Link>
+          <Link href="/productos" className="text-neutral-500 hover:text-primary-600">{tNav('products')}</Link>
           <span className="text-neutral-300">/</span>
           <span className="text-primary-600 font-medium truncate">{producto.nombre}</span>
         </nav>
@@ -136,7 +175,7 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
         <div className="p-4 space-y-4">
           {/* Referencia y Serie */}
           <div className="flex items-center gap-2 text-sm text-neutral-500">
-            <span>Ref: {producto.referencia}</span>
+            <span>{t('reference')}: {producto.referencia}</span>
             <span>•</span>
             <span>{producto.serie}</span>
           </div>
@@ -158,49 +197,49 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
           {/* Características */}
           <div className="grid grid-cols-2 gap-4 py-4 border-y border-neutral-200">
             <div>
-              <span className="text-sm text-neutral-500">Calidad</span>
+              <span className="text-sm text-neutral-500">{t('quality')}</span>
               <p className="font-medium text-neutral-900">{producto.calidad}</p>
             </div>
             <div>
-              <span className="text-sm text-neutral-500">Materia Prima</span>
-              <p className="font-medium text-neutral-900">{producto.materia_prima}</p>
+              <span className="text-sm text-neutral-500">{t('material')}</span>
+              <p className="font-medium text-neutral-900">{materiaPrimaLabel}</p>
             </div>
             <div>
-              <span className="text-sm text-neutral-500">Aspecto</span>
-              <p className="font-medium text-neutral-900">{producto.aspecto}</p>
+              <span className="text-sm text-neutral-500">{t('aspect')}</span>
+              <p className="font-medium text-neutral-900">{aspectoLabel}</p>
             </div>
             <div>
-              <span className="text-sm text-neutral-500">Acabado</span>
-              <p className="font-medium text-neutral-900">{producto.acabado}</p>
+              <span className="text-sm text-neutral-500">{t('finish')}</span>
+              <p className="font-medium text-neutral-900">{acabadoLabel}</p>
             </div>
           </div>
 
           {/* Información de empaquetado */}
           <div className="bg-neutral-50 rounded-xl p-4">
-            <h3 className="font-semibold text-neutral-900 mb-3">Información de Empaquetado</h3>
+            <h3 className="font-semibold text-neutral-900 mb-3">{t('packagingInfo')}</h3>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-neutral-500">m² / caja:</span>
+                <span className="text-neutral-500">{t('boxM2')}:</span>
                 <span className="font-medium">{producto.m2_caja} m²</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500">Piezas / caja:</span>
+                <span className="text-neutral-500">{t('boxPieces')}:</span>
                 <span className="font-medium">{producto.piezas_caja}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500">m² / palet:</span>
+                <span className="text-neutral-500">{t('palletM2')}:</span>
                 <span className="font-medium">{producto.m2_palet} m²</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500">Cajas / palet:</span>
+                <span className="text-neutral-500">{t('palletBoxes')}:</span>
                 <span className="font-medium">{producto.cajas_palet}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500">Peso caja:</span>
+                <span className="text-neutral-500">{t('boxWeight')}:</span>
                 <span className="font-medium">{producto.peso_caja_kg} kg</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-500">Pedido mín:</span>
+                <span className="text-neutral-500">{t('minOrder')}:</span>
                 <span className="font-medium text-primary-600">{producto.pedido_minimo_m2} m²</span>
               </div>
             </div>
@@ -216,9 +255,9 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
         <div className="max-w-7xl mx-auto px-6 py-12">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-8">
-            <Link href="/" className="hover:text-primary-600">Inicio</Link>
+            <Link href="/" className="hover:text-primary-600">{tNav('home')}</Link>
             <span className="text-neutral-300">/</span>
-            <Link href="/productos" className="hover:text-primary-600">Catálogo</Link>
+            <Link href="/productos" className="hover:text-primary-600">{tNav('products')}</Link>
             <span className="text-neutral-300">/</span>
             <span className="text-primary-600 font-medium">{producto.nombre}</span>
           </nav>
@@ -233,7 +272,7 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
             <div className="flex-1 max-w-xl">
               {/* Referencia y Serie */}
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-sm text-neutral-500">Ref: {producto.referencia}</span>
+                <span className="text-sm text-neutral-500">{t('reference')}: {producto.referencia}</span>
                 <span className="px-2 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded">
                   {producto.serie}
                 </span>
@@ -256,61 +295,61 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
               <div className="bg-neutral-50 rounded-2xl p-6 mb-8">
                 <PriceTag precio_m2={producto.precio_m2} size="xl" />
                 <p className="text-sm text-neutral-500 mt-2">
-                  Precio por metro cuadrado. IVA no incluido.
+                  {t('pricePerM2Note')}
                 </p>
               </div>
 
               {/* Características */}
               <div className="mb-8">
-                <h3 className="font-semibold text-lg text-neutral-900 mb-4">Características</h3>
+                <h3 className="font-semibold text-lg text-neutral-900 mb-4">{t('characteristics')}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white border border-neutral-200 rounded-xl p-4">
-                    <span className="text-sm text-neutral-500">Calidad</span>
+                    <span className="text-sm text-neutral-500">{t('quality')}</span>
                     <p className="font-semibold text-neutral-900 text-lg">{producto.calidad}</p>
                   </div>
                   <div className="bg-white border border-neutral-200 rounded-xl p-4">
-                    <span className="text-sm text-neutral-500">Materia Prima</span>
-                    <p className="font-semibold text-neutral-900 text-lg">{producto.materia_prima}</p>
+                    <span className="text-sm text-neutral-500">{t('material')}</span>
+                    <p className="font-semibold text-neutral-900 text-lg">{materiaPrimaLabel}</p>
                   </div>
                   <div className="bg-white border border-neutral-200 rounded-xl p-4">
-                    <span className="text-sm text-neutral-500">Aspecto</span>
-                    <p className="font-semibold text-neutral-900 text-lg">{producto.aspecto}</p>
+                    <span className="text-sm text-neutral-500">{t('aspect')}</span>
+                    <p className="font-semibold text-neutral-900 text-lg">{aspectoLabel}</p>
                   </div>
                   <div className="bg-white border border-neutral-200 rounded-xl p-4">
-                    <span className="text-sm text-neutral-500">Acabado</span>
-                    <p className="font-semibold text-neutral-900 text-lg">{producto.acabado}</p>
+                    <span className="text-sm text-neutral-500">{t('finish')}</span>
+                    <p className="font-semibold text-neutral-900 text-lg">{acabadoLabel}</p>
                   </div>
                 </div>
               </div>
 
               {/* Información de empaquetado */}
               <div className="mb-8">
-                <h3 className="font-semibold text-lg text-neutral-900 mb-4">Empaquetado y Pedido</h3>
+                <h3 className="font-semibold text-lg text-neutral-900 mb-4">{t('packagingAndOrder')}</h3>
                 <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
                   <table className="w-full text-sm">
                     <tbody className="divide-y divide-neutral-100">
                       <tr>
-                        <td className="px-4 py-3 text-neutral-500">m² por caja</td>
+                        <td className="px-4 py-3 text-neutral-500">{t('boxM2')}</td>
                         <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.m2_caja} m²</td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 text-neutral-500">Piezas por caja</td>
-                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.piezas_caja} uds</td>
+                        <td className="px-4 py-3 text-neutral-500">{t('boxPieces')}</td>
+                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.piezas_caja}</td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 text-neutral-500">m² por palet</td>
+                        <td className="px-4 py-3 text-neutral-500">{t('palletM2')}</td>
                         <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.m2_palet} m²</td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 text-neutral-500">Cajas por palet</td>
-                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.cajas_palet} cajas</td>
+                        <td className="px-4 py-3 text-neutral-500">{t('palletBoxes')}</td>
+                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.cajas_palet}</td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 text-neutral-500">Peso por caja</td>
+                        <td className="px-4 py-3 text-neutral-500">{t('boxWeight')}</td>
                         <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.peso_caja_kg} kg</td>
                       </tr>
                       <tr className="bg-primary-50">
-                        <td className="px-4 py-3 text-primary-700 font-medium">Pedido mínimo</td>
+                        <td className="px-4 py-3 text-primary-700 font-medium">{t('minOrder')}</td>
                         <td className="px-4 py-3 font-bold text-primary-700 text-right">{producto.pedido_minimo_m2} m²</td>
                       </tr>
                     </tbody>
@@ -324,7 +363,7 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
               {/* Info adicional */}
               <div className="mt-8 p-4 bg-primary-50 rounded-xl">
                 <p className="text-sm text-primary-800">
-                  <strong>Entrega en 24-48h</strong> para pedidos realizados antes de las 14:00h
+                  <strong>{t('deliveryTitle')}</strong> {t('deliveryNote')}
                 </p>
               </div>
             </div>

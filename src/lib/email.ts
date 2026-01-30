@@ -1,8 +1,13 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resend: Resend | null = null
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'SPHERA TILE <onboarding@resend.dev>'
+function getResendClient() {
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return resend
+}
 
 interface SendEmailParams {
   to: string
@@ -11,9 +16,12 @@ interface SendEmailParams {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailParams) {
+  const client = getResendClient()
+  const fromEmail = process.env.EMAIL_FROM || 'SPHERA TILE <onboarding@resend.dev>'
+
   try {
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
+    const { data, error } = await client.emails.send({
+      from: fromEmail,
       to,
       subject,
       html,

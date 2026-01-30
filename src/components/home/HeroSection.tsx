@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Logo } from '@/components/ui/Logo'
 import { LanguageSwitch } from '@/components/ui/LanguageSwitch'
 
@@ -15,7 +16,8 @@ const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1600607687939-ce8a6c251
 
 export function HeroSectionMobile() {
   const [config, setConfig] = useState<HeroConfig | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
+  const t = useTranslations('home')
 
   useEffect(() => {
     fetch('/api/configuracion?clave=hero_mobile')
@@ -71,10 +73,10 @@ export function HeroSectionMobile() {
       {/* Contenido del Hero */}
       <div className="relative z-10 h-full flex flex-col items-center justify-end text-center text-white px-6 pb-8">
         <h1 className="text-3xl font-bold mb-3 tracking-tight">
-          Cerámica de <span className="text-primary-300">Excelencia</span>
+          {t('heroTitle')} <span className="text-primary-300">{t('heroTitleHighlight')}</span>
         </h1>
         <p className="text-white/90 text-sm mb-6 max-w-xs">
-          Más de 700 referencias para profesionales
+          {t('heroSubtitleMobile')}
         </p>
 
         {/* Botones */}
@@ -83,13 +85,13 @@ export function HeroSectionMobile() {
             href="/productos?estado_producto=novedad"
             className="block w-full py-3.5 bg-white/10 backdrop-blur-sm text-white rounded-full font-semibold text-center transition-all active:scale-95 border border-white/30"
           >
-            Novedades
+            {t('news')}
           </Link>
           <Link
             href="/productos?estado_producto=oferta"
             className="block w-full py-3.5 bg-primary-600 text-white rounded-full font-semibold text-center transition-all active:scale-95"
           >
-            Ofertas
+            {t('offers')}
           </Link>
         </div>
       </div>
@@ -99,7 +101,8 @@ export function HeroSectionMobile() {
 
 export function HeroSectionDesktop() {
   const [config, setConfig] = useState<HeroConfig | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [, setLoading] = useState(true)
+  const t = useTranslations('home')
 
   useEffect(() => {
     fetch('/api/configuracion?clave=hero_desktop')
@@ -143,23 +146,23 @@ export function HeroSectionDesktop() {
       {/* Contenido del Hero */}
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center text-white px-6">
         <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-          Cerámica de <span className="text-primary-300">Excelencia</span>
+          {t('heroTitle')} <span className="text-primary-300">{t('heroTitleHighlight')}</span>
         </h1>
         <p className="text-xl md:text-2xl text-white/90 max-w-2xl mb-10">
-          Más de 700 referencias de porcelánico, gres y azulejos para profesionales y distribuidores
+          {t('heroSubtitleDesktop')}
         </p>
         <div className="flex gap-4">
           <Link
             href="/productos"
             className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all hover:scale-105"
           >
-            Explorar Catálogo
+            {t('exploreCatalog')}
           </Link>
           <Link
             href="/ceramoteca"
             className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all border border-white/30"
           >
-            Ceramoteca
+            {t('ceramoteca')}
           </Link>
         </div>
 

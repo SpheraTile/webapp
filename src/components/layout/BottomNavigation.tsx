@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   IconHome,
   IconSearch,
@@ -11,17 +12,18 @@ import {
 } from '@/components/ui/Icons'
 import { useCesta } from '@/context/CestaContext'
 
-const navItems = [
-  { href: '/', label: 'Inicio', icon: IconHome },
-  { href: '/productos', label: 'Productos', icon: IconSearch },
-  { href: '/ceramoteca', label: 'Ceramoteca', icon: IconCeramoteca },
-  { href: '/cesta', label: 'Cesta', icon: IconCart, showBadge: true },
-  { href: '/cuenta', label: 'Mi Cuenta', icon: IconUser },
-]
-
 export function BottomNavigation() {
   const pathname = usePathname()
   const { items } = useCesta()
+  const t = useTranslations('nav')
+
+  const navItems = [
+    { href: '/', label: t('home'), icon: IconHome },
+    { href: '/productos', label: t('products'), icon: IconSearch },
+    { href: '/ceramoteca', label: t('ceramoteca'), icon: IconCeramoteca },
+    { href: '/cesta', label: t('cart'), icon: IconCart, showBadge: true },
+    { href: '/cuenta', label: t('account'), icon: IconUser },
+  ]
 
   const totalItems = items.length
 

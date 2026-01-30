@@ -65,10 +65,43 @@
     "warehouse": "Warehouse"
   },
   "home": {
-    "heroTitle": "Quality ceramics for your projects",
-    "heroSubtitle": "Discover our selection of tiles and flooring",
+    "heroTitle": "Ceramics of",
+    "heroTitleHighlight": "Excellence",
+    "heroSubtitleMobile": "Over 700 references for professionals",
+    "heroSubtitleDesktop": "Over 700 references of porcelain, stoneware and tiles for professionals and distributors",
+    "news": "New Arrivals",
+    "offers": "Offers",
+    "exploreCatalog": "Explore Catalog",
+    "ceramoteca": "Ceramoteca",
+    "inspirationTitle": "Inspiration for Every Space",
+    "inspirationSubtitle": "Discover how our ceramics transform homes and professional projects",
+    "collectionsTitle": "Our Collections",
+    "collectionsSubtitle": "Premium materials for all types of projects",
+    "ctaTitle": "Ready to start your project?",
+    "ctaSubtitle": "Access our complete catalog with exclusive prices for professionals",
+    "ctaButton": "View Full Catalog",
     "viewCatalog": "View catalog",
-    "featuredProducts": "Featured products"
+    "featuredProducts": "Featured products",
+    "ambientBathroom": "Designer Bathrooms",
+    "ambientBathroomDesc": "High-end porcelain for wellness spaces",
+    "ambientKitchen": "Modern Kitchens",
+    "ambientKitchenDesc": "Resistant and elegant surfaces for the heart of the home",
+    "ambientLiving": "Elegant Living Rooms",
+    "ambientLivingDesc": "Large formats that transform spaces",
+    "ambientOutdoor": "Outdoors",
+    "ambientOutdoorDesc": "Non-slip flooring for terraces and gardens",
+    "categoryMarble": "Marble",
+    "categoryCement": "Cement",
+    "categoryWood": "Wood",
+    "categoryStone": "Stone",
+    "categoryPorcelain": "Porcelain",
+    "categoryPorcelainDesc": "Maximum resistance and durability",
+    "categoryStoneware": "Stoneware",
+    "categoryStonewareDesc": "Versatility and quality",
+    "categoryTile": "Tile",
+    "categoryTileDesc": "Tradition and design",
+    "categoryMosaic": "Mosaic",
+    "categoryMosaicDesc": "Unique details"
   },
   "products": {
     "title": "Products",
@@ -188,6 +221,11 @@
     "floorWall": "Floor and wall"
   },
   "footer": {
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "catalog": "Catalog",
+    "contact": "Contact",
+    "viewAll": "View all",
+    "schedule": "Monday - Friday: 8:00 AM - 6:00 PM",
+    "description": "Leader in distribution of high-quality ceramics for professionals. Over 20 years of experience in the industry."
   }
 }

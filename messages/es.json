@@ -65,10 +65,43 @@
     "warehouse": "Almacén"
   },
   "home": {
-    "heroTitle": "Cerámica de calidad para tus proyectos",
-    "heroSubtitle": "Descubre nuestra selección de azulejos y pavimentos",
+    "heroTitle": "Cerámica de",
+    "heroTitleHighlight": "Excelencia",
+    "heroSubtitleMobile": "Más de 700 referencias para profesionales",
+    "heroSubtitleDesktop": "Más de 700 referencias de porcelánico, gres y azulejos para profesionales y distribuidores",
+    "news": "Novedades",
+    "offers": "Ofertas",
+    "exploreCatalog": "Explorar Catálogo",
+    "ceramoteca": "Ceramoteca",
+    "inspirationTitle": "Inspiración para cada Espacio",
+    "inspirationSubtitle": "Descubre cómo nuestras cerámicas transforman hogares y proyectos profesionales",
+    "collectionsTitle": "Nuestras Colecciones",
+    "collectionsSubtitle": "Materiales de primera calidad para todo tipo de proyectos",
+    "ctaTitle": "¿Listo para empezar tu proyecto?",
+    "ctaSubtitle": "Accede a nuestro catálogo completo con precios exclusivos para profesionales",
+    "ctaButton": "Ver Catálogo Completo",
     "viewCatalog": "Ver catálogo",
-    "featuredProducts": "Productos destacados"
+    "featuredProducts": "Productos destacados",
+    "ambientBathroom": "Baños de Diseño",
+    "ambientBathroomDesc": "Porcelánico de alta gama para espacios de bienestar",
+    "ambientKitchen": "Cocinas Modernas",
+    "ambientKitchenDesc": "Superficies resistentes y elegantes para el corazón del hogar",
+    "ambientLiving": "Salones Elegantes",
+    "ambientLivingDesc": "Grandes formatos que transforman espacios",
+    "ambientOutdoor": "Exteriores",
+    "ambientOutdoorDesc": "Pavimentos antideslizantes para terrazas y jardines",
+    "categoryMarble": "Mármol",
+    "categoryCement": "Cemento",
+    "categoryWood": "Madera",
+    "categoryStone": "Piedra",
+    "categoryPorcelain": "Porcelánico",
+    "categoryPorcelainDesc": "Máxima resistencia y durabilidad",
+    "categoryStoneware": "Gres",
+    "categoryStonewareDesc": "Versatilidad y calidad",
+    "categoryTile": "Azulejo",
+    "categoryTileDesc": "Tradición y diseño",
+    "categoryMosaic": "Mosaico",
+    "categoryMosaicDesc": "Detalles únicos"
   },
   "products": {
     "title": "Productos",
@@ -188,6 +221,11 @@
     "floorWall": "Pavimento y revestimiento"
   },
   "footer": {
-    "rights": "Todos los derechos reservados"
+    "rights": "Todos los derechos reservados",
+    "catalog": "Catálogo",
+    "contact": "Contacto",
+    "viewAll": "Ver todo",
+    "schedule": "Lunes - Viernes: 8:00 - 18:00",
+    "description": "Líder en distribución de cerámica de alta calidad para profesionales. Más de 20 años de experiencia en el sector."
   }
 }

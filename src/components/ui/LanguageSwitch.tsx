@@ -64,16 +64,15 @@ export function LanguageSwitch({ variant = 'dark' }: LanguageSwitchProps) {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Current language button */}
+      {/* Current language button - only flag + arrow */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={loading}
-        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-50 rounded-full border ${buttonStyles}`}
+        className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 rounded-full border ${buttonStyles}`}
       >
-        <span className="text-lg">{currentLang.flag}</span>
-        <span className="uppercase">{locale}</span>
+        <span className="text-xl">{currentLang.flag}</span>
         <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -82,16 +81,16 @@ export function LanguageSwitch({ variant = 'dark' }: LanguageSwitchProps) {
         </svg>
       </button>
 
-      {/* Dropdown */}
+      {/* Dropdown with flags */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden min-w-[140px] z-50">
+        <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden z-50">
           {otherLanguages.map((lang) => (
             <button
               key={lang.code}
               onClick={() => changeLocale(lang.code)}
-              className="flex items-center gap-3 w-full px-4 py-2.5 text-left hover:bg-neutral-100 transition-colors text-neutral-800"
+              className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-neutral-100 transition-colors text-neutral-800"
             >
-              <span className="text-lg">{lang.flag}</span>
+              <span className="text-xl">{lang.flag}</span>
               <span className="text-sm font-medium">{lang.name}</span>
             </button>
           ))}

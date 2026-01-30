@@ -1,0 +1,336 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { Header } from '@/components/layout/Header'
+import { DesktopNav } from '@/components/layout/DesktopNav'
+import { StockBadge } from '@/components/ui/StockBadge'
+import { PriceTag } from '@/components/ui/PriceTag'
+import { ProductImage } from '@/components/ui/ProductImage'
+import { AddToCartButton } from '@/components/producto/AddToCartButton'
+import { Producto } from '@/types'
+
+function ProductGallery({ images, productName }: { images: string[]; productName: string }) {
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  if (images.length === 0) return null
+
+  return (
+    <div className="space-y-4">
+      {/* Imagen principal */}
+      <div className="relative aspect-square bg-neutral-100 rounded-2xl overflow-hidden">
+        <ProductImage
+          src={images[selectedIndex]}
+          alt={`${productName} - Imagen ${selectedIndex + 1}`}
+          fill
+          className="object-cover"
+          priority
+          sizes="(max-width: 1024px) 100vw, 50vw"
+        />
+      </div>
+
+      {/* Thumbnails */}
+      {images.length > 1 && (
+        <div className="flex gap-3">
+          {images.map((img, index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedIndex(index)}
+              className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                selectedIndex === index
+                  ? 'border-primary-600 ring-2 ring-primary-200'
+                  : 'border-transparent hover:border-neutral-300'
+              }`}
+            >
+              <ProductImage
+                src={img}
+                alt={`${productName} - Miniatura ${index + 1}`}
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MobileGallery({ images, productName }: { images: string[]; productName: string }) {
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  if (images.length === 0) return null
+
+  return (
+    <div className="p-4">
+      {/* Imagen principal */}
+      <div className="relative aspect-square bg-neutral-100 rounded-2xl overflow-hidden">
+        <ProductImage
+          src={images[selectedIndex]}
+          alt={`${productName} - Imagen ${selectedIndex + 1}`}
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+        />
+      </div>
+
+      {/* Indicadores / Thumbnails */}
+      {images.length > 1 && (
+        <div className="flex justify-center gap-2 pt-3">
+          {images.map((img, index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedIndex(index)}
+              className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                selectedIndex === index
+                  ? 'border-primary-600'
+                  : 'border-neutral-200'
+              }`}
+            >
+              <ProductImage
+                src={img}
+                alt={`${productName} - Miniatura ${index + 1}`}
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface ProductDetailClientProps {
+  producto: Producto
+}
+
+export function ProductDetailClient({ producto }: ProductDetailClientProps) {
+  // Combinar imagen principal con galería
+  const allImages = [producto.imagen, ...producto.galeria]
+
+  return (
+    <div className="min-h-screen bg-white lg:bg-neutral-50">
+      <DesktopNav />
+      <div className="lg:hidden">
+        <Header showBack backHref="/productos" />
+        {/* Migas de pan móvil */}
+        <nav className="flex items-center gap-2 text-sm px-4 py-2 bg-neutral-50 border-b border-neutral-100">
+          <Link href="/" className="text-neutral-500 hover:text-primary-600">Inicio</Link>
+          <span className="text-neutral-300">/</span>
+          <Link href="/productos" className="text-neutral-500 hover:text-primary-600">Catálogo</Link>
+          <span className="text-neutral-300">/</span>
+          <span className="text-primary-600 font-medium truncate">{producto.nombre}</span>
+        </nav>
+      </div>
+
+      {/* Layout móvil */}
+      <div className="lg:hidden">
+        {/* Galería móvil */}
+        <MobileGallery images={allImages} productName={producto.nombre} />
+
+        {/* Información del producto */}
+        <div className="p-4 space-y-4">
+          {/* Referencia y Serie */}
+          <div className="flex items-center gap-2 text-sm text-neutral-500">
+            <span>Ref: {producto.referencia}</span>
+            <span>•</span>
+            <span>{producto.serie}</span>
+          </div>
+
+          {/* Nombre y formato */}
+          <div>
+            <h1 className="text-2xl font-bold text-neutral-900 uppercase tracking-wide">
+              {producto.nombre}
+            </h1>
+            <p className="text-neutral-500 mt-1">{producto.formato}</p>
+          </div>
+
+          {/* Stock */}
+          <StockBadge stock_m2={producto.stock_m2} />
+
+          {/* Precio */}
+          <PriceTag precio_m2={producto.precio_m2} size="lg" />
+
+          {/* Características */}
+          <div className="grid grid-cols-2 gap-4 py-4 border-y border-neutral-200">
+            <div>
+              <span className="text-sm text-neutral-500">Calidad</span>
+              <p className="font-medium text-neutral-900">{producto.calidad}</p>
+            </div>
+            <div>
+              <span className="text-sm text-neutral-500">Materia Prima</span>
+              <p className="font-medium text-neutral-900">{producto.materia_prima}</p>
+            </div>
+            <div>
+              <span className="text-sm text-neutral-500">Aspecto</span>
+              <p className="font-medium text-neutral-900">{producto.aspecto}</p>
+            </div>
+            <div>
+              <span className="text-sm text-neutral-500">Acabado</span>
+              <p className="font-medium text-neutral-900">{producto.acabado}</p>
+            </div>
+          </div>
+
+          {/* Información de empaquetado */}
+          <div className="bg-neutral-50 rounded-xl p-4">
+            <h3 className="font-semibold text-neutral-900 mb-3">Información de Empaquetado</h3>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-neutral-500">m² / caja:</span>
+                <span className="font-medium">{producto.m2_caja} m²</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-500">Piezas / caja:</span>
+                <span className="font-medium">{producto.piezas_caja}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-500">m² / palet:</span>
+                <span className="font-medium">{producto.m2_palet} m²</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-500">Cajas / palet:</span>
+                <span className="font-medium">{producto.cajas_palet}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-500">Peso caja:</span>
+                <span className="font-medium">{producto.peso_caja_kg} kg</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-neutral-500">Pedido mín:</span>
+                <span className="font-medium text-primary-600">{producto.pedido_minimo_m2} m²</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Botón añadir a cesta */}
+          <AddToCartButton producto={producto} />
+        </div>
+      </div>
+
+      {/* Layout desktop */}
+      <div className="hidden lg:block pt-20">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-8">
+            <Link href="/" className="hover:text-primary-600">Inicio</Link>
+            <span className="text-neutral-300">/</span>
+            <Link href="/productos" className="hover:text-primary-600">Catálogo</Link>
+            <span className="text-neutral-300">/</span>
+            <span className="text-primary-600 font-medium">{producto.nombre}</span>
+          </nav>
+
+          <div className="flex gap-12">
+            {/* Columna izquierda: Galería */}
+            <div className="flex-1 sticky top-28 self-start">
+              <ProductGallery images={allImages} productName={producto.nombre} />
+            </div>
+
+            {/* Columna derecha: Info */}
+            <div className="flex-1 max-w-xl">
+              {/* Referencia y Serie */}
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-sm text-neutral-500">Ref: {producto.referencia}</span>
+                <span className="px-2 py-1 bg-primary-100 text-primary-700 text-xs font-medium rounded">
+                  {producto.serie}
+                </span>
+              </div>
+
+              {/* Nombre */}
+              <h1 className="text-4xl font-bold text-neutral-900 uppercase tracking-wide mb-4">
+                {producto.nombre}
+              </h1>
+
+              {/* Formato */}
+              <p className="text-xl text-neutral-600 mb-6">{producto.formato}</p>
+
+              {/* Stock badge */}
+              <div className="mb-6">
+                <StockBadge stock_m2={producto.stock_m2} />
+              </div>
+
+              {/* Precio destacado */}
+              <div className="bg-neutral-50 rounded-2xl p-6 mb-8">
+                <PriceTag precio_m2={producto.precio_m2} size="xl" />
+                <p className="text-sm text-neutral-500 mt-2">
+                  Precio por metro cuadrado. IVA no incluido.
+                </p>
+              </div>
+
+              {/* Características */}
+              <div className="mb-8">
+                <h3 className="font-semibold text-lg text-neutral-900 mb-4">Características</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white border border-neutral-200 rounded-xl p-4">
+                    <span className="text-sm text-neutral-500">Calidad</span>
+                    <p className="font-semibold text-neutral-900 text-lg">{producto.calidad}</p>
+                  </div>
+                  <div className="bg-white border border-neutral-200 rounded-xl p-4">
+                    <span className="text-sm text-neutral-500">Materia Prima</span>
+                    <p className="font-semibold text-neutral-900 text-lg">{producto.materia_prima}</p>
+                  </div>
+                  <div className="bg-white border border-neutral-200 rounded-xl p-4">
+                    <span className="text-sm text-neutral-500">Aspecto</span>
+                    <p className="font-semibold text-neutral-900 text-lg">{producto.aspecto}</p>
+                  </div>
+                  <div className="bg-white border border-neutral-200 rounded-xl p-4">
+                    <span className="text-sm text-neutral-500">Acabado</span>
+                    <p className="font-semibold text-neutral-900 text-lg">{producto.acabado}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Información de empaquetado */}
+              <div className="mb-8">
+                <h3 className="font-semibold text-lg text-neutral-900 mb-4">Empaquetado y Pedido</h3>
+                <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-sm">
+                    <tbody className="divide-y divide-neutral-100">
+                      <tr>
+                        <td className="px-4 py-3 text-neutral-500">m² por caja</td>
+                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.m2_caja} m²</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 text-neutral-500">Piezas por caja</td>
+                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.piezas_caja} uds</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 text-neutral-500">m² por palet</td>
+                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.m2_palet} m²</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 text-neutral-500">Cajas por palet</td>
+                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.cajas_palet} cajas</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 text-neutral-500">Peso por caja</td>
+                        <td className="px-4 py-3 font-semibold text-neutral-900 text-right">{producto.peso_caja_kg} kg</td>
+                      </tr>
+                      <tr className="bg-primary-50">
+                        <td className="px-4 py-3 text-primary-700 font-medium">Pedido mínimo</td>
+                        <td className="px-4 py-3 font-bold text-primary-700 text-right">{producto.pedido_minimo_m2} m²</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Botón añadir a cesta */}
+              <AddToCartButton producto={producto} />
+
+              {/* Info adicional */}
+              <div className="mt-8 p-4 bg-primary-50 rounded-xl">
+                <p className="text-sm text-primary-800">
+                  <strong>Entrega en 24-48h</strong> para pedidos realizados antes de las 14:00h
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

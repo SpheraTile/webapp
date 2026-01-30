@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-neutral-900 antialiased;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Ocultar scrollbar manteniendo funcionalidad */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer components {
+  /* Botón primario corporativo */
+  .btn-primary {
+    @apply bg-primary-600 text-white font-medium px-6 py-3 rounded-lg
+           transition-colors duration-200 hover:bg-primary-700
+           active:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Botón secundario */
+  .btn-secondary {
+    @apply bg-white text-neutral-900 font-medium px-6 py-3 rounded-lg
+           border border-neutral-300 transition-colors duration-200
+           hover:bg-neutral-50 active:bg-neutral-100;
+  }
+
+  /* Botón outline */
+  .btn-outline {
+    @apply bg-transparent text-primary-600 font-medium px-6 py-3 rounded-lg
+           border border-primary-600 transition-colors duration-200
+           hover:bg-primary-50 active:bg-primary-100;
+  }
+
+  /* Input base */
+  .input-base {
+    @apply w-full px-4 py-3 bg-neutral-100 rounded-full
+           border border-transparent text-neutral-900
+           placeholder:text-neutral-500
+           focus:outline-none focus:border-primary-500 focus:bg-white
+           transition-all duration-200;
+  }
+
+  /* Card de producto */
+  .product-card {
+    @apply bg-white rounded-lg overflow-hidden
+           transition-transform duration-200 active:scale-[0.98];
+  }
+
+  /* Badge de stock */
+  .stock-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5
+           bg-neutral-100 rounded-full text-sm text-neutral-700;
+  }
+
+  /* Navegación inferior item */
+  .nav-item {
+    @apply flex flex-col items-center justify-center gap-1
+           text-neutral-500 transition-colors duration-200;
+  }
+  .nav-item.active {
+    @apply text-primary-600;
+  }
+}
+
+@layer utilities {
+  /* Padding para safe areas en móvil */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Aspect ratio para imágenes de productos */
+  .aspect-product {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* Print styles for documents */
+@media print {
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+
+  .print\:bg-white {
+    background-color: white !important;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  /* Hide Next.js dev indicators and overlays */
+  #__next-build-watcher,
+  [data-nextjs-dialog],
+  [data-nextjs-dialog-overlay],
+  nextjs-portal,
+  [data-nextjs-toast],
+  [data-nextjs-scroll-focus-boundary] ~ div:last-child,
+  [data-next-mark],
+  [class*="__next"],
+  [id*="__next"]:not(#__next),
+  body > div[style*="position: fixed"],
+  body > div[style*="z-index: 9999"],
+  body > div[style*="z-index: 99999"] {
+    display: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+
+  /* Avoid breaking inside tables and important sections */
+  table, tr, td, th {
+    page-break-inside: avoid;
+  }
+}

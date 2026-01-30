@@ -1,0 +1,414 @@
+'use client'
+
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Header } from '@/components/layout/Header'
+import { DesktopNav } from '@/components/layout/DesktopNav'
+import { SearchBar } from '@/components/ui/SearchBar'
+import { ProductGrid } from '@/components/producto/ProductGrid'
+import { FiltersDrawer } from '@/components/filtros/FiltersDrawer'
+import { IconFilter, IconGrid, IconList } from '@/components/ui/Icons'
+import { Producto } from '@/types'
+
+interface FiltrosActivos {
+  calidad: string[]
+  materia_prima: string[]
+  aspecto: string[]
+  acabado: string[]
+  tipo_pieza: string[]
+  uso: string[]
+  estado_producto: string[]
+}
+
+const filtrosIniciales: FiltrosActivos = {
+  calidad: [],
+  materia_prima: [],
+  aspecto: [],
+  acabado: [],
+  tipo_pieza: [],
+  uso: [],
+  estado_producto: [],
+}
+
+// Mapeo de valores frontend a valores de BD (enum en mayúsculas)
+const mapToDBValue = (key: string, value: string): string => {
+  const maps: Record<string, Record<string, string>> = {
+    materia_prima: {
+      'Porcelánico': 'PORCELANICO',
+      'Gres': 'GRES',
+      'Azulejo': 'AZULEJO',
+    },
+    aspecto: {
+      'Blanco': 'BLANCO',
+      'Cemento': 'CEMENTO',
+      'Colores': 'COLORES',
+      'Madera': 'MADERA',
+      'Mármol': 'MARMOL',
+      'Piedra': 'PIEDRA',
+      'Terracota': 'TERRACOTA',
+    },
+    acabado: {
+      'Mate': 'MATE',
+      'Pulido': 'PULIDO',
+      'Satinado': 'SATINADO',
+      'Texturizado': 'TEXTURIZADO',
+    },
+    tipo_pieza: {
+      'base': 'BASE',
+      'decorado': 'DECORADO',
+      'multistep': 'MULTISTEP',
+    },
+    uso: {
+      'pavimento': 'PAVIMENTO',
+      'revestimiento': 'REVESTIMIENTO',
+      'pavimento_revestimiento': 'PAVIMENTO_REVESTIMIENTO',
+    },
+    estado_producto: {
+      'normal': 'NORMAL',
+      'oferta': 'OFERTA',
+      'novedad': 'NOVEDAD',
+    },
+  }
+  return maps[key]?.[value] || value
+}
+
+// Mapeo de valores de BD a valores frontend
+const mapFromDBValue = (key: string, value: string): string => {
+  const maps: Record<string, Record<string, string>> = {
+    materia_prima: {
+      'PORCELANICO': 'Porcelánico',
+      'GRES': 'Gres',
+      'AZULEJO': 'Azulejo',
+    },
+    aspecto: {
+      'BLANCO': 'Blanco',
+      'CEMENTO': 'Cemento',
+      'COLORES': 'Colores',
+      'MADERA': 'Madera',
+      'MARMOL': 'Mármol',
+      'PIEDRA': 'Piedra',
+      'TERRACOTA': 'Terracota',
+    },
+    acabado: {
+      'MATE': 'Mate',
+      'PULIDO': 'Pulido',
+      'SATINADO': 'Satinado',
+      'TEXTURIZADO': 'Texturizado',
+    },
+    tipo_pieza: {
+      'BASE': 'base',
+      'DECORADO': 'decorado',
+      'MULTISTEP': 'multistep',
+    },
+    uso: {
+      'PAVIMENTO': 'pavimento',
+      'REVESTIMIENTO': 'revestimiento',
+      'PAVIMENTO_REVESTIMIENTO': 'pavimento_revestimiento',
+    },
+    estado_producto: {
+      'NORMAL': 'normal',
+      'OFERTA': 'oferta',
+      'NOVEDAD': 'novedad',
+    },
+  }
+  return maps[key]?.[value] || value
+}
+
+function ProductosContent() {
+  const searchParams = useSearchParams()
+  const [busqueda, setBusqueda] = useState('')
+  const [filtrosActivos, setFiltrosActivos] = useState<FiltrosActivos>(filtrosIniciales)
+  const [mostrarFiltros, setMostrarFiltros] = useState(false)
+  const [vistaGrid, setVistaGrid] = useState(true)
+  const [mostrarBusqueda, setMostrarBusqueda] = useState(false)
+  const [productos, setProductos] = useState<Producto[]>([])
+  const [loading, setLoading] = useState(true)
+  const [total, setTotal] = useState(0)
+
+  // Leer filtros de la URL al cargar
+  useEffect(() => {
+    const nuevasFiltros: FiltrosActivos = { ...filtrosIniciales }
+
+    // Leer cada tipo de filtro de la URL
+    const estadoProducto = searchParams.get('estado_producto')
+    if (estadoProducto) {
+      nuevasFiltros.estado_producto = [estadoProducto]
+    }
+
+    const calidad = searchParams.get('calidad')
+    if (calidad) {
+      nuevasFiltros.calidad = [calidad]
+    }
+
+    const materiaPrima = searchParams.get('materia_prima')
+    if (materiaPrima) {
+      nuevasFiltros.materia_prima = [materiaPrima]
+    }
+
+    const aspecto = searchParams.get('aspecto')
+    if (aspecto) {
+      nuevasFiltros.aspecto = [aspecto]
+    }
+
+    const acabado = searchParams.get('acabado')
+    if (acabado) {
+      nuevasFiltros.acabado = [acabado]
+    }
+
+    const tipoPieza = searchParams.get('tipo_pieza')
+    if (tipoPieza) {
+      nuevasFiltros.tipo_pieza = [tipoPieza]
+    }
+
+    const uso = searchParams.get('uso')
+    if (uso) {
+      nuevasFiltros.uso = [uso]
+    }
+
+    setFiltrosActivos(nuevasFiltros)
+  }, [searchParams])
+
+  // Fetch productos from API
+  const fetchProductos = useCallback(async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+
+      if (busqueda) params.set('busqueda', busqueda)
+
+      // Mapear valores a formato DB
+      filtrosActivos.calidad.forEach(v => params.append('calidad', v))
+      filtrosActivos.materia_prima.forEach(v => params.append('materia_prima', mapToDBValue('materia_prima', v)))
+      filtrosActivos.aspecto.forEach(v => params.append('aspecto', mapToDBValue('aspecto', v)))
+      filtrosActivos.acabado.forEach(v => params.append('acabado', mapToDBValue('acabado', v)))
+      filtrosActivos.tipo_pieza.forEach(v => params.append('tipo_pieza', mapToDBValue('tipo_pieza', v)))
+      filtrosActivos.uso.forEach(v => params.append('uso', mapToDBValue('uso', v)))
+      filtrosActivos.estado_producto.forEach(v => params.append('estado_producto', mapToDBValue('estado_producto', v)))
+
+      const response = await fetch(`/api/productos?${params.toString()}`)
+      const data = await response.json()
+
+      // Mapear valores de DB a frontend
+      const productosNormalizados = data.productos.map((p: any) => ({
+        ...p,
+        materia_prima: mapFromDBValue('materia_prima', p.materia_prima),
+        aspecto: mapFromDBValue('aspecto', p.aspecto),
+        acabado: mapFromDBValue('acabado', p.acabado),
+        tipo_pieza: mapFromDBValue('tipo_pieza', p.tipo_pieza),
+        uso: mapFromDBValue('uso', p.uso),
+        estado_producto: mapFromDBValue('estado_producto', p.estado_producto),
+      }))
+
+      setProductos(productosNormalizados)
+      setTotal(data.pagination.total)
+    } catch (error) {
+      console.error('Error fetching productos:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [busqueda, filtrosActivos])
+
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      fetchProductos()
+    }, 300)
+    return () => clearTimeout(debounce)
+  }, [fetchProductos])
+
+  // Contar filtros activos
+  const totalFiltrosActivos =
+    filtrosActivos.calidad.length +
+    filtrosActivos.materia_prima.length +
+    filtrosActivos.aspecto.length +
+    filtrosActivos.acabado.length +
+    filtrosActivos.tipo_pieza.length +
+    filtrosActivos.uso.length +
+    filtrosActivos.estado_producto.length
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Navegación Desktop */}
+      <DesktopNav />
+
+      {/* Header Mobile + Barra de acciones - Todo sticky junto */}
+      <div className="lg:hidden sticky top-0 z-40 bg-white">
+        <Header
+          titulo="Productos"
+          showBack
+          showSearch
+          sticky={false}
+          onSearchClick={() => setMostrarBusqueda(!mostrarBusqueda)}
+        />
+
+        {/* Barra de búsqueda expandible (mobile) */}
+        {mostrarBusqueda && (
+          <div className="px-4 py-3 border-b border-neutral-100">
+            <SearchBar
+              value={busqueda}
+              onChange={setBusqueda}
+              placeholder="Buscar productos..."
+            />
+          </div>
+        )}
+
+        {/* Barra de acciones Mobile */}
+        <div className="border-b border-neutral-100 shadow-sm">
+          <div className="flex items-center justify-between px-4 py-3">
+            {/* Chip de productos */}
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1.5 bg-neutral-100 rounded-full text-sm font-medium">
+                Productos
+              </span>
+            </div>
+
+            {/* Botón de filtros */}
+            <button
+              onClick={() => setMostrarFiltros(true)}
+              className="relative p-2 text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors"
+            >
+              <IconFilter size={24} />
+              {totalFiltrosActivos > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary-600 text-white text-xs font-medium rounded-full flex items-center justify-center">
+                  {totalFiltrosActivos}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Contador y vista */}
+          <div className="flex items-center justify-between px-4 py-2 text-sm text-neutral-500">
+            <span>Mostrando {productos.length} elementos</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setVistaGrid(true)}
+                className={`p-1.5 rounded ${vistaGrid ? 'text-neutral-900' : 'text-neutral-400'}`}
+              >
+                <IconGrid size={20} />
+              </button>
+              <button
+                onClick={() => setVistaGrid(false)}
+                className={`p-1.5 rounded ${!vistaGrid ? 'text-neutral-900' : 'text-neutral-400'}`}
+              >
+                <IconList size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Header Desktop */}
+      <div className="hidden lg:block pt-20">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-neutral-900">Catálogo de Productos</h1>
+              <p className="text-neutral-600 mt-1">
+                {total} productos disponibles
+              </p>
+            </div>
+            <div className="w-96">
+              <SearchBar
+                value={busqueda}
+                onChange={setBusqueda}
+                placeholder="Buscar por nombre, referencia, serie..."
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido principal */}
+      <div className="flex lg:max-w-7xl lg:mx-auto">
+        {/* Sidebar de filtros (desktop) */}
+        <aside className="hidden lg:block w-72 flex-shrink-0 border-r border-neutral-100 min-h-[calc(100vh-12rem)]">
+          <div className="sticky top-28 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-semibold text-lg">Filtros</h2>
+              {totalFiltrosActivos > 0 && (
+                <button
+                  onClick={() => setFiltrosActivos(filtrosIniciales)}
+                  className="text-sm text-primary-600 hover:text-primary-700"
+                >
+                  Limpiar todo
+                </button>
+              )}
+            </div>
+            <FiltersDrawer
+              isOpen={true}
+              onClose={() => {}}
+              filtros={filtrosActivos}
+              onFiltrosChange={setFiltrosActivos}
+            />
+          </div>
+        </aside>
+
+        {/* Grid de productos */}
+        <div className="flex-1 p-4 lg:p-6">
+          {/* Vista toggle para desktop */}
+          <div className="hidden lg:flex items-center justify-end gap-2 mb-4">
+            <span className="text-sm text-neutral-500 mr-2">Vista:</span>
+            <button
+              onClick={() => setVistaGrid(true)}
+              className={`p-2 rounded-lg transition-colors ${vistaGrid ? 'bg-primary-100 text-primary-700' : 'text-neutral-400 hover:bg-neutral-100'}`}
+            >
+              <IconGrid size={20} />
+            </button>
+            <button
+              onClick={() => setVistaGrid(false)}
+              className={`p-2 rounded-lg transition-colors ${!vistaGrid ? 'bg-primary-100 text-primary-700' : 'text-neutral-400 hover:bg-neutral-100'}`}
+            >
+              <IconList size={20} />
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            </div>
+          ) : productos.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-neutral-500">No se encontraron productos</p>
+              <button
+                onClick={() => {
+                  setFiltrosActivos(filtrosIniciales)
+                  setBusqueda('')
+                }}
+                className="mt-4 text-primary-600 hover:text-primary-700"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          ) : (
+            <ProductGrid productos={productos} columnas={vistaGrid ? undefined : 1} />
+          )}
+        </div>
+      </div>
+
+      {/* Drawer de filtros (mobile only) */}
+      <div className="lg:hidden">
+        <FiltersDrawer
+          isOpen={mostrarFiltros}
+          onClose={() => setMostrarFiltros(false)}
+          filtros={filtrosActivos}
+          onFiltrosChange={setFiltrosActivos}
+        />
+      </div>
+    </div>
+  )
+}
+
+function ProductosLoading() {
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+    </div>
+  )
+}
+
+export default function ProductosPage() {
+  return (
+    <Suspense fallback={<ProductosLoading />}>
+      <ProductosContent />
+    </Suspense>
+  )
+}

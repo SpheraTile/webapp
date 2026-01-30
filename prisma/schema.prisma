@@ -1,0 +1,241 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==================== USUARIOS ====================
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  password      String
+  nombre        String
+  role          Role         @default(CLIENTE)
+  telefono      String?
+  empresa       String?
+  nif_cif       String?
+  direccion     String?
+  ciudad        String?
+  provincia     String?
+  codigo_postal String?
+  activo        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  pedidos       Pedido[]
+  resetTokens   ResetToken[]
+}
+
+// Token para resetear contraseña
+model ResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  CLIENTE
+}
+
+// ==================== PRODUCTOS ====================
+model Producto {
+  id               String         @id @default(cuid())
+  slug             String         @unique
+  referencia       String         @unique
+  nombre           String
+  serie            String
+  imagen           String
+  galeria          String[]
+  formato          String
+  precio_m2        Float
+  stock_m2         Float
+  calidad          Calidad
+  materia_prima    MateriaPrima
+  aspecto          Aspecto
+  acabado          Acabado
+  tipo_pieza       TipoPieza      @default(BASE)
+  uso              Uso            @default(PAVIMENTO)
+  estado_producto  EstadoProducto @default(NORMAL)
+  descripcion      String?
+  m2_caja          Float
+  piezas_caja      Int
+  m2_palet         Float
+  cajas_palet      Int
+  peso_caja_kg     Float
+  pedido_minimo_m2 Float
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  items            ItemPedido[]
+}
+
+enum Calidad {
+  COM
+  PRIMERA
+}
+
+enum MateriaPrima {
+  PORCELANICO
+  GRES
+  AZULEJO
+}
+
+enum Aspecto {
+  BLANCO
+  CEMENTO
+  COLORES
+  MADERA
+  MARMOL
+  PIEDRA
+  TERRACOTA
+}
+
+enum Acabado {
+  MATE
+  PULIDO
+  SATINADO
+  TEXTURIZADO
+}
+
+enum TipoPieza {
+  BASE
+  DECORADO
+  MULTISTEP
+}
+
+enum Uso {
+  PAVIMENTO
+  REVESTIMIENTO
+  PAVIMENTO_REVESTIMIENTO
+}
+
+enum EstadoProducto {
+  NORMAL
+  OFERTA
+  NOVEDAD
+}
+
+// ==================== PEDIDOS ====================
+model Pedido {
+  id              String       @id @default(cuid())
+  numero_pedido   String       @unique
+  userId          String
+  user            User         @relation(fields: [userId], references: [id])
+  direccion_envio String
+  ciudad          String
+  provincia       String?
+  codigo_postal   String
+  notas           String?
+  items           ItemPedido[]
+  total_m2        Float
+  subtotal_euros  Float
+  iva_porcentaje  Float        @default(21)
+  iva_euros       Float
+  total_euros     Float
+  estado          EstadoPedido @default(PENDIENTE)
+  albaran         Albaran?
+  factura         Factura?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model ItemPedido {
+  id                  String   @id @default(cuid())
+  pedidoId            String
+  pedido              Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productoId          String
+  producto            Producto @relation(fields: [productoId], references: [id])
+  producto_nombre     String
+  producto_referencia String
+  cantidad_m2         Float
+  cantidad_cajas      Int
+  precio_m2           Float
+  subtotal            Float
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  CONFIRMADO
+  PREPARANDO
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+}
+
+// ==================== ALBARANES ====================
+model Albaran {
+  id                String        @id @default(cuid())
+  numero_albaran    String        @unique
+  pedidoId          String        @unique
+  pedido            Pedido        @relation(fields: [pedidoId], references: [id])
+  direccion_entrega String
+  total_m2          Float
+  total_cajas       Int
+  peso_total_kg     Float
+  estado            EstadoAlbaran @default(BORRADOR)
+  notas             String?
+  transportista     String?
+  matricula         String?
+  fecha_entrega     DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+enum EstadoAlbaran {
+  BORRADOR
+  EMITIDO
+  ENTREGADO
+  ANULADO
+}
+
+// ==================== FACTURAS ====================
+model Factura {
+  id                    String        @id @default(cuid())
+  numero_factura        String        @unique
+  pedidoId              String        @unique
+  pedido                Pedido        @relation(fields: [pedidoId], references: [id])
+  direccion_facturacion String
+  subtotal_euros        Float
+  iva_porcentaje        Float         @default(21)
+  iva_euros             Float
+  total_euros           Float
+  estado                EstadoFactura @default(BORRADOR)
+  metodo_pago           MetodoPago    @default(TRANSFERENCIA)
+  notas                 String?
+  fecha_vencimiento     DateTime
+  fecha_pago            DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+enum EstadoFactura {
+  BORRADOR
+  EMITIDA
+  PAGADA
+  VENCIDA
+  ANULADA
+}
+
+enum MetodoPago {
+  TRANSFERENCIA
+  TARJETA
+  EFECTIVO
+  PAGARE
+  DOMICILIACION
+}
+
+// ==================== CONFIGURACIÓN DEL SITIO ====================
+model ConfiguracionSitio {
+  id              String   @id @default(cuid())
+  clave           String   @unique
+  valor           String
+  tipo            String   @default("text") // text, image, video, json
+  descripcion     String?
+  updatedAt       DateTime @updatedAt
+}

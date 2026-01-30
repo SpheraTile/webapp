@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Header } from '@/components/layout/Header'
 import { DesktopNav } from '@/components/layout/DesktopNav'
 import { CartItem } from '@/components/cesta/CartItem'
@@ -10,11 +11,12 @@ import { useCesta } from '@/context/CestaContext'
 import { IconCart } from '@/components/ui/Icons'
 
 export default function CestaPage() {
-  const { items, vaciarCesta, totalM2, totalEuros } = useCesta()
+  const { items, vaciarCesta } = useCesta()
   const [enviando, setEnviando] = useState(false)
   const [pedidoEnviado, setPedidoEnviado] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [numeroPedido, setNumeroPedido] = useState<string | null>(null)
+  const t = useTranslations('cart')
 
   const handleEnviarPedido = async () => {
     setEnviando(true)
@@ -42,7 +44,7 @@ export default function CestaPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al crear el pedido')
+        throw new Error(data.error || t('errorSending'))
       }
 
       setNumeroPedido(data.numero_pedido)
@@ -50,7 +52,7 @@ export default function CestaPage() {
       vaciarCesta()
     } catch (err: any) {
       console.error('Error enviando pedido:', err)
-      setError(err.message || 'Error al enviar el pedido. Por favor, inténtalo de nuevo.')
+      setError(err.message || t('errorSending'))
     } finally {
       setEnviando(false)
     }
@@ -62,7 +64,7 @@ export default function CestaPage() {
       <div className="min-h-screen bg-white">
         <DesktopNav />
         <div className="lg:hidden">
-          <Header titulo="Pedido enviado" />
+          <Header titulo={t('orderSent')} />
         </div>
         <div className="flex flex-col items-center justify-center px-4 py-16 lg:pt-40">
           <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mb-6">
@@ -79,22 +81,22 @@ export default function CestaPage() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-neutral-900 mb-2">
-            Pedido enviado correctamente
+            {t('orderSentSuccess')}
           </h2>
           {numeroPedido && (
             <p className="text-primary-600 font-semibold mb-2">
-              N° Pedido: {numeroPedido}
+              {t('orderNumber')}: {numeroPedido}
             </p>
           )}
           <p className="text-neutral-600 text-center mb-8">
-            Tu pedido ha sido enviado al almacén. Recibirás confirmación por email.
+            {t('orderSentMessage')}
           </p>
           <div className="flex gap-4">
             <Link href="/cuenta/pedidos" className="btn-secondary">
-              Ver mis pedidos
+              {t('viewMyOrders')}
             </Link>
             <Link href="/productos" className="btn-primary">
-              Seguir comprando
+              {t('continueShopping')}
             </Link>
           </div>
         </div>
@@ -108,20 +110,20 @@ export default function CestaPage() {
       <div className="min-h-screen bg-white">
         <DesktopNav />
         <div className="lg:hidden">
-          <Header titulo="Cesta" />
+          <Header titulo={t('title')} />
         </div>
         <div className="flex flex-col items-center justify-center px-4 py-16 lg:pt-40">
           <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mb-6">
             <IconCart size={40} className="text-neutral-400" />
           </div>
           <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-            Tu cesta está vacía
+            {t('empty')}
           </h2>
           <p className="text-neutral-600 text-center mb-8">
-            Explora nuestro catálogo y añade productos a tu pedido
+            {t('emptyDesc')}
           </p>
           <Link href="/productos" className="btn-primary">
-            Ver productos
+            {t('viewProducts')}
           </Link>
         </div>
       </div>
@@ -132,15 +134,15 @@ export default function CestaPage() {
     <div className="min-h-screen bg-white pb-48 lg:pb-0">
       <DesktopNav />
       <div className="lg:hidden">
-        <Header titulo="Cesta" />
+        <Header titulo={t('title')} />
       </div>
 
       {/* Contenedor desktop */}
       <div className="lg:pt-20 lg:max-w-6xl lg:mx-auto lg:px-6 lg:py-12">
         {/* Header desktop */}
         <div className="hidden lg:block mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900">Tu Cesta</h1>
-          <p className="text-neutral-600 mt-1">{items.length} productos en tu cesta</p>
+          <h1 className="text-3xl font-bold text-neutral-900">{t('yourCart')}</h1>
+          <p className="text-neutral-600 mt-1">{items.length} {t('productsInCart')}</p>
         </div>
 
         {/* Mensaje de error */}

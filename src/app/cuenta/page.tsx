@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Header } from '@/components/layout/Header'
 import { DesktopNav } from '@/components/layout/DesktopNav'
 import { IconUser, IconChevronDown, IconPackage, IconReceipt, IconMapPin, IconBell, IconHelp, IconLogout } from '@/components/ui/Icons'
@@ -28,6 +29,8 @@ export default function CuentaPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [pedidosCount, setPedidosCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const t = useTranslations('account')
+  const tAuth = useTranslations('auth')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -86,12 +89,12 @@ export default function CuentaPage() {
     <div className="min-h-screen bg-white lg:bg-neutral-50">
       <DesktopNav />
       <div className="lg:hidden">
-        <Header titulo="Mi Cuenta" />
+        <Header titulo={t('title')} />
       </div>
 
       <div className="lg:pt-20 lg:max-w-4xl lg:mx-auto lg:px-6 lg:py-12">
         <div className="hidden lg:block mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900">Mi Cuenta</h1>
+          <h1 className="text-3xl font-bold text-neutral-900">{t('title')}</h1>
         </div>
 
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
@@ -116,12 +119,12 @@ export default function CuentaPage() {
 
             {/* Info rápida (desktop) */}
             <div className="hidden lg:block mt-6 p-6 bg-white rounded-2xl shadow-sm">
-              <h3 className="font-semibold text-neutral-900 mb-3">Información</h3>
+              <h3 className="font-semibold text-neutral-900 mb-3">{t('information')}</h3>
               {profile?.telefono && (
                 <p className="text-sm text-neutral-600">{profile.telefono}</p>
               )}
               {profile?.nif_cif && (
-                <p className="text-sm text-neutral-500">NIF/CIF: {profile.nif_cif}</p>
+                <p className="text-sm text-neutral-500">{t('nifCif')}: {profile.nif_cif}</p>
               )}
               {profile?.ciudad && (
                 <p className="text-sm text-neutral-500">{profile.ciudad}{profile.provincia ? `, ${profile.provincia}` : ''}</p>
@@ -130,7 +133,7 @@ export default function CuentaPage() {
                 href="/cuenta/perfil"
                 className="mt-4 block w-full py-2 px-4 bg-primary-50 text-primary-700 rounded-lg font-medium hover:bg-primary-100 transition-colors text-center"
               >
-                Editar perfil
+                {t('editProfile')}
               </Link>
             </div>
           </div>
@@ -149,8 +152,8 @@ export default function CuentaPage() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold">Panel de Almacén</h3>
-                  <p className="text-sm text-neutral-400">Gestiona pedidos, productos y facturas</p>
+                  <h3 className="font-semibold">{t('warehousePanel')}</h3>
+                  <p className="text-sm text-neutral-400">{t('warehouseDesc')}</p>
                 </div>
                 <IconChevronDown size={20} className="text-neutral-400 -rotate-90" />
               </Link>
@@ -160,33 +163,33 @@ export default function CuentaPage() {
               <MenuOption
                 href="/cuenta/pedidos"
                 icon={<IconPackage size={22} />}
-                label="Mis pedidos"
+                label={t('orders')}
                 badge={pedidosCount > 0 ? String(pedidosCount) : undefined}
               />
               <MenuOption
                 href="/cuenta/facturas"
                 icon={<IconReceipt size={22} />}
-                label="Mis facturas"
+                label={t('invoices')}
               />
               <MenuOption
                 href="/cuenta/facturacion"
                 icon={<IconReceipt size={22} />}
-                label="Datos de facturación"
+                label={t('billing')}
               />
               <MenuOption
                 href="/cuenta/direcciones"
                 icon={<IconMapPin size={22} />}
-                label="Direcciones de envío"
+                label={t('addresses')}
               />
               <MenuOption
                 href="/cuenta/notificaciones"
                 icon={<IconBell size={22} />}
-                label="Notificaciones"
+                label={t('notifications')}
               />
               <MenuOption
                 href="/cuenta/ayuda"
                 icon={<IconHelp size={22} />}
-                label="Ayuda y soporte"
+                label={t('help')}
               />
             </div>
 
@@ -196,7 +199,7 @@ export default function CuentaPage() {
                 href="/cuenta/perfil"
                 className="block w-full py-3 text-center bg-neutral-100 text-neutral-700 font-medium rounded-xl hover:bg-neutral-200 transition-colors"
               >
-                Editar perfil
+                {t('editProfile')}
               </Link>
             </div>
 
@@ -207,7 +210,7 @@ export default function CuentaPage() {
                 className="flex items-center justify-center gap-2 w-full py-3 text-center text-red-600 font-medium lg:bg-white lg:rounded-xl lg:shadow-sm lg:hover:bg-red-50 transition-colors"
               >
                 <IconLogout size={20} />
-                Cerrar sesión
+                {tAuth('logout')}
               </button>
             </div>
           </div>

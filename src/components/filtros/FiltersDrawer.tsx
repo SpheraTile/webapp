@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { IconX } from '@/components/ui/Icons'
 import { FilterSection } from './FilterSection'
 import { FilterCheckbox } from './FilterCheckbox'
@@ -11,9 +12,6 @@ import {
   OPCIONES_TIPO_PIEZA,
   OPCIONES_USO,
   OPCIONES_ESTADO_PRODUCTO,
-  LABELS_TIPO_PIEZA,
-  LABELS_USO,
-  LABELS_ESTADO_PRODUCTO,
 } from '@/types'
 
 interface FiltrosActivos {
@@ -33,12 +31,57 @@ interface FiltersDrawerProps {
   onFiltrosChange: (filtros: FiltrosActivos) => void
 }
 
+// Translation keys for filter labels
+const LABELS_ESTADO_PRODUCTO: Record<string, string> = {
+  normal: 'normal',
+  oferta: 'offer',
+  novedad: 'new',
+}
+
+const LABELS_TIPO_PIEZA: Record<string, string> = {
+  base: 'base',
+  decorado: 'decorated',
+  multistep: 'multistep',
+}
+
+const LABELS_USO: Record<string, string> = {
+  pavimento: 'floor',
+  revestimiento: 'wall',
+  pavimento_revestimiento: 'floorWall',
+}
+
+const LABELS_MATERIA_PRIMA: Record<string, string> = {
+  'Porcelánico': 'porcelain',
+  'Gres': 'stoneware',
+  'Azulejo': 'tile',
+}
+
+const LABELS_ASPECTO: Record<string, string> = {
+  'Blanco': 'white',
+  'Cemento': 'cement',
+  'Colores': 'colors',
+  'Madera': 'wood',
+  'Mármol': 'marble',
+  'Piedra': 'stone',
+  'Terracota': 'terracotta',
+}
+
+const LABELS_ACABADO: Record<string, string> = {
+  'Mate': 'matte',
+  'Pulido': 'polished',
+  'Satinado': 'satin',
+  'Texturizado': 'textured',
+}
+
 export function FiltersDrawer({
   isOpen,
   onClose,
   filtros,
   onFiltrosChange,
 }: FiltersDrawerProps) {
+  const t = useTranslations('filters')
+  const tCommon = useTranslations('common')
+
   const toggleFiltro = (
     categoria: keyof FiltrosActivos,
     valor: string
@@ -92,7 +135,7 @@ export function FiltersDrawer({
       >
         {/* Header del drawer (solo móvil) */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-200 lg:hidden">
-          <h2 className="text-lg font-semibold">Filtros</h2>
+          <h2 className="text-lg font-semibold">{t('title')}</h2>
           <button
             onClick={onClose}
             className="p-2 -mr-2 text-neutral-500 hover:text-neutral-700"
@@ -104,11 +147,11 @@ export function FiltersDrawer({
         {/* Contenido de filtros */}
         <div className="overflow-y-auto h-[calc(100%-140px)] lg:h-auto p-4 lg:p-0">
           {/* Estado del producto (Ofertas, Novedades) */}
-          <FilterSection titulo="Estado" defaultOpen>
+          <FilterSection titulo={t('status')} defaultOpen>
             {OPCIONES_ESTADO_PRODUCTO.map((estado) => (
               <FilterCheckbox
                 key={estado}
-                label={LABELS_ESTADO_PRODUCTO[estado]}
+                label={t(LABELS_ESTADO_PRODUCTO[estado])}
                 checked={filtros.estado_producto.includes(estado)}
                 onChange={() => toggleFiltro('estado_producto', estado)}
               />
@@ -116,11 +159,11 @@ export function FiltersDrawer({
           </FilterSection>
 
           {/* Tipo de pieza */}
-          <FilterSection titulo="Tipo de Pieza">
+          <FilterSection titulo={t('pieceType')}>
             {OPCIONES_TIPO_PIEZA.map((tipo) => (
               <FilterCheckbox
                 key={tipo}
-                label={LABELS_TIPO_PIEZA[tipo]}
+                label={t(LABELS_TIPO_PIEZA[tipo])}
                 checked={filtros.tipo_pieza.includes(tipo)}
                 onChange={() => toggleFiltro('tipo_pieza', tipo)}
               />
@@ -128,18 +171,18 @@ export function FiltersDrawer({
           </FilterSection>
 
           {/* Uso */}
-          <FilterSection titulo="Uso">
+          <FilterSection titulo={t('use')}>
             {OPCIONES_USO.map((uso) => (
               <FilterCheckbox
                 key={uso}
-                label={LABELS_USO[uso]}
+                label={t(LABELS_USO[uso])}
                 checked={filtros.uso.includes(uso)}
                 onChange={() => toggleFiltro('uso', uso)}
               />
             ))}
           </FilterSection>
 
-          <FilterSection titulo="Calidad">
+          <FilterSection titulo={t('quality')}>
             {OPCIONES_CALIDAD.map((calidad) => (
               <FilterCheckbox
                 key={calidad}
@@ -150,33 +193,33 @@ export function FiltersDrawer({
             ))}
           </FilterSection>
 
-          <FilterSection titulo="Materia Prima">
+          <FilterSection titulo={t('material')}>
             {OPCIONES_MATERIA_PRIMA.map((materia) => (
               <FilterCheckbox
                 key={materia}
-                label={materia}
+                label={t(LABELS_MATERIA_PRIMA[materia])}
                 checked={filtros.materia_prima.includes(materia)}
                 onChange={() => toggleFiltro('materia_prima', materia)}
               />
             ))}
           </FilterSection>
 
-          <FilterSection titulo="Aspecto">
+          <FilterSection titulo={t('aspect')}>
             {OPCIONES_ASPECTO.map((aspecto) => (
               <FilterCheckbox
                 key={aspecto}
-                label={aspecto}
+                label={t(LABELS_ASPECTO[aspecto])}
                 checked={filtros.aspecto.includes(aspecto)}
                 onChange={() => toggleFiltro('aspecto', aspecto)}
               />
             ))}
           </FilterSection>
 
-          <FilterSection titulo="Acabado">
+          <FilterSection titulo={t('finish')}>
             {OPCIONES_ACABADO.map((acabado) => (
               <FilterCheckbox
                 key={acabado}
-                label={acabado}
+                label={t(LABELS_ACABADO[acabado])}
                 checked={filtros.acabado.includes(acabado)}
                 onChange={() => toggleFiltro('acabado', acabado)}
               />
@@ -192,14 +235,14 @@ export function FiltersDrawer({
                 onClick={limpiarFiltros}
                 className="btn-secondary flex-1"
               >
-                Limpiar ({totalFiltrosActivos})
+                {tCommon('clean')} ({totalFiltrosActivos})
               </button>
             )}
             <button
               onClick={onClose}
               className="btn-primary flex-1"
             >
-              Ver resultados
+              {tCommon('viewResults')}
             </button>
           </div>
         </div>

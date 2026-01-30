@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Header } from '@/components/layout/Header'
 import { DesktopNav } from '@/components/layout/DesktopNav'
 import { SearchBar } from '@/components/ui/SearchBar'
@@ -116,6 +117,8 @@ const mapFromDBValue = (key: string, value: string): string => {
 
 function ProductosContent() {
   const searchParams = useSearchParams()
+  const t = useTranslations('products')
+  const tCommon = useTranslations('common')
   const [busqueda, setBusqueda] = useState('')
   const [filtrosActivos, setFiltrosActivos] = useState<FiltrosActivos>(filtrosIniciales)
   const [mostrarFiltros, setMostrarFiltros] = useState(false)
@@ -233,7 +236,7 @@ function ProductosContent() {
       {/* Header Mobile + Barra de acciones - Todo sticky junto */}
       <div className="lg:hidden sticky top-0 z-40 bg-white">
         <Header
-          titulo="Productos"
+          titulo={t('title')}
           showBack
           showSearch
           sticky={false}
@@ -246,7 +249,7 @@ function ProductosContent() {
             <SearchBar
               value={busqueda}
               onChange={setBusqueda}
-              placeholder="Buscar productos..."
+              placeholder={t('searchPlaceholder')}
             />
           </div>
         )}
@@ -257,7 +260,7 @@ function ProductosContent() {
             {/* Chip de productos */}
             <div className="flex items-center gap-2">
               <span className="px-3 py-1.5 bg-neutral-100 rounded-full text-sm font-medium">
-                Productos
+                {t('title')}
               </span>
             </div>
 
@@ -277,7 +280,7 @@ function ProductosContent() {
 
           {/* Contador y vista */}
           <div className="flex items-center justify-between px-4 py-2 text-sm text-neutral-500">
-            <span>Mostrando {productos.length} elementos</span>
+            <span>{tCommon('showing')} {productos.length} {tCommon('elements')}</span>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setVistaGrid(true)}
@@ -301,16 +304,16 @@ function ProductosContent() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-neutral-900">Catálogo de Productos</h1>
+              <h1 className="text-3xl font-bold text-neutral-900">{t('catalogTitle')}</h1>
               <p className="text-neutral-600 mt-1">
-                {total} productos disponibles
+                {total} {t('availableProducts')}
               </p>
             </div>
             <div className="w-96">
               <SearchBar
                 value={busqueda}
                 onChange={setBusqueda}
-                placeholder="Buscar por nombre, referencia, serie..."
+                placeholder={t('searchPlaceholder')}
               />
             </div>
           </div>
@@ -323,13 +326,13 @@ function ProductosContent() {
         <aside className="hidden lg:block w-72 flex-shrink-0 border-r border-neutral-100 min-h-[calc(100vh-12rem)]">
           <div className="sticky top-28 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-semibold text-lg">Filtros</h2>
+              <h2 className="font-semibold text-lg">{t('filters')}</h2>
               {totalFiltrosActivos > 0 && (
                 <button
                   onClick={() => setFiltrosActivos(filtrosIniciales)}
                   className="text-sm text-primary-600 hover:text-primary-700"
                 >
-                  Limpiar todo
+                  {tCommon('clearAll')}
                 </button>
               )}
             </div>
@@ -346,7 +349,7 @@ function ProductosContent() {
         <div className="flex-1 p-4 lg:p-6">
           {/* Vista toggle para desktop */}
           <div className="hidden lg:flex items-center justify-end gap-2 mb-4">
-            <span className="text-sm text-neutral-500 mr-2">Vista:</span>
+            <span className="text-sm text-neutral-500 mr-2">{tCommon('view')}:</span>
             <button
               onClick={() => setVistaGrid(true)}
               className={`p-2 rounded-lg transition-colors ${vistaGrid ? 'bg-primary-100 text-primary-700' : 'text-neutral-400 hover:bg-neutral-100'}`}
@@ -367,7 +370,7 @@ function ProductosContent() {
             </div>
           ) : productos.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-neutral-500">No se encontraron productos</p>
+              <p className="text-neutral-500">{t('noProducts')}</p>
               <button
                 onClick={() => {
                   setFiltrosActivos(filtrosIniciales)
@@ -375,7 +378,7 @@ function ProductosContent() {
                 }}
                 className="mt-4 text-primary-600 hover:text-primary-700"
               >
-                Limpiar filtros
+                {t('clearFilters')}
               </button>
             </div>
           ) : (

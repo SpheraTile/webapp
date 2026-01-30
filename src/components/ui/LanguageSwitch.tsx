@@ -2,21 +2,43 @@
 
 import { useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
-const flags: Record<string, string> = {
-  es: '🇪🇸',
-  en: '🇬🇧',
-}
+const languages = [
+  { code: 'es', flag: '🇪🇸', name: 'Español' },
+  { code: 'en', flag: '🇬🇧', name: 'English' },
+  { code: 'ar', flag: '🇸🇦', name: 'العربية' },
+]
 
 export function LanguageSwitch() {
   const locale = useLocale()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const toggleLocale = async () => {
-    const newLocale = locale === 'es' ? 'en' : 'es'
+  const currentLang = languages.find(l => l.code === locale) || languages[0]
+  const otherLanguages = languages.filter(l => l.code !== locale)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const changeLocale = async (newLocale: string) => {
+    if (newLocale === locale) {
+      setIsOpen(false)
+      return
+    }
+
     setLoading(true)
+    setIsOpen(false)
 
     try {
       await fetch('/api/locale', {
@@ -24,7 +46,6 @@ export function LanguageSwitch() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ locale: newLocale }),
       })
-
       router.refresh()
     } catch (error) {
       console.error('Error changing locale:', error)
@@ -33,19 +54,41 @@ export function LanguageSwitch() {
     }
   }
 
-  const nextLocale = locale === 'es' ? 'en' : 'es'
-
   return (
-    <button
-      onClick={toggleLocale}
-      disabled={loading}
-      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-50 hover:scale-105 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
-      title={locale === 'es' ? 'Switch to English' : 'Cambiar a Español'}
-    >
-      <span className="text-lg">{flags[locale]}</span>
-      <span className="uppercase">{locale}</span>
-      <span className="text-xs opacity-60">→</span>
-      <span className="text-lg">{flags[nextLocale]}</span>
-    </button>
+    <div className="relative" ref={dropdownRef}>
+      {/* Current language button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        disabled={loading}
+        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-50 hover:scale-105 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+      >
+        <span className="text-lg">{currentLang.flag}</span>
+        <span className="uppercase">{locale}</span>
+        <svg
+          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Dropdown */}
+      {isOpen && (
+        <div className="absolute top-full right-0 mt-2 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200 overflow-hidden min-w-[140px] z-50">
+          {otherLanguages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => changeLocale(lang.code)}
+              className="flex items-center gap-3 w-full px-4 py-2.5 text-left hover:bg-neutral-100 transition-colors text-neutral-800"
+            >
+              <span className="text-lg">{lang.flag}</span>
+              <span className="text-sm font-medium">{lang.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

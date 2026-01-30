@@ -32,7 +32,7 @@ export function LanguageSwitch() {
     <button
       onClick={toggleLocale}
       disabled={loading}
-      className="flex items-center gap-1.5 px-2 py-1 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors disabled:opacity-50"
+      className="flex items-center gap-1.5 px-2 py-1 text-sm font-medium transition-colors disabled:opacity-50 hover:opacity-80"
       title={locale === 'es' ? 'Switch to English' : 'Cambiar a Español'}
     >
       <span className={`fi fi-${locale === 'es' ? 'es' : 'gb'} rounded-sm`} />

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
+import { LanguageSwitch } from '@/components/ui/LanguageSwitch'
 
 interface HeroConfig {
   tipo: 'imagen' | 'video'
@@ -32,7 +33,7 @@ export function HeroSectionMobile() {
   const isVideo = config?.tipo === 'video'
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-[calc(100dvh-4rem)] w-full overflow-hidden">
       {/* Fondo */}
       {isVideo ? (
         <video
@@ -56,19 +57,23 @@ export function HeroSectionMobile() {
       {/* Overlay oscuro */}
       <div className="absolute inset-0 bg-black/50" />
 
-      {/* Logo en la parte superior */}
-      <div className="absolute top-0 left-0 right-0 z-20 p-6 pt-8">
-        <div className="flex items-center justify-center">
-          <Logo size="lg" href={undefined} textColor="light" />
+      {/* Header con logo y selector de idioma */}
+      <div className="absolute top-0 left-0 right-0 z-20 p-4 pt-6">
+        <div className="flex items-center justify-between">
+          <div className="w-10" />
+          <Logo size="lg" href={undefined} />
+          <div className="text-white">
+            <LanguageSwitch />
+          </div>
         </div>
       </div>
 
       {/* Contenido del Hero */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-end text-center text-white px-6 pb-28">
-        <h1 className="text-4xl font-bold mb-4 tracking-tight">
+      <div className="relative z-10 h-full flex flex-col items-center justify-end text-center text-white px-6 pb-8">
+        <h1 className="text-3xl font-bold mb-3 tracking-tight">
           Cerámica de <span className="text-primary-300">Excelencia</span>
         </h1>
-        <p className="text-white/90 text-base mb-8 max-w-xs">
+        <p className="text-white/90 text-sm mb-6 max-w-xs">
           Más de 700 referencias para profesionales
         </p>
 
@@ -76,13 +81,13 @@ export function HeroSectionMobile() {
         <div className="w-full max-w-xs space-y-3">
           <Link
             href="/productos?estado_producto=novedad"
-            className="block w-full py-4 bg-white/10 backdrop-blur-sm text-white rounded-full font-semibold text-center transition-all active:scale-95 border border-white/30"
+            className="block w-full py-3.5 bg-white/10 backdrop-blur-sm text-white rounded-full font-semibold text-center transition-all active:scale-95 border border-white/30"
           >
             Novedades
           </Link>
           <Link
             href="/productos?estado_producto=oferta"
-            className="block w-full py-4 bg-primary-600 text-white rounded-full font-semibold text-center transition-all active:scale-95"
+            className="block w-full py-3.5 bg-primary-600 text-white rounded-full font-semibold text-center transition-all active:scale-95"
           >
             Ofertas
           </Link>

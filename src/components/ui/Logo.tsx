@@ -10,15 +10,15 @@ interface LogoProps {
 }
 
 const sizeConfig = {
-  sm: { image: 32, text: 'text-lg' },
-  md: { image: 40, text: 'text-xl' },
-  lg: { image: 48, text: 'text-2xl' },
-  xl: { image: 56, text: 'text-3xl' },
+  sm: { width: 120, height: 32 },
+  md: { width: 150, height: 40 },
+  lg: { width: 180, height: 48 },
+  xl: { width: 220, height: 56 },
 }
 
 export function Logo({
   size = 'md',
-  showText = true,
+  showText = false,
   href = '/',
   className = '',
   textColor = 'dark',
@@ -38,8 +38,8 @@ export function Logo({
       <Image
         src="/logo-sphera.webp"
         alt="SPHERA TILE"
-        width={config.image}
-        height={config.image}
+        width={config.width}
+        height={config.height}
         className="object-contain"
         priority
       />

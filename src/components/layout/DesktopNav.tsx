@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { Logo } from '@/components/ui/Logo'
+import { LanguageSwitch } from '@/components/ui/LanguageSwitch'
 import { useCesta } from '@/context/CestaContext'
 
 interface DesktopNavProps {
@@ -14,13 +16,14 @@ export function DesktopNav({ transparent = false }: DesktopNavProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
   const { items } = useCesta()
+  const t = useTranslations('nav')
   const totalItems = items.length
   const isAdmin = session?.user?.role === 'ADMIN'
 
   const navLinks = [
-    { href: '/productos', label: 'Catálogo' },
-    { href: '/ceramoteca', label: 'Ceramoteca' },
-    { href: '/cuenta', label: 'Mi Cuenta' },
+    { href: '/productos', label: t('products') },
+    { href: '/ceramoteca', label: t('ceramoteca') },
+    { href: '/cuenta', label: t('account') },
   ]
 
   return (
@@ -86,9 +89,10 @@ export function DesktopNav({ transparent = false }: DesktopNavProps) {
                   strokeLinejoin="round"
                 />
               </svg>
-              Almacén
+              {t('warehouse')}
             </Link>
           )}
+          <LanguageSwitch />
           <Link
             href="/cesta"
             className={`
@@ -113,7 +117,7 @@ export function DesktopNav({ transparent = false }: DesktopNavProps) {
                 strokeLinejoin="round"
               />
             </svg>
-            Cesta
+            {t('cart')}
             {totalItems > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                 {totalItems > 9 ? '9+' : totalItems}

@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/Logo'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams()
@@ -139,43 +140,21 @@ function ResetPasswordForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-neutral-700 mb-1"
-          >
-            Nueva contraseña
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
-        </div>
+        <PasswordInput
+          id="password"
+          label="Nueva contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
-        <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-neutral-700 mb-1"
-          >
-            Confirmar contraseña
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
-        </div>
+        <PasswordInput
+          id="confirmPassword"
+          label="Confirmar contraseña"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
 
         <button
           type="submit"

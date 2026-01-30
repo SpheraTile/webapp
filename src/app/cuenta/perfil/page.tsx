@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
 import { DesktopNav } from '@/components/layout/DesktopNav'
 import { IconCheck, IconUser } from '@/components/ui/Icons'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 
 interface UserProfile {
   id: string
@@ -303,52 +304,29 @@ function ChangePasswordSection() {
           </div>
         )}
 
-        <div>
-          <label htmlFor="currentPassword" className="block text-sm font-medium text-neutral-700 mb-2">
-            Contraseña actual
-          </label>
-          <input
-            type="password"
-            id="currentPassword"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
-            placeholder="••••••••"
-            required
-          />
-        </div>
+        <PasswordInput
+          id="currentPassword"
+          label="Contraseña actual"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          required
+        />
 
-        <div>
-          <label htmlFor="newPassword" className="block text-sm font-medium text-neutral-700 mb-2">
-            Nueva contraseña
-          </label>
-          <input
-            type="password"
-            id="newPassword"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
-        </div>
+        <PasswordInput
+          id="newPassword"
+          label="Nueva contraseña"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-neutral-700 mb-2">
-            Confirmar nueva contraseña
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
-            placeholder="••••••••"
-            required
-            minLength={6}
-          />
-        </div>
+        <PasswordInput
+          id="confirmPassword"
+          label="Confirmar nueva contraseña"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
 
         <button
           type="submit"

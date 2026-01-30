@@ -81,12 +81,22 @@ function mapProductoFromDB(dbProducto: any): Producto {
 
 // Generar rutas estáticas para todos los productos
 export async function generateStaticParams() {
-  const productos = await prisma.producto.findMany({
-    select: { slug: true },
-  })
-  return productos.map((producto) => ({
-    slug: producto.slug,
-  }))
+  // Durante el build en Vercel, DATABASE_URL puede no estar disponible
+  // Retornamos array vacío para que las páginas se generen bajo demanda
+  if (!process.env.DATABASE_URL) {
+    return []
+  }
+
+  try {
+    const productos = await prisma.producto.findMany({
+      select: { slug: true },
+    })
+    return productos.map((producto) => ({
+      slug: producto.slug,
+    }))
+  } catch {
+    return []
+  }
 }
 
 // Metadata dinámica

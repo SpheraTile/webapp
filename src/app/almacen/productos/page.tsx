@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useToast } from '@/components/ui/Toast'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 interface Producto {
   id: string
@@ -25,6 +27,8 @@ export default function ProductosAlmacenPage() {
   const [productos, setProductos] = useState<Producto[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const { showToast } = useToast()
+  const confirm = useConfirm()
 
   const fetchProductos = async () => {
     try {
@@ -49,7 +53,15 @@ export default function ProductosAlmacenPage() {
   }, [busqueda])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este producto?')) return
+    const confirmed = await confirm({
+      title: 'Eliminar producto',
+      message: '¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+      variant: 'danger',
+    })
+
+    if (!confirmed) return
 
     setDeleting(id)
     try {
@@ -59,13 +71,14 @@ export default function ProductosAlmacenPage() {
 
       if (response.ok) {
         setProductos(productos.filter((p) => p.id !== id))
+        showToast('Producto eliminado correctamente', 'success')
       } else {
         const error = await response.json()
-        alert(error.error || 'Error al eliminar')
+        showToast(error.error || 'Error al eliminar producto', 'error')
       }
     } catch (error) {
       console.error('Error deleting producto:', error)
-      alert('Error al eliminar producto')
+      showToast('Error al eliminar producto', 'error')
     } finally {
       setDeleting(null)
     }

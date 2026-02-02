@@ -106,6 +106,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 })
     }
 
+    // Verificar si tiene pedidos asociados
+    const lineasPedido = await prisma.itemPedido.count({
+      where: { productoId: id }
+    })
+
+    if (lineasPedido > 0) {
+      return NextResponse.json({
+        error: `No se puede eliminar: el producto tiene ${lineasPedido} pedido(s) asociado(s)`
+      }, { status: 400 })
+    }
+
     await prisma.producto.delete({ where: { id } })
 
     return NextResponse.json({ success: true })

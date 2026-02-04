@@ -53,6 +53,23 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // Verificar que todos los productos existen en la base de datos
+    const productIds = data.items.map((item: any) => item.productoId).filter(Boolean)
+    const existingProducts = await prisma.producto.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true }
+    })
+    const existingProductIds = new Set(existingProducts.map(p => p.id))
+
+    const missingProducts = productIds.filter((id: string) => !existingProductIds.has(id))
+    if (missingProducts.length > 0) {
+      console.log('Productos no encontrados:', missingProducts)
+      return NextResponse.json({
+        error: 'Algunos productos ya no están disponibles. Por favor, vacía la cesta y vuelve a añadir los productos.',
+        details: `Productos no encontrados: ${missingProducts.join(', ')}`
+      }, { status: 400 })
+    }
+
     // Validar que los items tengan datos válidos
     const itemsValidados = data.items.map((item: any) => {
       const cantidad_cajas = Math.ceil(item.cantidad_cajas || 1)

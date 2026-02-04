@@ -149,7 +149,10 @@
     "characteristics": "Características",
     "pricePerM2Note": "Precio por metro cuadrado. IVA no incluido.",
     "deliveryTitle": "Entrega en 24-48h",
-    "deliveryNote": "para pedidos realizados antes de las 14:00h"
+    "deliveryNote": "para pedidos realizados antes de las 14:00h",
+    "qrCode": "Código QR",
+    "qrCodeDescription": "Escanea para acceder a este producto",
+    "qrCodeClickToExpand": "Clic para ampliar"
   },
   "cart": {
     "title": "Cesta",

@@ -149,7 +149,10 @@
     "characteristics": "الخصائص",
     "pricePerM2Note": "السعر للمتر المربع. لا يشمل ضريبة القيمة المضافة.",
     "deliveryTitle": "التوصيل خلال 24-48 ساعة",
-    "deliveryNote": "للطلبات المقدمة قبل الساعة 2:00 مساءً"
+    "deliveryNote": "للطلبات المقدمة قبل الساعة 2:00 مساءً",
+    "qrCode": "رمز QR",
+    "qrCodeDescription": "امسح للوصول إلى هذا المنتج",
+    "qrCodeClickToExpand": "انقر للتكبير"
   },
   "cart": {
     "title": "السلة",

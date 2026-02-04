@@ -331,7 +331,7 @@ export default function FacturaDetallePage() {
                   </td>
                   <td className="px-4 py-3 text-center print:hidden">
                     {item.producto?.slug && (
-                      <ProductQRCode productSlug={item.producto.slug} size={56} />
+                      <ProductQRCode productSlug={item.producto.slug} size={56} expandable />
                     )}
                   </td>
                   <td className="px-4 py-3 text-right text-neutral-900">

@@ -8,6 +8,7 @@ import { DesktopNav } from '@/components/layout/DesktopNav'
 import { StockBadge } from '@/components/ui/StockBadge'
 import { PriceTag } from '@/components/ui/PriceTag'
 import { ProductImage } from '@/components/ui/ProductImage'
+import { ProductQRCode } from '@/components/ui/QRCode'
 import { AddToCartButton } from '@/components/producto/AddToCartButton'
 import { Producto } from '@/types'
 
@@ -245,6 +246,19 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
             </div>
           </div>
 
+          {/* Código QR */}
+          <div className="flex items-center justify-center gap-4 py-4 border-y border-neutral-200">
+            <ProductQRCode
+              productSlug={producto.slug}
+              size={80}
+              expandable
+            />
+            <div className="text-sm">
+              <p className="font-medium text-neutral-900">{t('qrCode')}</p>
+              <p className="text-neutral-500">{t('qrCodeDescription')}</p>
+            </div>
+          </div>
+
           {/* Botón añadir a cesta */}
           <AddToCartButton producto={producto} />
         </div>
@@ -365,6 +379,22 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
                 <p className="text-sm text-primary-800">
                   <strong>{t('deliveryTitle')}</strong> {t('deliveryNote')}
                 </p>
+              </div>
+
+              {/* Código QR */}
+              <div className="mt-8 bg-white border border-neutral-200 rounded-xl p-6">
+                <div className="flex items-center gap-6">
+                  <ProductQRCode
+                    productSlug={producto.slug}
+                    size={100}
+                    expandable
+                  />
+                  <div>
+                    <h3 className="font-semibold text-neutral-900 mb-1">{t('qrCode')}</h3>
+                    <p className="text-sm text-neutral-500">{t('qrCodeDescription')}</p>
+                    <p className="text-xs text-neutral-400 mt-2">{t('qrCodeClickToExpand')}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -341,7 +341,7 @@ export default function PedidoDetallePage() {
                   </td>
                   <td className="px-6 py-4 text-center print:hidden">
                     {item.producto?.slug && (
-                      <ProductQRCode productSlug={item.producto.slug} size={64} />
+                      <ProductQRCode productSlug={item.producto.slug} size={64} expandable />
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">

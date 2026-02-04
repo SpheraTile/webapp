@@ -149,7 +149,10 @@
     "characteristics": "Characteristics",
     "pricePerM2Note": "Price per square meter. VAT not included.",
     "deliveryTitle": "Delivery in 24-48h",
-    "deliveryNote": "for orders placed before 2:00 PM"
+    "deliveryNote": "for orders placed before 2:00 PM",
+    "qrCode": "QR Code",
+    "qrCodeDescription": "Scan to access this product",
+    "qrCodeClickToExpand": "Click to enlarge"
   },
   "cart": {
     "title": "Cart",

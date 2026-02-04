@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ShareActions } from '@/components/ui/ShareActions'
+import { ProductQRCode } from '@/components/ui/QRCode'
 
 interface ItemPedido {
   id: string
@@ -11,6 +12,10 @@ interface ItemPedido {
   producto_referencia: string
   cantidad_m2: number
   cantidad_cajas: number
+  producto: {
+    slug: string
+    imagen: string
+  }
 }
 
 interface Albaran {
@@ -325,6 +330,7 @@ export default function AlbaranDetallePage() {
             <thead className="bg-neutral-100">
               <tr>
                 <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Producto</th>
+                <th className="text-center px-4 py-2 text-xs font-medium text-neutral-500 uppercase print:hidden">QR</th>
                 <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Referencia</th>
                 <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Cajas</th>
                 <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">m²</th>
@@ -333,7 +339,23 @@ export default function AlbaranDetallePage() {
             <tbody className="divide-y divide-neutral-200">
               {albaran.pedido.items.map((item) => (
                 <tr key={item.id}>
-                  <td className="px-4 py-3 font-medium text-neutral-900">{item.producto_nombre}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {item.producto?.imagen && (
+                        <img
+                          src={item.producto.imagen}
+                          alt={item.producto_nombre}
+                          className="w-10 h-10 object-cover rounded"
+                        />
+                      )}
+                      <span className="font-medium text-neutral-900">{item.producto_nombre}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center print:hidden">
+                    {item.producto?.slug && (
+                      <ProductQRCode productSlug={item.producto.slug} size={56} />
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-neutral-500">{item.producto_referencia}</td>
                   <td className="px-4 py-3 text-right text-neutral-900">{item.cantidad_cajas}</td>
                   <td className="px-4 py-3 text-right text-neutral-900">{item.cantidad_m2.toFixed(2)}</td>

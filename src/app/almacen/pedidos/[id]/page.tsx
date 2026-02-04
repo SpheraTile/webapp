@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ShareActions } from '@/components/ui/ShareActions'
+import { ProductQRCode } from '@/components/ui/QRCode'
 
 interface ItemPedido {
   id: string
@@ -13,6 +14,10 @@ interface ItemPedido {
   cantidad_cajas: number
   precio_m2: number
   subtotal: number
+  producto: {
+    slug: string
+    imagen: string
+  }
 }
 
 interface Pedido {
@@ -310,6 +315,7 @@ export default function PedidoDetallePage() {
             <thead className="bg-neutral-50">
               <tr>
                 <th className="text-left px-6 py-3 text-xs font-medium text-neutral-500 uppercase">Producto</th>
+                <th className="text-center px-6 py-3 text-xs font-medium text-neutral-500 uppercase print:hidden">QR</th>
                 <th className="text-right px-6 py-3 text-xs font-medium text-neutral-500 uppercase">Cantidad</th>
                 <th className="text-right px-6 py-3 text-xs font-medium text-neutral-500 uppercase">Precio/m²</th>
                 <th className="text-right px-6 py-3 text-xs font-medium text-neutral-500 uppercase">Subtotal</th>
@@ -319,8 +325,24 @@ export default function PedidoDetallePage() {
               {pedido.items.map((item) => (
                 <tr key={item.id}>
                   <td className="px-6 py-4">
-                    <div className="font-medium text-neutral-900">{item.producto_nombre}</div>
-                    <div className="text-sm text-neutral-500">{item.producto_referencia}</div>
+                    <div className="flex items-center gap-3">
+                      {item.producto?.imagen && (
+                        <img
+                          src={item.producto.imagen}
+                          alt={item.producto_nombre}
+                          className="w-12 h-12 object-cover rounded-lg"
+                        />
+                      )}
+                      <div>
+                        <div className="font-medium text-neutral-900">{item.producto_nombre}</div>
+                        <div className="text-sm text-neutral-500">{item.producto_referencia}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center print:hidden">
+                    {item.producto?.slug && (
+                      <ProductQRCode productSlug={item.producto.slug} size={64} />
+                    )}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="text-neutral-900">{item.cantidad_m2.toFixed(2)} m²</div>

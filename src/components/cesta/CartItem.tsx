@@ -13,6 +13,7 @@ interface CartItemProps {
 export function CartItem({ item }: CartItemProps) {
   const { actualizarCantidad, eliminarItem } = useCesta()
   const { producto, cantidad_m2 } = item
+  const minimo = producto.pedido_minimo_m2 || 1
 
   const subtotal = cantidad_m2 * producto.precio_m2
 
@@ -23,7 +24,7 @@ export function CartItem({ item }: CartItemProps) {
   }
 
   const decrementar = () => {
-    if (cantidad_m2 > 1) {
+    if (cantidad_m2 > minimo) {
       actualizarCantidad(producto.id, cantidad_m2 - 1)
     }
   }
@@ -62,7 +63,8 @@ export function CartItem({ item }: CartItemProps) {
           <div className="flex items-center gap-2 bg-neutral-100 rounded-lg">
             <button
               onClick={decrementar}
-              className="p-2 text-neutral-600 hover:text-neutral-900"
+              disabled={cantidad_m2 <= minimo}
+              className="p-2 text-neutral-600 hover:text-neutral-900 disabled:opacity-30"
             >
               <IconMinus size={16} />
             </button>

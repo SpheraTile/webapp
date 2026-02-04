@@ -88,6 +88,9 @@ export default function PedidoDetallePage() {
   const [loading, setLoading] = useState(true)
   const [creatingAlbaran, setCreatingAlbaran] = useState(false)
   const [creatingFactura, setCreatingFactura] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   const fetchPedido = async () => {
     try {
@@ -190,6 +193,29 @@ export default function PedidoDetallePage() {
       alert('Error al crear factura')
     } finally {
       setCreatingFactura(false)
+    }
+  }
+
+  const handleEliminarPedido = async () => {
+    if (!pedido || deleteConfirmText !== 'BORRAR') return
+    setDeleting(true)
+    try {
+      const response = await fetch(`/api/pedidos/${pedido.id}`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        router.push('/almacen/pedidos')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Error al eliminar pedido')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Error al eliminar pedido')
+    } finally {
+      setDeleting(false)
+      setShowDeleteModal(false)
+      setDeleteConfirmText('')
     }
   }
 
@@ -452,6 +478,80 @@ export default function PedidoDetallePage() {
           </p>
         )}
       </div>
+
+      {/* Zona de peligro - Eliminar pedido */}
+      {!pedido.albaran && !pedido.factura && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 mt-6 print:hidden">
+          <h2 className="text-lg font-semibold text-red-800 mb-2">Zona de peligro</h2>
+          <p className="text-sm text-red-600 mb-4">
+            Una vez eliminado, el pedido no se puede recuperar. Esta acción es irreversible.
+          </p>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+          >
+            Eliminar pedido
+          </button>
+        </div>
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-neutral-900">¿Eliminar pedido?</h3>
+                <p className="text-sm text-neutral-500">{pedido.numero_pedido}</p>
+              </div>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-red-800">
+                <strong>⚠️ Advertencia:</strong> Esta acción eliminará permanentemente el pedido y todos sus datos asociados. No se puede deshacer.
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Para confirmar, escribe <span className="font-bold text-red-600">BORRAR</span> en el campo de abajo:
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Escribe BORRAR para confirmar"
+                className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false)
+                  setDeleteConfirmText('')
+                }}
+                className="flex-1 px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleEliminarPedido}
+                disabled={deleteConfirmText !== 'BORRAR' || deleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? 'Eliminando...' : 'Eliminar pedido'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

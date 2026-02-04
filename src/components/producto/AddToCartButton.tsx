@@ -11,7 +11,8 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ producto, className = '' }: AddToCartButtonProps) {
-  const [cantidad, setCantidad] = useState(1)
+  const minimo = producto.pedido_minimo_m2 || 1
+  const [cantidad, setCantidad] = useState(minimo)
   const [mostrarInput, setMostrarInput] = useState(false)
   const { agregarItem, items } = useCesta()
 
@@ -21,9 +22,9 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
   const stockDisponible = producto.stock_m2 - cantidadEnCesta
 
   const handleAgregar = () => {
-    if (cantidad > 0 && cantidad <= stockDisponible) {
+    if (cantidad >= minimo && cantidad <= stockDisponible) {
       agregarItem(producto, cantidad)
-      setCantidad(1)
+      setCantidad(minimo)
       setMostrarInput(false)
     }
   }
@@ -35,7 +36,7 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
   }
 
   const decrementar = () => {
-    if (cantidad > 1) {
+    if (cantidad > minimo) {
       setCantidad((prev) => prev - 1)
     }
   }
@@ -57,7 +58,7 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
       <div className="flex items-center justify-between bg-neutral-100 rounded-lg p-2">
         <button
           onClick={decrementar}
-          disabled={cantidad <= 1}
+          disabled={cantidad <= minimo}
           className="p-2 text-neutral-600 hover:text-neutral-900 disabled:opacity-30"
         >
           <IconMinus size={20} />
@@ -69,13 +70,13 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
             value={cantidad}
             onChange={(e) => {
               const val = parseFloat(e.target.value)
-              if (!isNaN(val) && val > 0 && val <= stockDisponible) {
+              if (!isNaN(val) && val >= minimo && val <= stockDisponible) {
                 setCantidad(val)
               }
             }}
             className="w-20 text-center bg-white rounded-lg py-2 font-medium
                        focus:outline-none focus:ring-2 focus:ring-primary-500"
-            min={1}
+            min={minimo}
             max={stockDisponible}
             step={0.01}
           />
@@ -91,9 +92,9 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
         </button>
       </div>
 
-      {/* Info de stock disponible */}
+      {/* Info de pedido mínimo y stock disponible */}
       <p className="text-sm text-neutral-500 text-center">
-        Máximo disponible: {stockDisponible.toFixed(2)} m²
+        Pedido mínimo: {minimo} m² · Máximo disponible: {stockDisponible.toFixed(2)} m²
       </p>
 
       {/* Botón agregar */}

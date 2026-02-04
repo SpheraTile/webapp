@@ -113,6 +113,16 @@ export function CestaProvider({ children }: { children: ReactNode }) {
 
   const agregarItem = useCallback(
     (producto: Producto, cantidad_m2: number) => {
+      const minimo = producto.pedido_minimo_m2 || 1
+
+      // Validar contra pedido mínimo
+      if (cantidad_m2 < minimo) {
+        console.warn(
+          `No se puede agregar ${cantidad_m2} m². Pedido mínimo: ${minimo} m²`
+        )
+        return
+      }
+
       // Validar contra stock disponible
       const itemExistente = state.items.find(
         (item) => item.producto.id === producto.id
@@ -135,18 +145,27 @@ export function CestaProvider({ children }: { children: ReactNode }) {
   const actualizarCantidad = useCallback(
     (productoId: string, cantidad_m2: number) => {
       const item = state.items.find((i) => i.producto.id === productoId)
-      if (item && cantidad_m2 > item.producto.stock_m2) {
+      if (!item) return
+
+      const minimo = item.producto.pedido_minimo_m2 || 1
+
+      // Validar contra pedido mínimo
+      if (cantidad_m2 < minimo) {
+        console.warn(
+          `Cantidad mínima requerida: ${minimo} m²`
+        )
+        return
+      }
+
+      // Validar contra stock máximo
+      if (cantidad_m2 > item.producto.stock_m2) {
         console.warn(
           `Cantidad máxima disponible: ${item.producto.stock_m2} m²`
         )
         return
       }
 
-      if (cantidad_m2 <= 0) {
-        dispatch({ type: 'ELIMINAR_ITEM', productoId })
-      } else {
-        dispatch({ type: 'ACTUALIZAR_CANTIDAD', productoId, cantidad_m2 })
-      }
+      dispatch({ type: 'ACTUALIZAR_CANTIDAD', productoId, cantidad_m2 })
     },
     [state.items]
   )

@@ -12,20 +12,26 @@ interface CartItemProps {
 
 export function CartItem({ item }: CartItemProps) {
   const { actualizarCantidad, eliminarItem } = useCesta()
-  const { producto, cantidad_m2 } = item
-  const minimo = producto.pedido_minimo_m2 || 1
+  const { producto, cantidad_m2, cantidad_cajas } = item
+
+  // Calcular mínimo en cajas
+  const minimoM2 = producto.pedido_minimo_m2 || producto.m2_caja
+  const minimoCajas = Math.ceil(minimoM2 / producto.m2_caja)
+
+  // Calcular máximo en cajas
+  const maxCajas = Math.floor(producto.stock_m2 / producto.m2_caja)
 
   const subtotal = cantidad_m2 * producto.precio_m2
 
   const incrementar = () => {
-    if (cantidad_m2 < producto.stock_m2) {
-      actualizarCantidad(producto.id, cantidad_m2 + 1)
+    if (cantidad_cajas < maxCajas) {
+      actualizarCantidad(producto.id, cantidad_cajas + 1)
     }
   }
 
   const decrementar = () => {
-    if (cantidad_m2 > minimo) {
-      actualizarCantidad(producto.id, cantidad_m2 - 1)
+    if (cantidad_cajas > minimoCajas) {
+      actualizarCantidad(producto.id, cantidad_cajas - 1)
     }
   }
 
@@ -63,17 +69,18 @@ export function CartItem({ item }: CartItemProps) {
           <div className="flex items-center gap-2 bg-neutral-100 rounded-lg">
             <button
               onClick={decrementar}
-              disabled={cantidad_m2 <= minimo}
+              disabled={cantidad_cajas <= minimoCajas}
               className="p-2 text-neutral-600 hover:text-neutral-900 disabled:opacity-30"
             >
               <IconMinus size={16} />
             </button>
-            <span className="w-16 text-center font-medium">
-              {cantidad_m2} m²
-            </span>
+            <div className="text-center px-2">
+              <span className="font-medium">{cantidad_cajas}</span>
+              <span className="text-neutral-500 text-xs ml-1">cajas</span>
+            </div>
             <button
               onClick={incrementar}
-              disabled={cantidad_m2 >= producto.stock_m2}
+              disabled={cantidad_cajas >= maxCajas}
               className="p-2 text-neutral-600 hover:text-neutral-900 disabled:opacity-30"
             >
               <IconPlus size={16} />
@@ -87,6 +94,11 @@ export function CartItem({ item }: CartItemProps) {
             <IconTrash size={20} />
           </button>
         </div>
+
+        {/* Mostrar m² calculados */}
+        <p className="text-xs text-neutral-400 mt-1">
+          = {cantidad_m2.toFixed(2)} m²
+        </p>
       </div>
 
       {/* Subtotal */}

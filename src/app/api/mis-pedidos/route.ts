@@ -33,12 +33,12 @@ export async function POST(request: NextRequest) {
     const count = await prisma.pedido.count()
     const numero_pedido = `PED-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`
 
-    // Calcular totales
-    const subtotal = data.items.reduce((sum: number, item: any) => sum + item.subtotal, 0)
+    // Calcular totales (asegurar que son números válidos)
+    const subtotal = data.items.reduce((sum: number, item: any) => sum + (Number(item.subtotal) || 0), 0)
     const iva_porcentaje = 21
     const iva_euros = subtotal * iva_porcentaje / 100
     const total_euros = subtotal + iva_euros
-    const total_m2 = data.items.reduce((sum: number, item: any) => sum + item.cantidad_m2, 0)
+    const total_m2 = data.items.reduce((sum: number, item: any) => sum + (Number(item.cantidad_m2) || 0), 0)
 
     // Usar dirección del usuario o la proporcionada
     const direccion_envio = data.direccion_envio || user.direccion || ''
@@ -51,6 +51,23 @@ export async function POST(request: NextRequest) {
         error: 'Debes completar tu dirección de envío en tu perfil o proporcionar una'
       }, { status: 400 })
     }
+
+    // Validar que los items tengan datos válidos
+    const itemsValidados = data.items.map((item: any) => {
+      const cantidad_cajas = Math.ceil(item.cantidad_cajas || 1)
+      if (!item.productoId) {
+        throw new Error('Falta productoId en un item')
+      }
+      return {
+        productoId: item.productoId,
+        producto_nombre: item.producto_nombre || 'Producto',
+        producto_referencia: item.producto_referencia || '',
+        cantidad_m2: Number(item.cantidad_m2) || 0,
+        cantidad_cajas: Number.isFinite(cantidad_cajas) ? cantidad_cajas : 1,
+        precio_m2: Number(item.precio_m2) || 0,
+        subtotal: Number(item.subtotal) || 0,
+      }
+    })
 
     const pedido = await prisma.pedido.create({
       data: {
@@ -68,15 +85,7 @@ export async function POST(request: NextRequest) {
         total_euros,
         estado: 'PENDIENTE',
         items: {
-          create: data.items.map((item: any) => ({
-            productoId: item.productoId,
-            producto_nombre: item.producto_nombre,
-            producto_referencia: item.producto_referencia || '',
-            cantidad_m2: item.cantidad_m2,
-            cantidad_cajas: item.cantidad_cajas,
-            precio_m2: item.precio_m2,
-            subtotal: item.subtotal,
-          })),
+          create: itemsValidados,
         },
       },
       include: {
@@ -108,9 +117,13 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(pedido, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating pedido:', error)
-    return NextResponse.json({ error: 'Error al crear el pedido' }, { status: 500 })
+    console.error('Error details:', error?.message, error?.code, error?.meta)
+    return NextResponse.json({
+      error: 'Error al crear el pedido',
+      details: error?.message || 'Unknown error'
+    }, { status: 500 })
   }
 }
 

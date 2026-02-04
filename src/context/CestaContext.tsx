@@ -14,10 +14,10 @@ interface CestaState {
   items: ItemCesta[]
 }
 
-// Acciones
+// Acciones - ahora trabajamos con CAJAS
 type CestaAction =
-  | { type: 'AGREGAR_ITEM'; producto: Producto; cantidad_m2: number }
-  | { type: 'ACTUALIZAR_CANTIDAD'; productoId: string; cantidad_m2: number }
+  | { type: 'AGREGAR_ITEM'; producto: Producto; cantidad_cajas: number }
+  | { type: 'ACTUALIZAR_CANTIDAD'; productoId: string; cantidad_cajas: number }
   | { type: 'ELIMINAR_ITEM'; productoId: string }
   | { type: 'VACIAR_CESTA' }
 
@@ -36,8 +36,8 @@ function cestaReducer(state: CestaState, action: CestaAction): CestaState {
 
       if (itemExistente) {
         // Actualizar cantidad si ya existe
-        const nuevaCantidadM2 = itemExistente.cantidad_m2 + action.cantidad_m2
-        const nuevaCantidadCajas = Math.ceil(nuevaCantidadM2 / action.producto.m2_caja)
+        const nuevaCantidadCajas = itemExistente.cantidad_cajas + action.cantidad_cajas
+        const nuevaCantidadM2 = nuevaCantidadCajas * action.producto.m2_caja
         return {
           ...state,
           items: state.items.map((item) =>
@@ -49,12 +49,12 @@ function cestaReducer(state: CestaState, action: CestaAction): CestaState {
       }
 
       // Agregar nuevo item
-      const cantidad_cajas = Math.ceil(action.cantidad_m2 / action.producto.m2_caja)
+      const cantidad_m2 = action.cantidad_cajas * action.producto.m2_caja
       return {
         ...state,
         items: [
           ...state.items,
-          { producto: action.producto, cantidad_m2: action.cantidad_m2, cantidad_cajas },
+          { producto: action.producto, cantidad_m2, cantidad_cajas: action.cantidad_cajas },
         ],
       }
     }
@@ -66,8 +66,8 @@ function cestaReducer(state: CestaState, action: CestaAction): CestaState {
           item.producto.id === action.productoId
             ? {
                 ...item,
-                cantidad_m2: action.cantidad_m2,
-                cantidad_cajas: Math.ceil(action.cantidad_m2 / item.producto.m2_caja)
+                cantidad_cajas: action.cantidad_cajas,
+                cantidad_m2: action.cantidad_cajas * item.producto.m2_caja
               }
             : item
         ),
@@ -97,11 +97,12 @@ function cestaReducer(state: CestaState, action: CestaAction): CestaState {
 
 // Contexto
 interface CestaContextType extends CestaState {
-  agregarItem: (producto: Producto, cantidad_m2: number) => void
-  actualizarCantidad: (productoId: string, cantidad_m2: number) => void
+  agregarItem: (producto: Producto, cantidad_cajas: number) => void
+  actualizarCantidad: (productoId: string, cantidad_cajas: number) => void
   eliminarItem: (productoId: string) => void
   vaciarCesta: () => void
   totalM2: number
+  totalCajas: number
   totalEuros: number
 }
 
@@ -112,13 +113,15 @@ export function CestaProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cestaReducer, estadoInicial)
 
   const agregarItem = useCallback(
-    (producto: Producto, cantidad_m2: number) => {
-      const minimo = producto.pedido_minimo_m2 || 1
+    (producto: Producto, cantidad_cajas: number) => {
+      // Calcular mínimo en cajas
+      const minimoM2 = producto.pedido_minimo_m2 || producto.m2_caja
+      const minimoCajas = Math.ceil(minimoM2 / producto.m2_caja)
 
       // Validar contra pedido mínimo
-      if (cantidad_m2 < minimo) {
+      if (cantidad_cajas < minimoCajas) {
         console.warn(
-          `No se puede agregar ${cantidad_m2} m². Pedido mínimo: ${minimo} m²`
+          `No se puede agregar ${cantidad_cajas} cajas. Mínimo: ${minimoCajas} cajas`
         )
         return
       }
@@ -127,45 +130,51 @@ export function CestaProvider({ children }: { children: ReactNode }) {
       const itemExistente = state.items.find(
         (item) => item.producto.id === producto.id
       )
-      const cantidadActual = itemExistente?.cantidad_m2 || 0
-      const cantidadTotal = cantidadActual + cantidad_m2
+      const cajasActuales = itemExistente?.cantidad_cajas || 0
+      const cajasTotal = cajasActuales + cantidad_cajas
+      const m2Total = cajasTotal * producto.m2_caja
 
-      if (cantidadTotal > producto.stock_m2) {
+      if (m2Total > producto.stock_m2) {
+        const cajasDisponibles = Math.floor((producto.stock_m2 - cajasActuales * producto.m2_caja) / producto.m2_caja)
         console.warn(
-          `No se puede agregar ${cantidad_m2} m². Stock disponible: ${producto.stock_m2 - cantidadActual} m²`
+          `No se puede agregar ${cantidad_cajas} cajas. Disponibles: ${cajasDisponibles} cajas`
         )
         return
       }
 
-      dispatch({ type: 'AGREGAR_ITEM', producto, cantidad_m2 })
+      dispatch({ type: 'AGREGAR_ITEM', producto, cantidad_cajas })
     },
     [state.items]
   )
 
   const actualizarCantidad = useCallback(
-    (productoId: string, cantidad_m2: number) => {
+    (productoId: string, cantidad_cajas: number) => {
       const item = state.items.find((i) => i.producto.id === productoId)
       if (!item) return
 
-      const minimo = item.producto.pedido_minimo_m2 || 1
+      // Calcular mínimo en cajas
+      const minimoM2 = item.producto.pedido_minimo_m2 || item.producto.m2_caja
+      const minimoCajas = Math.ceil(minimoM2 / item.producto.m2_caja)
 
       // Validar contra pedido mínimo
-      if (cantidad_m2 < minimo) {
+      if (cantidad_cajas < minimoCajas) {
         console.warn(
-          `Cantidad mínima requerida: ${minimo} m²`
+          `Cantidad mínima requerida: ${minimoCajas} cajas`
         )
         return
       }
 
       // Validar contra stock máximo
-      if (cantidad_m2 > item.producto.stock_m2) {
+      const m2Solicitados = cantidad_cajas * item.producto.m2_caja
+      if (m2Solicitados > item.producto.stock_m2) {
+        const maxCajas = Math.floor(item.producto.stock_m2 / item.producto.m2_caja)
         console.warn(
-          `Cantidad máxima disponible: ${item.producto.stock_m2} m²`
+          `Cantidad máxima disponible: ${maxCajas} cajas`
         )
         return
       }
 
-      dispatch({ type: 'ACTUALIZAR_CANTIDAD', productoId, cantidad_m2 })
+      dispatch({ type: 'ACTUALIZAR_CANTIDAD', productoId, cantidad_cajas })
     },
     [state.items]
   )
@@ -184,6 +193,11 @@ export function CestaProvider({ children }: { children: ReactNode }) {
     0
   )
 
+  const totalCajas = state.items.reduce(
+    (total, item) => total + item.cantidad_cajas,
+    0
+  )
+
   const totalEuros = state.items.reduce(
     (total, item) => total + item.cantidad_m2 * item.producto.precio_m2,
     0
@@ -198,6 +212,7 @@ export function CestaProvider({ children }: { children: ReactNode }) {
         eliminarItem,
         vaciarCesta,
         totalM2,
+        totalCajas,
         totalEuros,
       }}
     >

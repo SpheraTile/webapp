@@ -30,9 +30,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'El pedido debe tener al menos un producto' }, { status: 400 })
     }
 
-    // Generar número de pedido
-    const count = await prisma.pedido.count()
-    const numero_pedido = `PED-${new Date().getFullYear()}-${String(count + 1).padStart(5, '0')}`
+    // Generar número de pedido basado en el último número existente
+    const currentYear = new Date().getFullYear()
+    const lastOrder = await prisma.pedido.findFirst({
+      where: {
+        numero_pedido: {
+          startsWith: `PED-${currentYear}-`
+        }
+      },
+      orderBy: { numero_pedido: 'desc' },
+      select: { numero_pedido: true }
+    })
+
+    let nextNumber = 1
+    if (lastOrder?.numero_pedido) {
+      // Extraer el número del formato PED-2026-00001
+      const match = lastOrder.numero_pedido.match(/PED-\d{4}-(\d+)/)
+      if (match) {
+        nextNumber = parseInt(match[1], 10) + 1
+      }
+    }
+    const numero_pedido = `PED-${currentYear}-${String(nextNumber).padStart(5, '0')}`
 
     // Calcular totales (asegurar que son números válidos)
     const subtotal = data.items.reduce((sum: number, item: any) => sum + (Number(item.subtotal) || 0), 0)

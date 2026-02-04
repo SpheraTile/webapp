@@ -330,7 +330,7 @@ export default function AlbaranDetallePage() {
             <thead className="bg-neutral-100">
               <tr>
                 <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Producto</th>
-                <th className="text-center px-4 py-2 text-xs font-medium text-neutral-500 uppercase print:hidden">QR</th>
+                <th className="text-center px-4 py-2 text-xs font-medium text-neutral-500 uppercase">QR</th>
                 <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Referencia</th>
                 <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Cajas</th>
                 <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">m²</th>
@@ -351,7 +351,7 @@ export default function AlbaranDetallePage() {
                       <span className="font-medium text-neutral-900">{item.producto_nombre}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center print:hidden">
+                  <td className="px-4 py-3 text-center">
                     {item.producto?.slug && (
                       <ProductQRCode productSlug={item.producto.slug} size={56} expandable />
                     )}

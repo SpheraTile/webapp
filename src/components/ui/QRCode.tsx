@@ -102,7 +102,7 @@ export function ProductQRCode({
       {/* Modal de QR ampliado */}
       {isExpanded && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm print:hidden"
           onClick={() => setIsExpanded(false)}
         >
           <div
@@ -178,7 +178,7 @@ export function ExpandableQRCode({
       {/* Modal de QR ampliado */}
       {isExpanded && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm print:hidden"
           onClick={() => setIsExpanded(false)}
         >
           <div

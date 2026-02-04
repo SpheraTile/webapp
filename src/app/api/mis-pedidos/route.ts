@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json()
+    console.log('Datos recibidos:', JSON.stringify(data, null, 2))
 
     // Obtener datos del usuario para la dirección
     const user = await prisma.user.findUnique({

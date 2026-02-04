@@ -44,7 +44,8 @@ export default function CestaPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || t('errorSending'))
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error
+        throw new Error(errorMsg || t('errorSending'))
       }
 
       setNumeroPedido(data.numero_pedido)

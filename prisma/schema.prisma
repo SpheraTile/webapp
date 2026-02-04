@@ -212,6 +212,22 @@ model Factura {
   fecha_pago            DateTime?
   createdAt             DateTime      @default(now())
   updatedAt             DateTime      @updatedAt
+  items                 ItemFactura[]
+}
+
+model ItemFactura {
+  id                  String   @id @default(cuid())
+  facturaId           String
+  factura             Factura  @relation(fields: [facturaId], references: [id], onDelete: Cascade)
+  productoId          String?
+  producto_nombre     String
+  producto_referencia String
+  producto_slug       String?
+  producto_imagen     String?
+  cantidad_m2         Float
+  cantidad_cajas      Int
+  precio_m2           Float
+  subtotal            Float
 }
 
 enum EstadoFactura {

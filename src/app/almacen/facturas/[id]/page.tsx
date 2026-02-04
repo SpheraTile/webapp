@@ -6,18 +6,16 @@ import Link from 'next/link'
 import { ShareActions } from '@/components/ui/ShareActions'
 import { ProductQRCode } from '@/components/ui/QRCode'
 
-interface ItemPedido {
+interface ItemFactura {
   id: string
   producto_nombre: string
   producto_referencia: string
+  producto_slug: string | null
+  producto_imagen: string | null
   cantidad_m2: number
   cantidad_cajas: number
   precio_m2: number
   subtotal: number
-  producto: {
-    slug: string
-    imagen: string
-  }
 }
 
 interface Factura {
@@ -34,10 +32,10 @@ interface Factura {
   fecha_vencimiento: string
   fecha_pago: string | null
   createdAt: string
+  items: ItemFactura[]
   pedido: {
     id: string
     numero_pedido: string
-    items: ItemPedido[]
     user: {
       nombre: string
       email: string
@@ -95,6 +93,9 @@ export default function FacturaDetallePage() {
   const printRef = useRef<HTMLDivElement>(null)
   const [factura, setFactura] = useState<Factura | null>(null)
   const [loading, setLoading] = useState(true)
+  const [editandoPrecios, setEditandoPrecios] = useState(false)
+  const [preciosEditados, setPreciosEditados] = useState<Record<string, number>>({})
+  const [guardando, setGuardando] = useState(false)
 
   const fetchFactura = async () => {
     try {
@@ -156,6 +157,77 @@ export default function FacturaDetallePage() {
       console.error('Error:', error)
     }
   }
+
+  const iniciarEdicionPrecios = () => {
+    if (!factura) return
+    const precios: Record<string, number> = {}
+    factura.items.forEach((item) => {
+      precios[item.id] = item.precio_m2
+    })
+    setPreciosEditados(precios)
+    setEditandoPrecios(true)
+  }
+
+  const cancelarEdicionPrecios = () => {
+    setEditandoPrecios(false)
+    setPreciosEditados({})
+  }
+
+  const handleGuardarPrecios = async () => {
+    if (!factura) return
+    setGuardando(true)
+    try {
+      const itemsActualizados = factura.items.map((item) => ({
+        id: item.id,
+        precio_m2: preciosEditados[item.id] ?? item.precio_m2,
+        cantidad_m2: item.cantidad_m2,
+      }))
+
+      const response = await fetch(`/api/facturas/${factura.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: itemsActualizados }),
+      })
+
+      if (response.ok) {
+        await fetchFactura()
+        setEditandoPrecios(false)
+        setPreciosEditados({})
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Error al guardar precios')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Error al guardar precios')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  // Calcular totales temporales cuando se editan precios
+  const calcularSubtotalTemp = (itemId: string, cantidadM2: number) => {
+    const precio = preciosEditados[itemId]
+    if (precio !== undefined) {
+      return cantidadM2 * precio
+    }
+    return null
+  }
+
+  const subtotalTemp = editandoPrecios && factura
+    ? factura.items.reduce((sum, item) => {
+        const precio = preciosEditados[item.id] ?? item.precio_m2
+        return sum + (item.cantidad_m2 * precio)
+      }, 0)
+    : null
+
+  const ivaTemp = subtotalTemp !== null && factura
+    ? subtotalTemp * (factura.iva_porcentaje / 100)
+    : null
+
+  const totalTemp = subtotalTemp !== null && ivaTemp !== null
+    ? subtotalTemp + ivaTemp
+    : null
 
   if (loading) {
     return (
@@ -300,7 +372,34 @@ export default function FacturaDetallePage() {
 
         {/* Detalle de la factura */}
         <div className="p-6">
-          <h3 className="text-sm font-medium text-neutral-500 mb-4">DETALLE</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-neutral-500">DETALLE</h3>
+            {!editandoPrecios ? (
+              <button
+                onClick={iniciarEdicionPrecios}
+                className="text-primary-600 hover:text-primary-700 text-sm font-medium print:hidden"
+              >
+                Editar precios
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 print:hidden">
+                <button
+                  onClick={cancelarEdicionPrecios}
+                  className="px-3 py-1 text-sm text-neutral-600 hover:text-neutral-800"
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleGuardarPrecios}
+                  disabled={guardando}
+                  className="px-3 py-1 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+                >
+                  {guardando ? 'Guardando...' : 'Guardar precios'}
+                </button>
+              </div>
+            )}
+          </div>
           <table className="w-full">
             <thead className="bg-neutral-100">
               <tr>
@@ -312,40 +411,61 @@ export default function FacturaDetallePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
-              {factura.pedido.items.map((item) => (
-                <tr key={item.id}>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {item.producto?.imagen && (
-                        <img
-                          src={item.producto.imagen}
-                          alt={item.producto_nombre}
-                          className="w-10 h-10 object-cover rounded"
-                        />
-                      )}
-                      <div>
-                        <p className="font-medium text-neutral-900">{item.producto_nombre}</p>
-                        <p className="text-sm text-neutral-500">Ref: {item.producto_referencia}</p>
+              {factura.items.map((item) => {
+                const precioActual = editandoPrecios ? (preciosEditados[item.id] ?? item.precio_m2) : item.precio_m2
+                const subtotalActual = editandoPrecios ? (item.cantidad_m2 * precioActual) : item.subtotal
+                return (
+                  <tr key={item.id}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        {item.producto_imagen && (
+                          <img
+                            src={item.producto_imagen}
+                            alt={item.producto_nombre}
+                            className="w-10 h-10 object-cover rounded"
+                          />
+                        )}
+                        <div>
+                          <p className="font-medium text-neutral-900">{item.producto_nombre}</p>
+                          <p className="text-sm text-neutral-500">Ref: {item.producto_referencia}</p>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {item.producto?.slug && (
-                      <ProductQRCode productSlug={item.producto.slug} size={56} expandable />
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right text-neutral-900">
-                    {item.cantidad_m2.toFixed(2)} m²
-                    <span className="block text-sm text-neutral-500">({item.cantidad_cajas} cajas)</span>
-                  </td>
-                  <td className="px-4 py-3 text-right text-neutral-900">
-                    {formatCurrency(item.precio_m2)}€/m²
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                    {formatCurrency(item.subtotal)}€
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {item.producto_slug && (
+                        <ProductQRCode productSlug={item.producto_slug} size={56} expandable />
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right text-neutral-900">
+                      {item.cantidad_m2.toFixed(2)} m²
+                      <span className="block text-sm text-neutral-500">({item.cantidad_cajas} cajas)</span>
+                    </td>
+                    <td className="px-4 py-3 text-right text-neutral-900">
+                      {editandoPrecios ? (
+                        <div className="flex items-center justify-end gap-1 print:hidden">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={preciosEditados[item.id] ?? item.precio_m2}
+                            onChange={(e) => setPreciosEditados({
+                              ...preciosEditados,
+                              [item.id]: parseFloat(e.target.value) || 0
+                            })}
+                            className="w-20 px-2 py-1 border border-neutral-300 rounded text-right text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          />
+                          <span className="text-sm">€/m²</span>
+                        </div>
+                      ) : (
+                        <span>{formatCurrency(item.precio_m2)}€/m²</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium text-neutral-900">
+                      {formatCurrency(subtotalActual)}€
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
 
@@ -354,15 +474,21 @@ export default function FacturaDetallePage() {
             <div className="w-64">
               <div className="flex justify-between py-2 border-b border-neutral-200">
                 <span className="text-neutral-500">Base imponible</span>
-                <span className="text-neutral-900">{formatCurrency(factura.subtotal_euros)}€</span>
+                <span className={`text-neutral-900 ${editandoPrecios && subtotalTemp !== factura.subtotal_euros ? 'text-primary-600 font-medium' : ''}`}>
+                  {formatCurrency(subtotalTemp ?? factura.subtotal_euros)}€
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-neutral-200">
                 <span className="text-neutral-500">IVA ({factura.iva_porcentaje}%)</span>
-                <span className="text-neutral-900">{formatCurrency(factura.iva_euros)}€</span>
+                <span className={`text-neutral-900 ${editandoPrecios && ivaTemp !== factura.iva_euros ? 'text-primary-600 font-medium' : ''}`}>
+                  {formatCurrency(ivaTemp ?? factura.iva_euros)}€
+                </span>
               </div>
               <div className="flex justify-between py-3 font-bold text-lg">
                 <span>TOTAL</span>
-                <span>{formatCurrency(factura.total_euros)}€</span>
+                <span className={editandoPrecios && totalTemp !== factura.total_euros ? 'text-primary-600' : ''}>
+                  {formatCurrency(totalTemp ?? factura.total_euros)}€
+                </span>
               </div>
             </div>
           </div>

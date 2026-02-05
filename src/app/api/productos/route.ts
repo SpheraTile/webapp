@@ -149,6 +149,7 @@ export async function POST(request: NextRequest) {
         cajas_palet: parseInt(data.cajas_palet),
         peso_caja_kg: parseFloat(data.peso_caja_kg),
         pedido_minimo_m2: parseFloat(data.pedido_minimo_m2),
+        hs_code: data.hs_code || null,
       },
     })
 

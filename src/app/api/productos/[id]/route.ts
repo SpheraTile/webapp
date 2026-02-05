@@ -73,6 +73,7 @@ export async function PUT(
         cajas_palet: data.cajas_palet !== undefined ? parseInt(data.cajas_palet) : undefined,
         peso_caja_kg: data.peso_caja_kg !== undefined ? parseFloat(data.peso_caja_kg) : undefined,
         pedido_minimo_m2: data.pedido_minimo_m2 !== undefined ? parseFloat(data.pedido_minimo_m2) : undefined,
+        hs_code: data.hs_code !== undefined ? (data.hs_code || null) : undefined,
       },
     })
 

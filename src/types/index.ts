@@ -46,6 +46,7 @@ export interface Producto {
   cajas_palet: number
   peso_caja_kg: number
   pedido_minimo_m2: number
+  hs_code?: string // Código arancelario (H.S. Code)
   createdAt?: Date
   updatedAt?: Date
 }

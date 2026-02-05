@@ -63,6 +63,7 @@ export default function EditarProductoPage() {
     cajas_palet: '',
     peso_caja_kg: '',
     pedido_minimo_m2: '',
+    hs_code: '',
   })
 
   // Cargar datos del producto
@@ -103,6 +104,7 @@ export default function EditarProductoPage() {
           cajas_palet: producto.cajas_palet?.toString() || '',
           peso_caja_kg: producto.peso_caja_kg?.toString() || '',
           pedido_minimo_m2: producto.pedido_minimo_m2?.toString() || '',
+          hs_code: producto.hs_code || '',
         })
 
         setImagenPrincipal(producto.imagen || '')
@@ -694,6 +696,29 @@ export default function EditarProductoPage() {
                 className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="14.4"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Información Aduanera */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 mb-4">Información Aduanera</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
+                H.S. Code (Código Arancelario)
+              </label>
+              <input
+                type="text"
+                name="hs_code"
+                value={form.hs_code}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="6907.21.00"
+              />
+              <p className="text-xs text-neutral-400 mt-1">
+                Código del Sistema Armonizado para exportación
+              </p>
             </div>
           </div>
         </div>

@@ -184,7 +184,6 @@ export default function AlbaranDetallePage() {
       <div className="bg-white rounded-xl shadow-sm p-3 lg:p-4 mb-4 lg:mb-6 print:hidden">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4">
           <ShareActions
-            title="Albarán"
             documentNumber={albaran.numero_albaran}
             documentType="albaran"
             clientEmail={albaran.pedido.user.email}

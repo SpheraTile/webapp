@@ -91,6 +91,9 @@ export default function PedidoDetallePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [editandoPrecios, setEditandoPrecios] = useState(false)
+  const [preciosEditados, setPreciosEditados] = useState<Record<string, number>>({})
+  const [guardando, setGuardando] = useState(false)
 
   const fetchPedido = async () => {
     try {
@@ -196,6 +199,67 @@ export default function PedidoDetallePage() {
     }
   }
 
+  const iniciarEdicionPrecios = () => {
+    if (!pedido) return
+    const precios: Record<string, number> = {}
+    pedido.items.forEach((item) => {
+      precios[item.id] = item.precio_m2
+    })
+    setPreciosEditados(precios)
+    setEditandoPrecios(true)
+  }
+
+  const cancelarEdicionPrecios = () => {
+    setEditandoPrecios(false)
+    setPreciosEditados({})
+  }
+
+  const handlePrecioChange = (itemId: string, nuevoPrecio: number) => {
+    setPreciosEditados((prev) => ({
+      ...prev,
+      [itemId]: nuevoPrecio,
+    }))
+  }
+
+  const calcularSubtotalTemp = (item: ItemPedido) => {
+    const precio = preciosEditados[item.id] ?? item.precio_m2
+    return item.cantidad_m2 * precio
+  }
+
+  const calcularTotalesTemp = () => {
+    if (!pedido) return { subtotal: 0, iva: 0, total: 0 }
+    const subtotal = pedido.items.reduce((sum, item) => sum + calcularSubtotalTemp(item), 0)
+    const iva = subtotal * (pedido.iva_porcentaje / 100)
+    const total = subtotal + iva
+    return { subtotal, iva, total }
+  }
+
+  const guardarPrecios = async () => {
+    if (!pedido) return
+    setGuardando(true)
+    try {
+      const response = await fetch(`/api/pedidos/${pedido.id}/precios`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ precios: preciosEditados }),
+      })
+
+      if (response.ok) {
+        await fetchPedido()
+        setEditandoPrecios(false)
+        setPreciosEditados({})
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Error al actualizar precios')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Error al actualizar precios')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
   const handleEliminarPedido = async () => {
     if (!pedido || deleteConfirmText !== 'BORRAR') return
     setDeleting(true)
@@ -256,7 +320,6 @@ export default function PedidoDetallePage() {
       <div className="bg-white rounded-xl shadow-sm p-4 mb-6 print:hidden">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <ShareActions
-            title="Pedido"
             documentNumber={pedido.numero_pedido}
             documentType="pedido"
             clientEmail={pedido.user.email}
@@ -333,8 +396,36 @@ export default function PedidoDetallePage() {
 
       {/* Productos */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-        <div className="p-6 border-b border-neutral-200">
+        <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-neutral-900">Productos</h2>
+          {!pedido.factura && (
+            <div className="flex items-center gap-2">
+              {editandoPrecios ? (
+                <>
+                  <button
+                    onClick={cancelarEdicionPrecios}
+                    className="px-3 py-1.5 text-sm text-neutral-600 hover:text-neutral-800"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={guardarPrecios}
+                    disabled={guardando}
+                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    {guardando ? 'Guardando...' : 'Guardar precios'}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={iniciarEdicionPrecios}
+                  className="px-3 py-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  Editar precios
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -375,10 +466,24 @@ export default function PedidoDetallePage() {
                     <div className="text-sm text-neutral-500">{item.cantidad_cajas} cajas</div>
                   </td>
                   <td className="px-6 py-4 text-right text-neutral-900">
-                    {formatCurrency(item.precio_m2)}€
+                    {editandoPrecios ? (
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={preciosEditados[item.id] ?? item.precio_m2}
+                        onChange={(e) => handlePrecioChange(item.id, parseFloat(e.target.value) || 0)}
+                        className="w-24 text-right border border-neutral-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      />
+                    ) : (
+                      <>{formatCurrency(item.precio_m2)}€</>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-right font-medium text-neutral-900">
-                    {formatCurrency(item.subtotal)}€
+                    {editandoPrecios
+                      ? <>{formatCurrency(calcularSubtotalTemp(item))}€</>
+                      : <>{formatCurrency(item.subtotal)}€</>
+                    }
                   </td>
                 </tr>
               ))}
@@ -389,18 +494,44 @@ export default function PedidoDetallePage() {
         {/* Totales */}
         <div className="p-6 bg-neutral-50 border-t border-neutral-200">
           <div className="max-w-xs ml-auto space-y-2">
-            <div className="flex justify-between">
-              <span className="text-neutral-500">Subtotal</span>
-              <span className="text-neutral-900">{formatCurrency(pedido.subtotal_euros)}€</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-neutral-500">IVA ({pedido.iva_porcentaje}%)</span>
-              <span className="text-neutral-900">{formatCurrency(pedido.iva_euros)}€</span>
-            </div>
-            <div className="flex justify-between pt-2 border-t border-neutral-200">
-              <span className="font-semibold text-neutral-900">Total</span>
-              <span className="font-bold text-xl text-neutral-900">{formatCurrency(pedido.total_euros)}€</span>
-            </div>
+            {editandoPrecios ? (
+              <>
+                {(() => {
+                  const totales = calcularTotalesTemp()
+                  return (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">Subtotal</span>
+                        <span className="text-amber-600 font-medium">{formatCurrency(totales.subtotal)}€</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">IVA ({pedido.iva_porcentaje}%)</span>
+                        <span className="text-amber-600 font-medium">{formatCurrency(totales.iva)}€</span>
+                      </div>
+                      <div className="flex justify-between pt-2 border-t border-neutral-200">
+                        <span className="font-semibold text-neutral-900">Total</span>
+                        <span className="font-bold text-xl text-amber-600">{formatCurrency(totales.total)}€</span>
+                      </div>
+                    </>
+                  )
+                })()}
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-neutral-500">Subtotal</span>
+                  <span className="text-neutral-900">{formatCurrency(pedido.subtotal_euros)}€</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-500">IVA ({pedido.iva_porcentaje}%)</span>
+                  <span className="text-neutral-900">{formatCurrency(pedido.iva_euros)}€</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-neutral-200">
+                  <span className="font-semibold text-neutral-900">Total</span>
+                  <span className="font-bold text-xl text-neutral-900">{formatCurrency(pedido.total_euros)}€</span>
+                </div>
+              </>
+            )}
             <div className="text-right text-sm text-neutral-500">
               Total: {pedido.total_m2.toFixed(2)} m²
             </div>

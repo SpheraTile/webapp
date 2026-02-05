@@ -70,6 +70,7 @@ model Producto {
   cajas_palet      Int
   peso_caja_kg     Float
   pedido_minimo_m2 Float
+  hs_code          String?        // Código arancelario (H.S. Code)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   items            ItemPedido[]

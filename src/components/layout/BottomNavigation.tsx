@@ -10,11 +10,14 @@ import {
   IconCart,
   IconUser,
 } from '@/components/ui/Icons'
+import { Bot } from 'lucide-react'
 import { useCesta } from '@/context/CestaContext'
+import { useChat } from '@/context/ChatContext'
 
 export function BottomNavigation() {
   const pathname = usePathname()
   const { items } = useCesta()
+  const { toggleChat, isOpen: isChatOpen, isEnabled: isChatEnabled } = useChat()
   const t = useTranslations('nav')
 
   const navItems = [
@@ -22,7 +25,6 @@ export function BottomNavigation() {
     { href: '/productos', label: t('products'), icon: IconSearch },
     { href: '/ceramoteca', label: t('ceramoteca'), icon: IconCeramoteca },
     { href: '/cesta', label: t('cart'), icon: IconCart, showBadge: true },
-    { href: '/cuenta', label: t('account'), icon: IconUser },
   ]
 
   const totalItems = items.length
@@ -60,6 +62,25 @@ export function BottomNavigation() {
             </Link>
           )
         })}
+
+        {/* Show Chat button or Mi cuenta based on chat enabled setting */}
+        {isChatEnabled ? (
+          <button
+            onClick={toggleChat}
+            className={`nav-item flex-1 py-2 ${isChatOpen ? 'active' : ''}`}
+          >
+            <Bot size={24} />
+            <span className="text-xs mt-1">{t('chat')}</span>
+          </button>
+        ) : (
+          <Link
+            href="/cuenta"
+            className={`nav-item flex-1 py-2 ${pathname.startsWith('/cuenta') ? 'active' : ''}`}
+          >
+            <IconUser size={24} />
+            <span className="text-xs mt-1">{t('account')}</span>
+          </Link>
+        )}
       </div>
     </nav>
   )

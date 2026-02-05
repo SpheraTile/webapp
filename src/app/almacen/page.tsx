@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Bot } from 'lucide-react'
 
 interface PedidoPendiente {
   id: string
@@ -57,14 +58,24 @@ function EstadoBadge({ estado }: { estado: string }) {
 export default function AlmacenDashboard() {
   const [pedidosPendientes, setPedidosPendientes] = useState<PedidoPendiente[]>([])
   const [loading, setLoading] = useState(true)
+  const [chatEnabled, setChatEnabled] = useState(true)
+  const [savingChat, setSavingChat] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/pedidos?estado=PENDIENTE,CONFIRMADO,PREPARANDO&limit=10')
-        if (response.ok) {
-          const data = await response.json()
+        // Fetch pending orders
+        const ordersResponse = await fetch('/api/pedidos?estado=PENDIENTE,CONFIRMADO,PREPARANDO&limit=10')
+        if (ordersResponse.ok) {
+          const data = await ordersResponse.json()
           setPedidosPendientes(data.pedidos || [])
+        }
+
+        // Fetch chat enabled setting
+        const chatResponse = await fetch('/api/configuracion?clave=chat_enabled')
+        if (chatResponse.ok) {
+          const chatData = await chatResponse.json()
+          setChatEnabled(chatData.valor === null || chatData.valor === 'true')
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
@@ -75,6 +86,32 @@ export default function AlmacenDashboard() {
 
     fetchData()
   }, [])
+
+  const toggleChatEnabled = async () => {
+    setSavingChat(true)
+    const newValue = !chatEnabled
+
+    try {
+      const response = await fetch('/api/configuracion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clave: 'chat_enabled',
+          valor: newValue.toString(),
+          tipo: 'boolean',
+          descripcion: 'Habilitar o deshabilitar el asistente IA',
+        }),
+      })
+
+      if (response.ok) {
+        setChatEnabled(newValue)
+      }
+    } catch (error) {
+      console.error('Error saving chat setting:', error)
+    } finally {
+      setSavingChat(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -150,6 +187,37 @@ export default function AlmacenDashboard() {
             <p className="text-xs text-neutral-500 hidden lg:block">Crear manualmente</p>
           </div>
         </Link>
+      </div>
+
+      {/* Configuración rápida */}
+      <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6 mb-6 lg:mb-8">
+        <h2 className="text-lg font-semibold text-neutral-900 mb-4">Configuración</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+              <Bot size={20} />
+            </div>
+            <div>
+              <h3 className="font-medium text-neutral-900">Asistente IA</h3>
+              <p className="text-sm text-neutral-500">
+                {chatEnabled ? 'Activo en la tienda' : 'Desactivado'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={toggleChatEnabled}
+            disabled={savingChat}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+              chatEnabled ? 'bg-primary-600' : 'bg-neutral-300'
+            } ${savingChat ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                chatEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Pedidos pendientes */}

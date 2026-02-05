@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Logo } from '@/components/ui/Logo'
 import { LanguageSwitch } from '@/components/ui/LanguageSwitch'
+import { IconUser } from '@/components/ui/Icons'
+import { useChat } from '@/context/ChatContext'
 
 interface HeroConfig {
   tipo: 'imagen' | 'video'
@@ -18,6 +20,7 @@ export function HeroSectionMobile() {
   const [config, setConfig] = useState<HeroConfig | null>(null)
   const [, setLoading] = useState(true)
   const t = useTranslations('home')
+  const { isEnabled: isChatEnabled } = useChat()
 
   useEffect(() => {
     fetch('/api/configuracion?clave=hero_mobile')
@@ -62,7 +65,17 @@ export function HeroSectionMobile() {
       {/* Header con logo y selector de idioma */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 pt-6">
         <div className="flex items-center justify-between">
-          <div className="w-10" />
+          {/* Show user icon only when chat is enabled (Mi cuenta is in header instead of bottom nav) */}
+          {isChatEnabled ? (
+            <Link
+              href="/cuenta"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all rounded-full border bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+            >
+              <IconUser size={20} />
+            </Link>
+          ) : (
+            <div className="w-10" />
+          )}
           <Logo size="lg" href={undefined} />
           <div className="text-white">
             <LanguageSwitch variant="light" />

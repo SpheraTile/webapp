@@ -68,7 +68,8 @@
     "cart": "Cart",
     "account": "My Account",
     "ceramoteca": "Ceramoteca",
-    "warehouse": "Warehouse"
+    "warehouse": "Warehouse",
+    "chat": "AI Assist"
   },
   "home": {
     "heroTitle": "Ceramics of",
@@ -276,6 +277,27 @@
     "viewAll": "View all",
     "schedule": "Monday - Friday: 8:00 AM - 6:00 PM",
     "description": "Leader in distribution of high-quality ceramics for professionals. Over 20 years of experience in the industry."
+  },
+  "chat": {
+    "welcomeMessage": "Hello! I'm SPHERA TILE's virtual assistant. How can I help you today? I can help you with:\n\n• Search products by features\n• Check prices and stock\n• Calculate orders\n• View personalized recommendations",
+    "assistantName": "SPHERA Assistant",
+    "assistantSubtitle": "Always available to help you",
+    "openChat": "Open chat",
+    "closeChat": "Close chat",
+    "contactHuman": "Contact a human",
+    "contactUs": "Contact us",
+    "call": "Call",
+    "typing": "Typing...",
+    "inputPlaceholder": "Type your message...",
+    "errorOccurred": "An error occurred. Please try again.",
+    "errorSending": "Error sending message",
+    "errorMessage": "Sorry, an error occurred. Please try again or contact us directly.",
+    "wood": "Wood",
+    "nonSlip": "Non-slip",
+    "recommended": "Recommended",
+    "quickActionWood": "Show me products with wood look",
+    "quickActionNonSlip": "I'm looking for non-slip ceramics",
+    "quickActionRecommended": "View my recommendations"
   },
   "ceramoteca": {
     "title": "Digital Ceramoteca",

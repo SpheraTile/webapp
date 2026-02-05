@@ -3,8 +3,10 @@ import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { CestaProvider } from '@/context/CestaContext'
+import { ChatProvider } from '@/context/ChatContext'
 import { SessionProvider } from '@/components/providers/SessionProvider'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
+import Chatbot from '@/components/chat/Chatbot'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -46,8 +48,11 @@ export default async function RootLayout({
         <SessionProvider>
           <NextIntlClientProvider messages={messages}>
             <CestaProvider>
-              <main className="min-h-screen pb-20 lg:pb-0 lg:pt-0">{children}</main>
-              <BottomNavigation />
+              <ChatProvider>
+                <main className="min-h-screen pb-20 lg:pb-0 lg:pt-0">{children}</main>
+                <BottomNavigation />
+                <Chatbot />
+              </ChatProvider>
             </CestaProvider>
           </NextIntlClientProvider>
         </SessionProvider>

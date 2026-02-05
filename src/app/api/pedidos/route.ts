@@ -13,7 +13,13 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     if (estado && estado !== 'todos') {
-      where.estado = estado.toUpperCase()
+      // Support multiple estados separated by comma
+      const estados = estado.split(',').map(e => e.trim().toUpperCase())
+      if (estados.length === 1) {
+        where.estado = estados[0]
+      } else {
+        where.estado = { in: estados }
+      }
     }
 
     if (busqueda) {

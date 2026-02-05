@@ -16,18 +16,25 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.25",
+    "@ai-sdk/react": "^3.0.74",
+    "@neondatabase/serverless": "^1.0.2",
     "@prisma/client": "^5.22.0",
+    "ai": "^6.0.72",
     "bcryptjs": "^3.0.3",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.1.0",
+    "lucide-react": "^0.563.0",
     "next": "^16.1.6",
     "next-auth": "^4.24.13",
     "next-intl": "^4.8.1",
+    "openai": "^6.18.0",
     "prisma": "^5.22.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "resend": "^6.9.1"
+    "resend": "^6.9.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

@@ -68,7 +68,8 @@
     "cart": "Cesta",
     "account": "Mi Cuenta",
     "ceramoteca": "Ceramoteca",
-    "warehouse": "Almacén"
+    "warehouse": "Almacén",
+    "chat": "Asistente IA"
   },
   "home": {
     "heroTitle": "Cerámica de",
@@ -276,6 +277,27 @@
     "viewAll": "Ver todo",
     "schedule": "Lunes - Viernes: 8:00 - 18:00",
     "description": "Líder en distribución de cerámica de alta calidad para profesionales. Más de 20 años de experiencia en el sector."
+  },
+  "chat": {
+    "welcomeMessage": "¡Hola! Soy el asistente virtual de SPHERA TILE. ¿En qué puedo ayudarte hoy? Puedo ayudarte a:\n\n• Buscar productos por características\n• Consultar precios y stock\n• Calcular pedidos\n• Ver recomendaciones personalizadas",
+    "assistantName": "Asistente SPHERA",
+    "assistantSubtitle": "Siempre disponible para ayudarte",
+    "openChat": "Abrir chat",
+    "closeChat": "Cerrar chat",
+    "contactHuman": "Contactar con un humano",
+    "contactUs": "Contactar con nosotros",
+    "call": "Llamar",
+    "typing": "Escribiendo...",
+    "inputPlaceholder": "Escribe tu mensaje...",
+    "errorOccurred": "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+    "errorSending": "Error al enviar mensaje",
+    "errorMessage": "Lo siento, ha ocurrido un error. Por favor, inténtalo de nuevo o contacta con nosotros directamente.",
+    "wood": "Madera",
+    "nonSlip": "Antideslizante",
+    "recommended": "Recomendados",
+    "quickActionWood": "Muéstrame productos con aspecto madera",
+    "quickActionNonSlip": "Busco cerámicas antideslizantes",
+    "quickActionRecommended": "Ver mis recomendaciones"
   },
   "ceramoteca": {
     "title": "Ceramoteca Digital",

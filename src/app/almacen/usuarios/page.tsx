@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 
 interface Usuario {
   id: string
@@ -94,19 +93,19 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 lg:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 lg:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900">Usuarios</h1>
-          <p className="text-neutral-500 mt-1">Gestiona los usuarios del sistema</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900">Usuarios</h1>
+          <p className="text-neutral-500 mt-1 text-sm lg:text-base">Gestiona los usuarios del sistema</p>
         </div>
         <button
           onClick={() => {
             setSelectedUser(null)
             setShowModal(true)
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors w-full sm:w-auto"
         >
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -116,20 +115,20 @@ export default function UsuariosPage() {
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl p-4 shadow-sm mb-6 flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[200px]">
+      <div className="bg-white rounded-xl p-4 shadow-sm mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <div className="flex-1">
           <input
             type="text"
             placeholder="Buscar por nombre, email o empresa..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
           />
         </div>
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full sm:w-auto px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
         >
           <option value="">Todos los roles</option>
           <option value="CLIENTE">Clientes</option>
@@ -137,8 +136,72 @@ export default function UsuariosPage() {
         </select>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      {/* Vista móvil - Tarjetas */}
+      <div className="lg:hidden space-y-3">
+        {usuarios.length === 0 ? (
+          <div className="bg-white rounded-xl p-8 text-center text-neutral-500">
+            No se encontraron usuarios
+          </div>
+        ) : (
+          usuarios.map((usuario) => (
+            <div
+              key={usuario.id}
+              className={`bg-white rounded-xl p-4 shadow-sm ${!usuario.activo ? 'opacity-60' : ''}`}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-neutral-900 truncate">{usuario.nombre}</div>
+                  <div className="text-sm text-neutral-500 truncate">{usuario.email}</div>
+                </div>
+                <div className="flex items-center gap-1 ml-2">
+                  <RoleBadge role={usuario.role} />
+                </div>
+              </div>
+
+              {usuario.empresa && (
+                <p className="text-sm text-neutral-600 mb-2">
+                  <span className="text-neutral-400">Empresa:</span> {usuario.empresa}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500 mb-3">
+                <span>{usuario._count.pedidos} pedidos</span>
+                <span>•</span>
+                <span>Alta: {formatDate(usuario.createdAt)}</span>
+                <span>•</span>
+                <span className={`px-2 py-0.5 rounded-full font-medium ${usuario.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {usuario.activo ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-neutral-100">
+                <button
+                  onClick={() => {
+                    setSelectedUser(usuario)
+                    setShowModal(true)
+                  }}
+                  className="flex-1 py-2 px-3 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleToggleActive(usuario)}
+                  className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors ${
+                    usuario.activo
+                      ? 'text-red-600 bg-red-50 hover:bg-red-100'
+                      : 'text-green-600 bg-green-50 hover:bg-green-100'
+                  }`}
+                >
+                  {usuario.activo ? 'Desactivar' : 'Activar'}
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Vista desktop - Tabla */}
+      <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden">
         <table className="w-full">
           <thead className="bg-neutral-50">
             <tr>

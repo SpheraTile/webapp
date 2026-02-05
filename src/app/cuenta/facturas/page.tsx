@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
 import { DesktopNav } from '@/components/layout/DesktopNav'
-import { IconReceipt, IconChevronDown, IconDownload } from '@/components/ui/Icons'
+import { IconReceipt, IconDownload } from '@/components/ui/Icons'
 
 interface Factura {
   id: string
@@ -183,13 +183,13 @@ export default function MisFacturasPage() {
                     >
                       Ver detalle
                     </Link>
-                    <button
-                      onClick={() => window.open(`/api/mis-facturas/${factura.id}/pdf`, '_blank')}
+                    <Link
+                      href={`/cuenta/facturas/${factura.id}`}
                       className="py-2 px-4 text-sm font-medium text-neutral-600 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2"
                     >
                       <IconDownload size={16} />
                       PDF
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { exportToPDF, downloadPDF } from '@/lib/pdf'
 
 interface ShareActionsProps {
   title: string
@@ -9,6 +10,7 @@ interface ShareActionsProps {
   clientEmail?: string
   clientPhone?: string
   onPrint?: () => void
+  printRef?: React.RefObject<HTMLElement | null>
 }
 
 export function ShareActions({
@@ -18,10 +20,12 @@ export function ShareActions({
   clientEmail,
   clientPhone,
   onPrint,
+  printRef,
 }: ShareActionsProps) {
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [email, setEmail] = useState(clientEmail || '')
   const [sending, setSending] = useState(false)
+  const [generatingPDF, setGeneratingPDF] = useState(false)
 
   const documentLabels = {
     pedido: 'Pedido',
@@ -29,23 +33,128 @@ export function ShareActions({
     factura: 'Factura',
   }
 
-  const getMessage = () => {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-    return `${documentLabels[documentType]} ${documentNumber} de SPHERA TILE. Ver documento: ${baseUrl}${window.location.pathname}`
+  const getFilename = () => {
+    return `${documentLabels[documentType]}_${documentNumber}`.replace(/\s+/g, '_')
   }
 
-  const handleWhatsApp = () => {
-    const message = encodeURIComponent(getMessage())
-    const phone = clientPhone?.replace(/\D/g, '') || ''
-    const url = phone
-      ? `https://wa.me/${phone}?text=${message}`
-      : `https://wa.me/?text=${message}`
-    window.open(url, '_blank')
+  const generatePDF = async (): Promise<Blob | null> => {
+    if (!printRef?.current) {
+      alert('No se puede generar el PDF. Elemento no encontrado.')
+      return null
+    }
+
+    setGeneratingPDF(true)
+    try {
+      const blob = await exportToPDF({
+        filename: getFilename(),
+        element: printRef.current as HTMLElement,
+        orientation: 'portrait',
+      })
+      return blob
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      alert('Error al generar el PDF')
+      return null
+    } finally {
+      setGeneratingPDF(false)
+    }
   }
 
-  const handleTelegram = () => {
-    const message = encodeURIComponent(getMessage())
-    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${message}`, '_blank')
+  const handleDownloadPDF = async () => {
+    if (!printRef?.current) {
+      alert('No se puede generar el PDF. Elemento no encontrado.')
+      return
+    }
+
+    setGeneratingPDF(true)
+    try {
+      await downloadPDF({
+        filename: getFilename(),
+        element: printRef.current as HTMLElement,
+        orientation: 'portrait',
+      })
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      alert('Error al descargar el PDF')
+    } finally {
+      setGeneratingPDF(false)
+    }
+  }
+
+  const handleWhatsApp = async () => {
+    // Generate PDF and share
+    const blob = await generatePDF()
+    if (blob) {
+      // Try to use Web Share API if available (mobile)
+      if (navigator.share && navigator.canShare) {
+        try {
+          const file = new File([blob], `${getFilename()}.pdf`, { type: 'application/pdf' })
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `${documentLabels[documentType]} ${documentNumber}`,
+              text: `${documentLabels[documentType]} ${documentNumber} de SPHERA TILE`,
+            })
+            return
+          }
+        } catch (error) {
+          console.log('Web Share API not available, falling back to link')
+        }
+      }
+
+      // Fallback: download PDF and open WhatsApp with message
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${getFilename()}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      // Open WhatsApp
+      const message = encodeURIComponent(`${documentLabels[documentType]} ${documentNumber} de SPHERA TILE. Te adjunto el PDF.`)
+      const phone = clientPhone?.replace(/\D/g, '') || ''
+      const whatsappUrl = phone
+        ? `https://wa.me/${phone}?text=${message}`
+        : `https://wa.me/?text=${message}`
+      window.open(whatsappUrl, '_blank')
+    }
+  }
+
+  const handleTelegram = async () => {
+    // Generate PDF and share
+    const blob = await generatePDF()
+    if (blob) {
+      // Try to use Web Share API if available (mobile)
+      if (navigator.share && navigator.canShare) {
+        try {
+          const file = new File([blob], `${getFilename()}.pdf`, { type: 'application/pdf' })
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `${documentLabels[documentType]} ${documentNumber}`,
+              text: `${documentLabels[documentType]} ${documentNumber} de SPHERA TILE`,
+            })
+            return
+          }
+        } catch (error) {
+          console.log('Web Share API not available, falling back to link')
+        }
+      }
+
+      // Fallback: download PDF and open Telegram
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${getFilename()}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      alert('PDF descargado. Ábrelo y compártelo manualmente en Telegram.')
+    }
   }
 
   const handleEmail = async () => {
@@ -53,14 +162,28 @@ export function ShareActions({
 
     setSending(true)
     try {
-      // Por ahora, abrimos el cliente de correo del sistema
-      const subject = encodeURIComponent(`${documentLabels[documentType]} ${documentNumber} - SPHERA TILE`)
-      const body = encodeURIComponent(getMessage())
-      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`
-      setShowEmailModal(false)
+      // Generate PDF
+      const blob = await generatePDF()
+      if (blob) {
+        // Download PDF first
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `${getFilename()}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+
+        // Then open email client
+        const subject = encodeURIComponent(`${documentLabels[documentType]} ${documentNumber} - SPHERA TILE`)
+        const body = encodeURIComponent(`Adjunto encontrarás ${documentLabels[documentType].toLowerCase()} ${documentNumber} de SPHERA TILE.\n\nSaludos,\nSPHERA TILE`)
+        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`
+        setShowEmailModal(false)
+      }
     } catch (error) {
       console.error('Error sending email:', error)
-      alert('Error al enviar el correo')
+      alert('Error al preparar el correo')
     } finally {
       setSending(false)
     }
@@ -76,7 +199,22 @@ export function ShareActions({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Descargar PDF */}
+        {printRef && (
+          <button
+            onClick={handleDownloadPDF}
+            disabled={generatingPDF}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+            title="Descargar PDF"
+          >
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="hidden sm:inline">{generatingPDF ? 'Generando...' : 'PDF'}</span>
+          </button>
+        )}
+
         {/* Email */}
         <button
           onClick={() => setShowEmailModal(true)}
@@ -92,7 +230,8 @@ export function ShareActions({
         {/* WhatsApp */}
         <button
           onClick={handleWhatsApp}
-          className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] transition-colors"
+          disabled={generatingPDF}
+          className="flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] transition-colors disabled:opacity-50"
           title="Compartir por WhatsApp"
         >
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -104,7 +243,8 @@ export function ShareActions({
         {/* Telegram */}
         <button
           onClick={handleTelegram}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#006699] transition-colors"
+          disabled={generatingPDF}
+          className="flex items-center gap-2 px-4 py-2 bg-[#0088cc] text-white rounded-lg hover:bg-[#006699] transition-colors disabled:opacity-50"
           title="Compartir por Telegram"
         >
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -128,11 +268,14 @@ export function ShareActions({
 
       {/* Modal de Email */}
       {showEmailModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-neutral-900 mb-4">
               Enviar {documentLabels[documentType]} por Email
             </h3>
+            <p className="text-sm text-neutral-500 mb-4">
+              Se descargará el PDF y se abrirá tu cliente de correo para que lo adjuntes.
+            </p>
             <div className="mb-4">
               <label className="block text-sm font-medium text-neutral-700 mb-1">
                 Correo electrónico
@@ -154,10 +297,10 @@ export function ShareActions({
               </button>
               <button
                 onClick={handleEmail}
-                disabled={!email || sending}
+                disabled={!email || sending || generatingPDF}
                 className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
               >
-                {sending ? 'Enviando...' : 'Enviar'}
+                {sending || generatingPDF ? 'Preparando...' : 'Enviar'}
               </button>
             </div>
           </div>

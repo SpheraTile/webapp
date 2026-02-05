@@ -275,6 +275,7 @@ export default function FacturaDetallePage() {
             documentType="factura"
             clientEmail={factura.pedido.user.email}
             clientPhone={factura.pedido.user.telefono || undefined}
+            printRef={printRef}
           />
 
           <div className="flex items-center gap-4">

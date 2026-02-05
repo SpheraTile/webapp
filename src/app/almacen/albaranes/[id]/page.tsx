@@ -189,6 +189,7 @@ export default function AlbaranDetallePage() {
             documentType="albaran"
             clientEmail={albaran.pedido.user.email}
             clientPhone={albaran.pedido.user.telefono || undefined}
+            printRef={printRef}
           />
 
           {/* Selector de estado */}

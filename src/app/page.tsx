@@ -271,8 +271,8 @@ export default async function HomePage() {
               <div>
                 <h4 className="font-semibold text-lg mb-4">{tFooter('contact')}</h4>
                 <ul className="space-y-3 text-neutral-400">
-                  <li>info@spheratile.com</li>
-                  <li>+34 900 123 456</li>
+                  <li>info@spheratile.es</li>
+                  <li>+34 633 909 095</li>
                   <li>{tFooter('schedule')}</li>
                 </ul>
               </div>

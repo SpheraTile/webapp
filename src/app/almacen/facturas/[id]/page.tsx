@@ -332,10 +332,10 @@ export default function FacturaDetallePage() {
             <div className="sm:text-right">
               <p className="font-bold text-base lg:text-lg">SPHERA TILE S.L.</p>
               <p className="text-xs lg:text-sm text-neutral-500">CIF: B12345678</p>
-              <p className="text-xs lg:text-sm text-neutral-500">Pol. Industrial Norte, Nave 15</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Av. Del Mediterráneo 113</p>
               <p className="text-xs lg:text-sm text-neutral-500">12200 Onda, Castellón</p>
-              <p className="text-xs lg:text-sm text-neutral-500">Tel: +34 964 123 456</p>
-              <p className="text-xs lg:text-sm text-neutral-500">info@spheratile.com</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Tel: +34 633 909 095</p>
+              <p className="text-xs lg:text-sm text-neutral-500">info@spheratile.es</p>
             </div>
           </div>
         </div>

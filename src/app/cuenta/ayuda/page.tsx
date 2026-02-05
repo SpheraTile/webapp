@@ -88,10 +88,10 @@ export default function AyudaPage() {
                 </p>
                 <div className="mt-3 space-y-1">
                   <p className="text-primary-800 text-sm">
-                    <strong>Email:</strong> soporte@spheratile.com
+                    <strong>Email:</strong> info@spheratile.es
                   </p>
                   <p className="text-primary-800 text-sm">
-                    <strong>Teléfono:</strong> +34 964 123 456
+                    <strong>Teléfono:</strong> +34 633 909 095
                   </p>
                   <p className="text-primary-800 text-sm">
                     <strong>Horario:</strong> L-V 9:00 - 18:00

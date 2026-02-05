@@ -11,7 +11,7 @@ export default function CeramotecaPage() {
   const t = useTranslations('ceramoteca')
 
   // URL del showroom/exposición en Google Maps
-  const showroomUrl = 'https://maps.google.com/?q=SPHERA+TILE+Onda+Castellon'
+  const showroomUrl = 'https://maps.google.com/?q=Avenida+Del+Mediterráneo+113,+12200+Onda,+Castellón,+Spain'
 
   return (
     <div className="min-h-screen bg-white lg:bg-neutral-50">

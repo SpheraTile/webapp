@@ -134,16 +134,16 @@ export default function FacturasPage() {
     .reduce((sum, f) => sum + f.total_euros, 0)
 
   return (
-    <div className="p-8">
+    <div className="p-4 lg:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 lg:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900">Facturas</h1>
-          <p className="text-neutral-500 mt-1">Gestión de facturación</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900">Facturas</h1>
+          <p className="text-neutral-500 mt-1 text-sm lg:text-base">Gestión de facturación</p>
         </div>
         <Link
           href="/almacen/facturas/nueva"
-          className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+          className="flex items-center justify-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium text-sm lg:text-base"
         >
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -153,35 +153,35 @@ export default function FacturasPage() {
       </div>
 
       {/* Resumen */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl shadow-sm p-4">
-          <div className="text-sm text-neutral-500 mb-1">Total Facturado</div>
-          <div className="text-2xl font-bold text-neutral-900">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 mb-4 lg:mb-6">
+        <div className="bg-white rounded-xl shadow-sm p-3 lg:p-4">
+          <div className="text-xs lg:text-sm text-neutral-500 mb-1">Total Facturado</div>
+          <div className="text-lg lg:text-2xl font-bold text-neutral-900">
             {formatCurrency(totalPendiente + totalPagado)}€
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-4">
-          <div className="text-sm text-neutral-500 mb-1">Pendiente de Cobro</div>
-          <div className="text-2xl font-bold text-orange-600">
+        <div className="bg-white rounded-xl shadow-sm p-3 lg:p-4">
+          <div className="text-xs lg:text-sm text-neutral-500 mb-1">Pendiente de Cobro</div>
+          <div className="text-lg lg:text-2xl font-bold text-orange-600">
             {formatCurrency(totalPendiente)}€
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-4">
-          <div className="text-sm text-neutral-500 mb-1">Cobrado</div>
-          <div className="text-2xl font-bold text-green-600">
+        <div className="bg-white rounded-xl shadow-sm p-3 lg:p-4">
+          <div className="text-xs lg:text-sm text-neutral-500 mb-1">Cobrado</div>
+          <div className="text-lg lg:text-2xl font-bold text-green-600">
             {formatCurrency(totalPagado)}€
           </div>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-neutral-500">Estado:</span>
+      <div className="bg-white rounded-xl shadow-sm p-3 lg:p-4 mb-4 lg:mb-6">
+        <div className="flex items-center gap-3 lg:gap-4">
+          <span className="text-xs lg:text-sm text-neutral-500">Estado:</span>
           <select
             value={filtroEstado}
             onChange={(e) => setFiltroEstado(e.target.value)}
-            className="border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="flex-1 sm:flex-initial border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
           >
             <option value="todos">Todos</option>
             {ESTADOS_FACTURA.map((estado) => (
@@ -193,135 +193,165 @@ export default function FacturasPage() {
         </div>
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-neutral-50">
-              <tr>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Nº Factura
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Cliente
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Fecha Emisión
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Vencimiento
-                </th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Importe
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Pago
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {loading ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                    </div>
-                  </td>
-                </tr>
-              ) : facturas.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-neutral-500">
-                    No se encontraron facturas
-                  </td>
-                </tr>
-              ) : (
-                facturas.map((factura) => (
-                  <tr key={factura.id} className="hover:bg-neutral-50 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-neutral-900">
-                      {factura.numero_factura}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-neutral-900">{factura.pedido.user.nombre}</div>
-                      <div className="text-sm text-neutral-500">{factura.pedido.user.nif_cif || '-'}</div>
-                    </td>
-                    <td className="px-6 py-4 text-neutral-500">
-                      {formatDate(factura.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 text-neutral-500">
-                      {formatDate(factura.fecha_vencimiento)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="font-semibold text-neutral-900">
-                        {formatCurrency(factura.total_euros)}€
-                      </div>
-                      <div className="text-sm text-neutral-500">
-                        Base: {formatCurrency(factura.subtotal_euros)}€
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <MetodoPagoBadge metodo={factura.metodo_pago} />
-                    </td>
-                    <td className="px-6 py-4">
-                      <EstadoBadge estado={factura.estado} />
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          className="p-2 text-neutral-400 hover:text-primary-600 transition-colors"
-                          title="Ver / Imprimir"
-                        >
-                          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                          </svg>
-                        </button>
-                        <button
-                          className="p-2 text-neutral-400 hover:text-primary-600 transition-colors"
-                          title="Descargar PDF"
-                        >
-                          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </button>
-                        {factura.estado === 'BORRADOR' && (
-                          <button
-                            onClick={() => handleCambiarEstado(factura.id, 'EMITIDA')}
-                            className="p-2 text-neutral-400 hover:text-blue-600 transition-colors"
-                            title="Emitir factura"
-                          >
-                            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                        )}
-                        {factura.estado === 'EMITIDA' && (
-                          <button
-                            onClick={() => handleCambiarEstado(factura.id, 'PAGADA')}
-                            className="p-2 text-neutral-400 hover:text-green-600 transition-colors"
-                            title="Marcar como pagada"
-                          >
-                            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* Loading */}
+      {loading ? (
+        <div className="bg-white rounded-xl shadow-sm p-12">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          </div>
         </div>
-      </div>
+      ) : facturas.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm p-12 text-center text-neutral-500">
+          No se encontraron facturas
+        </div>
+      ) : (
+        <>
+          {/* Mobile view - card layout */}
+          <div className="lg:hidden space-y-3">
+            {facturas.map((factura) => (
+              <Link
+                key={factura.id}
+                href={`/almacen/facturas/${factura.id}`}
+                className="block bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="font-semibold text-neutral-900">{factura.numero_factura}</p>
+                    <p className="text-sm text-neutral-500">{factura.pedido.user.nombre}</p>
+                  </div>
+                  <EstadoBadge estado={factura.estado} />
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                  <div>
+                    <span className="text-neutral-500 block">Emisión</span>
+                    <span className="font-medium">{formatDate(factura.createdAt)}</span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-500 block">Vencimiento</span>
+                    <span className="font-medium">{formatDate(factura.fecha_vencimiento)}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+                  <MetodoPagoBadge metodo={factura.metodo_pago} />
+                  <div className="text-right">
+                    <span className="font-bold text-primary-600">{formatCurrency(factura.total_euros)}€</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop view - table layout */}
+          <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-neutral-50">
+                  <tr>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Nº Factura
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Cliente
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Fecha Emisión
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Vencimiento
+                    </th>
+                    <th className="text-right px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Importe
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Pago
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="text-right px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {facturas.map((factura) => (
+                    <tr key={factura.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="px-6 py-4 font-semibold text-neutral-900">
+                        <Link href={`/almacen/facturas/${factura.id}`} className="hover:text-primary-600">
+                          {factura.numero_factura}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-neutral-900">{factura.pedido.user.nombre}</div>
+                        <div className="text-sm text-neutral-500">{factura.pedido.user.nif_cif || '-'}</div>
+                      </td>
+                      <td className="px-6 py-4 text-neutral-500">
+                        {formatDate(factura.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 text-neutral-500">
+                        {formatDate(factura.fecha_vencimiento)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="font-semibold text-neutral-900">
+                          {formatCurrency(factura.total_euros)}€
+                        </div>
+                        <div className="text-sm text-neutral-500">
+                          Base: {formatCurrency(factura.subtotal_euros)}€
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <MetodoPagoBadge metodo={factura.metodo_pago} />
+                      </td>
+                      <td className="px-6 py-4">
+                        <EstadoBadge estado={factura.estado} />
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/almacen/facturas/${factura.id}`}
+                            className="p-2 text-neutral-400 hover:text-primary-600 transition-colors"
+                            title="Ver detalles"
+                          >
+                            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          </Link>
+                          {factura.estado === 'BORRADOR' && (
+                            <button
+                              onClick={() => handleCambiarEstado(factura.id, 'EMITIDA')}
+                              className="p-2 text-neutral-400 hover:text-blue-600 transition-colors"
+                              title="Emitir factura"
+                            >
+                              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </button>
+                          )}
+                          {factura.estado === 'EMITIDA' && (
+                            <button
+                              onClick={() => handleCambiarEstado(factura.id, 'PAGADA')}
+                              className="p-2 text-neutral-400 hover:text-green-600 transition-colors"
+                              title="Marcar como pagada"
+                            >
+                              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Resumen */}
-      <div className="mt-6 text-sm text-neutral-500">
+      <div className="mt-4 lg:mt-6 text-xs lg:text-sm text-neutral-500">
         Mostrando {facturas.length} facturas
       </div>
     </div>

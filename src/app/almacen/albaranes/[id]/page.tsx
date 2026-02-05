@@ -164,9 +164,9 @@ export default function AlbaranDetallePage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-4 lg:p-8 max-w-4xl mx-auto">
       {/* Header - hidden when printing */}
-      <div className="flex items-start justify-between mb-8 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 lg:mb-8 print:hidden">
         <div>
           <Link href="/almacen/albaranes" className="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-flex items-center gap-1">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -174,15 +174,15 @@ export default function AlbaranDetallePage() {
             </svg>
             Volver a albaranes
           </Link>
-          <h1 className="text-3xl font-bold text-neutral-900">Albarán {albaran.numero_albaran}</h1>
-          <p className="text-neutral-500 mt-1">Fecha: {formatDate(albaran.createdAt)}</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900">Albarán {albaran.numero_albaran}</h1>
+          <p className="text-neutral-500 mt-1 text-sm lg:text-base">Fecha: {formatDate(albaran.createdAt)}</p>
         </div>
         <EstadoBadge estado={albaran.estado} />
       </div>
 
       {/* Acciones de compartir */}
-      <div className="bg-white rounded-xl shadow-sm p-4 mb-6 print:hidden">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl shadow-sm p-3 lg:p-4 mb-4 lg:mb-6 print:hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4">
           <ShareActions
             title="Albarán"
             documentNumber={albaran.numero_albaran}
@@ -194,11 +194,11 @@ export default function AlbaranDetallePage() {
 
           {/* Selector de estado */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-neutral-500">Cambiar estado:</span>
+            <span className="text-sm text-neutral-500 hidden sm:inline">Cambiar estado:</span>
             <select
               value={albaran.estado}
               onChange={(e) => handleCambiarEstado(e.target.value)}
-              className="border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex-1 sm:flex-initial border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
             >
               {ESTADOS_ALBARAN.map((estado) => (
                 <option key={estado} value={estado}>
@@ -213,24 +213,24 @@ export default function AlbaranDetallePage() {
       {/* Documento imprimible */}
       <div ref={printRef} className="bg-white rounded-xl shadow-sm overflow-hidden print:shadow-none">
         {/* Cabecera del documento */}
-        <div className="p-6 border-b border-neutral-200 print:border-black">
-          <div className="flex justify-between items-start">
+        <div className="p-4 lg:p-6 border-b border-neutral-200 print:border-black">
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-neutral-900">ALBARÁN DE ENTREGA</h2>
-              <p className="text-lg font-medium text-primary-600">{albaran.numero_albaran}</p>
+              <h2 className="text-xl lg:text-2xl font-bold text-neutral-900">ALBARÁN DE ENTREGA</h2>
+              <p className="text-base lg:text-lg font-medium text-primary-600">{albaran.numero_albaran}</p>
             </div>
-            <div className="text-right">
-              <p className="font-bold text-lg">SPHERA TILE</p>
-              <p className="text-sm text-neutral-500">CIF: B12345678</p>
-              <p className="text-sm text-neutral-500">Tel: +34 964 123 456</p>
+            <div className="sm:text-right">
+              <p className="font-bold text-base lg:text-lg">SPHERA TILE</p>
+              <p className="text-xs lg:text-sm text-neutral-500">CIF: B12345678</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Tel: +34 964 123 456</p>
             </div>
           </div>
         </div>
 
         {/* Datos del cliente y envío */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border-b border-neutral-200">
-          <div>
-            <h3 className="text-sm font-medium text-neutral-500 mb-2">CLIENTE</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6 border-b border-neutral-200">
+          <div className="text-sm lg:text-base">
+            <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-2">CLIENTE</h3>
             <p className="font-medium text-neutral-900">{albaran.pedido.user.nombre}</p>
             {albaran.pedido.user.empresa && (
               <p className="text-neutral-700">{albaran.pedido.user.empresa}</p>
@@ -243,71 +243,71 @@ export default function AlbaranDetallePage() {
               <p className="text-neutral-500">Tel: {albaran.pedido.user.telefono}</p>
             )}
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-neutral-500 mb-2">DIRECCIÓN DE ENTREGA</h3>
+          <div className="text-sm lg:text-base">
+            <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-2">DIRECCIÓN DE ENTREGA</h3>
             <p className="text-neutral-900 whitespace-pre-line">{albaran.direccion_entrega}</p>
           </div>
         </div>
 
         {/* Datos de transporte */}
-        <div className="p-6 border-b border-neutral-200 bg-neutral-50">
+        <div className="p-4 lg:p-6 border-b border-neutral-200 bg-neutral-50">
           <div className="flex items-center justify-between mb-4 print:hidden">
-            <h3 className="text-sm font-medium text-neutral-500">DATOS DE TRANSPORTE</h3>
+            <h3 className="text-xs lg:text-sm font-medium text-neutral-500">DATOS DE TRANSPORTE</h3>
             {!editando && (
               <button
                 onClick={() => setEditando(true)}
-                className="text-primary-600 hover:text-primary-700 text-sm"
+                className="text-primary-600 hover:text-primary-700 text-xs lg:text-sm"
               >
                 Editar
               </button>
             )}
           </div>
           {editando ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
               <div>
-                <label className="block text-sm text-neutral-600 mb-1">Transportista</label>
+                <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Transportista</label>
                 <input
                   type="text"
                   value={transportista}
                   onChange={(e) => setTransportista(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg"
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm text-neutral-600 mb-1">Matrícula</label>
+                <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Matrícula</label>
                 <input
                   type="text"
                   value={matricula}
                   onChange={(e) => setMatricula(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg"
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm text-neutral-600 mb-1">Notas</label>
+                <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Notas</label>
                 <input
                   type="text"
                   value={notasAlbaran}
                   onChange={(e) => setNotasAlbaran(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg"
+                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
                 />
               </div>
-              <div className="md:col-span-3 flex justify-end gap-2">
+              <div className="sm:col-span-3 flex justify-end gap-2">
                 <button
                   onClick={() => setEditando(false)}
-                  className="px-4 py-2 text-neutral-600 hover:text-neutral-800"
+                  className="px-3 lg:px-4 py-2 text-neutral-600 hover:text-neutral-800 text-sm"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleGuardarDatos}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="px-3 lg:px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
                 >
                   Guardar
                 </button>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 lg:gap-4 text-xs lg:text-sm">
               <div>
                 <span className="text-neutral-500">Transportista:</span>
                 <span className="ml-2 text-neutral-900">{albaran.transportista || '-'}</span>
@@ -325,9 +325,49 @@ export default function AlbaranDetallePage() {
         </div>
 
         {/* Mercancía */}
-        <div className="p-6">
-          <h3 className="text-sm font-medium text-neutral-500 mb-4">MERCANCÍA</h3>
-          <table className="w-full">
+        <div className="p-4 lg:p-6">
+          <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-4">MERCANCÍA</h3>
+
+          {/* Mobile view - card layout */}
+          <div className="lg:hidden space-y-3">
+            {albaran.pedido.items.map((item) => (
+              <div key={item.id} className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
+                <div className="flex items-start gap-3 mb-2">
+                  {item.producto?.imagen && (
+                    <img
+                      src={item.producto.imagen}
+                      alt={item.producto_nombre}
+                      className="w-12 h-12 object-cover rounded flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-neutral-900 text-sm truncate">{item.producto_nombre}</p>
+                    <p className="text-xs text-neutral-500">Ref: {item.producto_referencia}</p>
+                  </div>
+                  {item.producto?.slug && (
+                    <ProductQRCode productSlug={item.producto.slug} size={40} expandable />
+                  )}
+                </div>
+                <div className="flex justify-between text-xs pt-2 border-t border-neutral-200">
+                  <span className="text-neutral-500">Cajas: <span className="font-medium text-neutral-900">{item.cantidad_cajas}</span></span>
+                  <span className="text-neutral-500">m²: <span className="font-medium text-neutral-900">{item.cantidad_m2.toFixed(2)}</span></span>
+                </div>
+              </div>
+            ))}
+            {/* Mobile totals */}
+            <div className="bg-neutral-100 rounded-lg p-3 mt-4">
+              <div className="flex justify-between text-sm font-bold">
+                <span>TOTAL</span>
+                <span>{albaran.total_cajas} cajas / {albaran.total_m2.toFixed(2)} m²</span>
+              </div>
+              <p className="text-xs text-neutral-500 text-right mt-1">
+                Peso estimado: {albaran.peso_total_kg.toFixed(2)} kg
+              </p>
+            </div>
+          </div>
+
+          {/* Desktop view - table layout */}
+          <table className="hidden lg:table w-full">
             <thead className="bg-neutral-100">
               <tr>
                 <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Producto</th>
@@ -365,12 +405,12 @@ export default function AlbaranDetallePage() {
             </tbody>
             <tfoot className="border-t-2 border-neutral-300">
               <tr className="font-bold">
-                <td colSpan={2} className="px-4 py-3 text-right">TOTAL</td>
+                <td colSpan={3} className="px-4 py-3 text-right">TOTAL</td>
                 <td className="px-4 py-3 text-right">{albaran.total_cajas}</td>
                 <td className="px-4 py-3 text-right">{albaran.total_m2.toFixed(2)} m²</td>
               </tr>
               <tr>
-                <td colSpan={4} className="px-4 py-2 text-right text-neutral-500">
+                <td colSpan={5} className="px-4 py-2 text-right text-neutral-500">
                   Peso total estimado: {albaran.peso_total_kg.toFixed(2)} kg
                 </td>
               </tr>
@@ -379,33 +419,33 @@ export default function AlbaranDetallePage() {
         </div>
 
         {/* Firmas */}
-        <div className="p-6 border-t border-neutral-200">
-          <div className="grid grid-cols-2 gap-8">
+        <div className="p-4 lg:p-6 border-t border-neutral-200">
+          <div className="grid grid-cols-2 gap-4 lg:gap-8">
             <div>
-              <p className="text-sm text-neutral-500 mb-12">Entregado por:</p>
+              <p className="text-xs lg:text-sm text-neutral-500 mb-8 lg:mb-12">Entregado por:</p>
               <div className="border-t border-neutral-300 pt-2">
-                <p className="text-sm text-neutral-500">Firma y sello</p>
+                <p className="text-xs lg:text-sm text-neutral-500">Firma y sello</p>
               </div>
             </div>
             <div>
-              <p className="text-sm text-neutral-500 mb-12">Recibido por:</p>
+              <p className="text-xs lg:text-sm text-neutral-500 mb-8 lg:mb-12">Recibido por:</p>
               <div className="border-t border-neutral-300 pt-2">
-                <p className="text-sm text-neutral-500">Firma, nombre y DNI</p>
+                <p className="text-xs lg:text-sm text-neutral-500">Firma, nombre y DNI</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Pedido relacionado */}
-        <div className="p-6 border-t border-neutral-200 bg-neutral-50 print:hidden">
-          <div className="flex items-center justify-between">
+        <div className="p-4 lg:p-6 border-t border-neutral-200 bg-neutral-50 print:hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-sm text-neutral-500">Pedido relacionado</p>
-              <p className="font-medium text-neutral-900">{albaran.pedido.numero_pedido}</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Pedido relacionado</p>
+              <p className="font-medium text-neutral-900 text-sm lg:text-base">{albaran.pedido.numero_pedido}</p>
             </div>
             <Link
               href={`/almacen/pedidos/${albaran.pedido.id}`}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm text-center"
             >
               Ver pedido
             </Link>

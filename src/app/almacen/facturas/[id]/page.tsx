@@ -206,14 +206,6 @@ export default function FacturaDetallePage() {
   }
 
   // Calcular totales temporales cuando se editan precios
-  const calcularSubtotalTemp = (itemId: string, cantidadM2: number) => {
-    const precio = preciosEditados[itemId]
-    if (precio !== undefined) {
-      return cantidadM2 * precio
-    }
-    return null
-  }
-
   const subtotalTemp = editandoPrecios && factura
     ? factura.items.reduce((sum, item) => {
         const precio = preciosEditados[item.id] ?? item.precio_m2
@@ -250,9 +242,9 @@ export default function FacturaDetallePage() {
   )
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-4 lg:p-8 max-w-4xl mx-auto">
       {/* Header - hidden when printing */}
-      <div className="flex items-start justify-between mb-8 print:hidden">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 lg:mb-8 print:hidden">
         <div>
           <Link href="/almacen/facturas" className="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-flex items-center gap-1">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -260,15 +252,15 @@ export default function FacturaDetallePage() {
             </svg>
             Volver a facturas
           </Link>
-          <h1 className="text-3xl font-bold text-neutral-900">Factura {factura.numero_factura}</h1>
-          <p className="text-neutral-500 mt-1">Emitida: {formatDate(factura.createdAt)}</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900">Factura {factura.numero_factura}</h1>
+          <p className="text-neutral-500 mt-1 text-sm lg:text-base">Emitida: {formatDate(factura.createdAt)}</p>
         </div>
         <EstadoBadge estado={factura.estado} />
       </div>
 
       {/* Acciones de compartir */}
-      <div className="bg-white rounded-xl shadow-sm p-4 mb-6 print:hidden">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl shadow-sm p-3 lg:p-4 mb-4 lg:mb-6 print:hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4">
           <ShareActions
             title="Factura"
             documentNumber={factura.numero_factura}
@@ -278,12 +270,12 @@ export default function FacturaDetallePage() {
             printRef={printRef}
           />
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:gap-4">
             {/* Botón marcar como pagada */}
             {factura.estado === 'EMITIDA' && (
               <button
                 onClick={handleMarcarPagada}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm lg:text-base"
               >
                 Marcar como pagada
               </button>
@@ -291,11 +283,11 @@ export default function FacturaDetallePage() {
 
             {/* Selector de estado */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-neutral-500">Estado:</span>
+              <span className="text-sm text-neutral-500 hidden sm:inline">Estado:</span>
               <select
                 value={factura.estado}
                 onChange={(e) => handleCambiarEstado(e.target.value)}
-                className="border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="flex-1 sm:flex-initial border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
               >
                 {ESTADOS_FACTURA.map((estado) => (
                   <option key={estado} value={estado}>
@@ -324,12 +316,12 @@ export default function FacturaDetallePage() {
       {/* Documento imprimible */}
       <div ref={printRef} className="bg-white rounded-xl shadow-sm overflow-hidden print:shadow-none">
         {/* Cabecera del documento */}
-        <div className="p-6 border-b border-neutral-200 print:border-black">
-          <div className="flex justify-between items-start">
+        <div className="p-4 lg:p-6 border-b border-neutral-200 print:border-black">
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-neutral-900">FACTURA</h2>
-              <p className="text-lg font-medium text-primary-600">{factura.numero_factura}</p>
-              <div className="mt-2 text-sm">
+              <h2 className="text-xl lg:text-2xl font-bold text-neutral-900">FACTURA</h2>
+              <p className="text-base lg:text-lg font-medium text-primary-600">{factura.numero_factura}</p>
+              <div className="mt-2 text-xs lg:text-sm">
                 <p><span className="text-neutral-500">Fecha emisión:</span> {formatDate(factura.createdAt)}</p>
                 <p><span className="text-neutral-500">Fecha vencimiento:</span> {formatDate(factura.fecha_vencimiento)}</p>
                 {factura.fecha_pago && (
@@ -337,22 +329,22 @@ export default function FacturaDetallePage() {
                 )}
               </div>
             </div>
-            <div className="text-right">
-              <p className="font-bold text-lg">SPHERA TILE S.L.</p>
-              <p className="text-sm text-neutral-500">CIF: B12345678</p>
-              <p className="text-sm text-neutral-500">Pol. Industrial Norte, Nave 15</p>
-              <p className="text-sm text-neutral-500">12200 Onda, Castellón</p>
-              <p className="text-sm text-neutral-500">Tel: +34 964 123 456</p>
-              <p className="text-sm text-neutral-500">info@spheratile.com</p>
+            <div className="sm:text-right">
+              <p className="font-bold text-base lg:text-lg">SPHERA TILE S.L.</p>
+              <p className="text-xs lg:text-sm text-neutral-500">CIF: B12345678</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Pol. Industrial Norte, Nave 15</p>
+              <p className="text-xs lg:text-sm text-neutral-500">12200 Onda, Castellón</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Tel: +34 964 123 456</p>
+              <p className="text-xs lg:text-sm text-neutral-500">info@spheratile.com</p>
             </div>
           </div>
         </div>
 
         {/* Datos del cliente */}
-        <div className="p-6 border-b border-neutral-200 bg-neutral-50">
-          <h3 className="text-sm font-medium text-neutral-500 mb-3">DATOS DEL CLIENTE</h3>
-          <div className="grid grid-cols-2 gap-6">
-            <div>
+        <div className="p-4 lg:p-6 border-b border-neutral-200 bg-neutral-50">
+          <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-3">DATOS DEL CLIENTE</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+            <div className="text-sm lg:text-base">
               <p className="font-medium text-neutral-900">{factura.pedido.user.nombre}</p>
               {factura.pedido.user.empresa && (
                 <p className="text-neutral-700">{factura.pedido.user.empresa}</p>
@@ -361,7 +353,7 @@ export default function FacturaDetallePage() {
                 <p className="text-neutral-700">NIF/CIF: {factura.pedido.user.nif_cif}</p>
               )}
             </div>
-            <div>
+            <div className="text-sm lg:text-base">
               <p className="text-neutral-700 whitespace-pre-line">{factura.direccion_facturacion}</p>
               <p className="text-neutral-500 mt-2">{factura.pedido.user.email}</p>
               {factura.pedido.user.telefono && (
@@ -372,13 +364,13 @@ export default function FacturaDetallePage() {
         </div>
 
         {/* Detalle de la factura */}
-        <div className="p-6">
+        <div className="p-4 lg:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-neutral-500">DETALLE</h3>
+            <h3 className="text-xs lg:text-sm font-medium text-neutral-500">DETALLE</h3>
             {!editandoPrecios ? (
               <button
                 onClick={iniciarEdicionPrecios}
-                className="text-primary-600 hover:text-primary-700 text-sm font-medium print:hidden"
+                className="text-primary-600 hover:text-primary-700 text-xs lg:text-sm font-medium print:hidden"
               >
                 Editar precios
               </button>
@@ -386,7 +378,7 @@ export default function FacturaDetallePage() {
               <div className="flex items-center gap-2 print:hidden">
                 <button
                   onClick={cancelarEdicionPrecios}
-                  className="px-3 py-1 text-sm text-neutral-600 hover:text-neutral-800"
+                  className="px-2 lg:px-3 py-1 text-xs lg:text-sm text-neutral-600 hover:text-neutral-800"
                   disabled={guardando}
                 >
                   Cancelar
@@ -394,14 +386,76 @@ export default function FacturaDetallePage() {
                 <button
                   onClick={handleGuardarPrecios}
                   disabled={guardando}
-                  className="px-3 py-1 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50"
+                  className="px-2 lg:px-3 py-1 bg-primary-600 text-white rounded text-xs lg:text-sm hover:bg-primary-700 disabled:opacity-50"
                 >
-                  {guardando ? 'Guardando...' : 'Guardar precios'}
+                  {guardando ? 'Guardando...' : 'Guardar'}
                 </button>
               </div>
             )}
           </div>
-          <table className="w-full">
+
+          {/* Mobile view - card layout */}
+          <div className="lg:hidden space-y-3">
+            {factura.items.map((item) => {
+              const precioActual = editandoPrecios ? (preciosEditados[item.id] ?? item.precio_m2) : item.precio_m2
+              const subtotalActual = editandoPrecios ? (item.cantidad_m2 * precioActual) : item.subtotal
+              return (
+                <div key={item.id} className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
+                  <div className="flex items-start gap-3 mb-2">
+                    {item.producto_imagen && (
+                      <img
+                        src={item.producto_imagen}
+                        alt={item.producto_nombre}
+                        className="w-12 h-12 object-cover rounded flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-neutral-900 text-sm truncate">{item.producto_nombre}</p>
+                      <p className="text-xs text-neutral-500">Ref: {item.producto_referencia}</p>
+                    </div>
+                    {item.producto_slug && (
+                      <ProductQRCode productSlug={item.producto_slug} size={40} expandable />
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <span className="text-neutral-500 block">Cantidad</span>
+                      <span className="font-medium">{item.cantidad_m2.toFixed(2)} m²</span>
+                      <span className="text-neutral-500 block">({item.cantidad_cajas} cajas)</span>
+                    </div>
+                    <div>
+                      <span className="text-neutral-500 block">Precio</span>
+                      {editandoPrecios ? (
+                        <div className="flex items-center gap-1 print:hidden">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={preciosEditados[item.id] ?? item.precio_m2}
+                            onChange={(e) => setPreciosEditados({
+                              ...preciosEditados,
+                              [item.id]: parseFloat(e.target.value) || 0
+                            })}
+                            className="w-16 px-1 py-0.5 border border-neutral-300 rounded text-right text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+                          />
+                          <span>€</span>
+                        </div>
+                      ) : (
+                        <span className="font-medium">{formatCurrency(item.precio_m2)}€/m²</span>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <span className="text-neutral-500 block">Importe</span>
+                      <span className="font-medium text-primary-600">{formatCurrency(subtotalActual)}€</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Desktop view - table layout */}
+          <table className="hidden lg:table w-full">
             <thead className="bg-neutral-100">
               <tr>
                 <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Descripción</th>
@@ -471,21 +525,21 @@ export default function FacturaDetallePage() {
           </table>
 
           {/* Totales */}
-          <div className="mt-6 flex justify-end">
-            <div className="w-64">
-              <div className="flex justify-between py-2 border-b border-neutral-200">
+          <div className="mt-4 lg:mt-6 flex justify-end">
+            <div className="w-full sm:w-64">
+              <div className="flex justify-between py-2 border-b border-neutral-200 text-sm lg:text-base">
                 <span className="text-neutral-500">Base imponible</span>
                 <span className={`text-neutral-900 ${editandoPrecios && subtotalTemp !== factura.subtotal_euros ? 'text-primary-600 font-medium' : ''}`}>
                   {formatCurrency(subtotalTemp ?? factura.subtotal_euros)}€
                 </span>
               </div>
-              <div className="flex justify-between py-2 border-b border-neutral-200">
+              <div className="flex justify-between py-2 border-b border-neutral-200 text-sm lg:text-base">
                 <span className="text-neutral-500">IVA ({factura.iva_porcentaje}%)</span>
                 <span className={`text-neutral-900 ${editandoPrecios && ivaTemp !== factura.iva_euros ? 'text-primary-600 font-medium' : ''}`}>
                   {formatCurrency(ivaTemp ?? factura.iva_euros)}€
                 </span>
               </div>
-              <div className="flex justify-between py-3 font-bold text-lg">
+              <div className="flex justify-between py-3 font-bold text-base lg:text-lg">
                 <span>TOTAL</span>
                 <span className={editandoPrecios && totalTemp !== factura.total_euros ? 'text-primary-600' : ''}>
                   {formatCurrency(totalTemp ?? factura.total_euros)}€
@@ -496,40 +550,40 @@ export default function FacturaDetallePage() {
         </div>
 
         {/* Información de pago */}
-        <div className="p-6 border-t border-neutral-200 bg-neutral-50">
-          <h3 className="text-sm font-medium text-neutral-500 mb-3">FORMA DE PAGO</h3>
-          <p className="text-neutral-900">{METODOS_PAGO[factura.metodo_pago] || factura.metodo_pago}</p>
+        <div className="p-4 lg:p-6 border-t border-neutral-200 bg-neutral-50">
+          <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-3">FORMA DE PAGO</h3>
+          <p className="text-neutral-900 text-sm lg:text-base">{METODOS_PAGO[factura.metodo_pago] || factura.metodo_pago}</p>
           {factura.metodo_pago === 'TRANSFERENCIA' && (
             <div className="mt-3 p-3 bg-white rounded border border-neutral-200">
-              <p className="text-sm text-neutral-500">Datos bancarios:</p>
-              <p className="font-mono text-neutral-900">ES12 3456 7890 1234 5678 9012</p>
-              <p className="text-sm text-neutral-500 mt-1">Concepto: {factura.numero_factura}</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Datos bancarios:</p>
+              <p className="font-mono text-neutral-900 text-xs lg:text-sm break-all">ES12 3456 7890 1234 5678 9012</p>
+              <p className="text-xs lg:text-sm text-neutral-500 mt-1">Concepto: {factura.numero_factura}</p>
             </div>
           )}
           {factura.notas && (
             <div className="mt-4">
-              <p className="text-sm text-neutral-500">Notas:</p>
-              <p className="text-neutral-700">{factura.notas}</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Notas:</p>
+              <p className="text-neutral-700 text-sm lg:text-base">{factura.notas}</p>
             </div>
           )}
         </div>
 
         {/* Pie de página legal */}
-        <div className="p-6 border-t border-neutral-200 text-xs text-neutral-500 text-center">
+        <div className="p-4 lg:p-6 border-t border-neutral-200 text-[10px] lg:text-xs text-neutral-500 text-center">
           <p>SPHERA TILE S.L. - CIF: B12345678 - Inscrita en el Registro Mercantil de Castellón</p>
           <p>Tomo 1234, Libro 567, Folio 89, Sección 8, Hoja CS-12345</p>
         </div>
 
         {/* Pedido relacionado */}
-        <div className="p-6 border-t border-neutral-200 bg-neutral-50 print:hidden">
-          <div className="flex items-center justify-between">
+        <div className="p-4 lg:p-6 border-t border-neutral-200 bg-neutral-50 print:hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-sm text-neutral-500">Pedido relacionado</p>
-              <p className="font-medium text-neutral-900">{factura.pedido.numero_pedido}</p>
+              <p className="text-xs lg:text-sm text-neutral-500">Pedido relacionado</p>
+              <p className="font-medium text-neutral-900 text-sm lg:text-base">{factura.pedido.numero_pedido}</p>
             </div>
             <Link
               href={`/almacen/pedidos/${factura.pedido.id}`}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm text-center"
             >
               Ver pedido
             </Link>

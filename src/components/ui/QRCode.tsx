@@ -51,6 +51,12 @@ interface ProductQRCodeProps {
   showLabel?: boolean
   /** Enable click to expand */
   expandable?: boolean
+  /** Product name to display in expanded view */
+  productName?: string
+  /** Product format to display in expanded view */
+  productFormat?: string
+  /** Whether we're already on the product page (hide link) */
+  isProductPage?: boolean
 }
 
 export function ProductQRCode({
@@ -59,6 +65,9 @@ export function ProductQRCode({
   className = '',
   showLabel = false,
   expandable = false,
+  productName,
+  productFormat,
+  isProductPage = false,
 }: ProductQRCodeProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -82,6 +91,13 @@ export function ProductQRCode({
 
   if (!expandable) {
     return qrContent
+  }
+
+  const handleGoToProduct = () => {
+    setIsExpanded(false)
+    if (!isProductPage) {
+      window.location.href = `/productos/${productSlug}`
+    }
   }
 
   return (
@@ -110,19 +126,38 @@ export function ProductQRCode({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col items-center">
+              {/* Product info */}
+              {productName && (
+                <div className="text-center mb-4">
+                  <h3 className="font-bold text-lg text-neutral-900 uppercase">{productName}</h3>
+                  {productFormat && (
+                    <p className="text-neutral-500">{productFormat}</p>
+                  )}
+                </div>
+              )}
+
               <QRCode value={productUrl} size={240} />
+
               <p className="text-sm text-neutral-600 mt-4 text-center">
                 Escanea este código QR para acceder al producto
               </p>
-              <p className="text-xs text-neutral-400 mt-2 font-mono break-all text-center max-w-[240px]">
-                {productUrl}
-              </p>
-              <button
-                onClick={() => setIsExpanded(false)}
-                className="mt-6 px-6 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors font-medium"
-              >
-                Cerrar
-              </button>
+
+              <div className="flex flex-col gap-2 mt-6 w-full">
+                {!isProductPage && (
+                  <button
+                    onClick={handleGoToProduct}
+                    className="w-full px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors font-medium"
+                  >
+                    Ver producto
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsExpanded(false)}
+                  className="w-full px-6 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors font-medium"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -152,7 +152,8 @@
     "deliveryNote": "للطلبات المقدمة قبل الساعة 2:00 مساءً",
     "qrCode": "رمز QR",
     "qrCodeDescription": "امسح للوصول إلى هذا المنتج",
-    "qrCodeClickToExpand": "انقر للتكبير"
+    "qrCodeClickToExpand": "انقر للتكبير",
+    "relatedProducts": "منتجات ذات صلة"
   },
   "cart": {
     "title": "السلة",
@@ -255,6 +256,7 @@
     "polished": "مصقول",
     "satin": "ساتان",
     "textured": "محبب",
+    "nonSlip": "مانع للانزلاق",
     "use": "الاستخدام",
     "floor": "أرضيات",
     "wall": "جدران",

@@ -102,6 +102,7 @@ enum Acabado {
   PULIDO
   SATINADO
   TEXTURIZADO
+  ANTIDESLIZANTE
 }
 
 enum TipoPieza {

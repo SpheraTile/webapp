@@ -9,7 +9,7 @@ const OPCIONES = {
   calidad: ['COM', 'PRIMERA'],
   materia_prima: ['PORCELANICO', 'GRES', 'AZULEJO'],
   aspecto: ['BLANCO', 'CEMENTO', 'COLORES', 'MADERA', 'MARMOL', 'PIEDRA', 'TERRACOTA'],
-  acabado: ['MATE', 'PULIDO', 'SATINADO', 'TEXTURIZADO'],
+  acabado: ['MATE', 'PULIDO', 'SATINADO', 'TEXTURIZADO', 'ANTIDESLIZANTE'],
   tipo_pieza: ['BASE', 'DECORADO', 'MULTISTEP'],
   uso: ['PAVIMENTO', 'REVESTIMIENTO', 'PAVIMENTO_REVESTIMIENTO'],
   estado_producto: ['NORMAL', 'OFERTA', 'NOVEDAD'],
@@ -18,7 +18,7 @@ const OPCIONES = {
 const LABELS = {
   materia_prima: { PORCELANICO: 'Porcelánico', GRES: 'Gres', AZULEJO: 'Azulejo' },
   aspecto: { BLANCO: 'Blanco', CEMENTO: 'Cemento', COLORES: 'Colores', MADERA: 'Madera', MARMOL: 'Mármol', PIEDRA: 'Piedra', TERRACOTA: 'Terracota' },
-  acabado: { MATE: 'Mate', PULIDO: 'Pulido', SATINADO: 'Satinado', TEXTURIZADO: 'Texturizado' },
+  acabado: { MATE: 'Mate', PULIDO: 'Pulido', SATINADO: 'Satinado', TEXTURIZADO: 'Texturizado', ANTIDESLIZANTE: 'Antideslizante' },
   tipo_pieza: { BASE: 'Base', DECORADO: 'Decorado', MULTISTEP: 'Multistep' },
   uso: { PAVIMENTO: 'Pavimento', REVESTIMIENTO: 'Revestimiento', PAVIMENTO_REVESTIMIENTO: 'Pavimento y Revestimiento' },
   estado_producto: { NORMAL: 'Normal', OFERTA: 'Oferta', NOVEDAD: 'Novedad' },

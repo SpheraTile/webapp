@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Header } from '@/components/layout/Header'
@@ -34,6 +34,7 @@ const ACABADO_KEYS: Record<string, string> = {
   'Pulido': 'polished',
   'Satinado': 'satin',
   'Texturizado': 'textured',
+  'Antideslizante': 'nonSlip',
 }
 
 function ProductGallery({ images, productName }: { images: string[]; productName: string }) {
@@ -126,6 +127,115 @@ function MobileGallery({ images, productName }: { images: string[]; productName:
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+// Related products component
+function RelatedProducts({ currentProduct }: { currentProduct: Producto }) {
+  const [related, setRelated] = useState<Producto[]>([])
+  const [loading, setLoading] = useState(true)
+  const t = useTranslations('products')
+
+  useEffect(() => {
+    const fetchRelated = async () => {
+      try {
+        // Fetch products from same series first
+        const response = await fetch(`/api/productos?limit=8`)
+        if (response.ok) {
+          const data = await response.json()
+          const productos = data.productos || []
+
+          // Filter out current product
+          const filtered = productos.filter((p: Producto) => p.id !== currentProduct.id)
+
+          // Sort: same series first, then same aspecto, then same materia_prima
+          const sorted = filtered.sort((a: Producto, b: Producto) => {
+            // Same series gets highest priority
+            const aSerieMatch = a.serie === currentProduct.serie ? 3 : 0
+            const bSerieMatch = b.serie === currentProduct.serie ? 3 : 0
+
+            // Same aspecto gets second priority
+            const aAspectoMatch = a.aspecto === currentProduct.aspecto ? 2 : 0
+            const bAspectoMatch = b.aspecto === currentProduct.aspecto ? 2 : 0
+
+            // Same materia_prima gets third priority
+            const aMateriaMatch = a.materia_prima === currentProduct.materia_prima ? 1 : 0
+            const bMateriaMatch = b.materia_prima === currentProduct.materia_prima ? 1 : 0
+
+            const aScore = aSerieMatch + aAspectoMatch + aMateriaMatch
+            const bScore = bSerieMatch + bAspectoMatch + bMateriaMatch
+
+            return bScore - aScore
+          })
+
+          setRelated(sorted.slice(0, 4))
+        }
+      } catch (error) {
+        console.error('Error fetching related products:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRelated()
+  }, [currentProduct])
+
+  if (loading) {
+    return (
+      <div className="mt-16 pb-12">
+        <h2 className="text-2xl font-bold text-neutral-900 mb-8">{t('relatedProducts')}</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-square bg-neutral-200 rounded-xl mb-3"></div>
+              <div className="h-4 bg-neutral-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-neutral-200 rounded w-1/2"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (related.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="mt-16 pb-12">
+      <h2 className="text-2xl font-bold text-neutral-900 mb-8">{t('relatedProducts')}</h2>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        {related.map((producto) => (
+          <Link
+            key={producto.id}
+            href={`/productos/${producto.slug}`}
+            className="group bg-white rounded-xl overflow-hidden border border-neutral-200 hover:border-primary-300 hover:shadow-lg transition-all"
+          >
+            <div className="relative aspect-square bg-neutral-100">
+              <ProductImage
+                src={producto.imagen}
+                alt={producto.nombre}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />
+              {producto.serie === currentProduct.serie && (
+                <span className="absolute top-2 left-2 px-2 py-1 bg-primary-600 text-white text-xs font-medium rounded">
+                  Misma serie
+                </span>
+              )}
+            </div>
+            <div className="p-4">
+              <h3 className="font-semibold text-neutral-900 truncate group-hover:text-primary-600 transition-colors">
+                {producto.nombre}
+              </h3>
+              <p className="text-sm text-neutral-500 mb-2">{producto.formato}</p>
+              <p className="font-bold text-primary-600">{producto.precio_m2.toFixed(2)}€/m²</p>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }
@@ -252,6 +362,9 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
               productSlug={producto.slug}
               size={80}
               expandable
+              productName={producto.nombre}
+              productFormat={producto.formato}
+              isProductPage
             />
             <div className="text-sm">
               <p className="font-medium text-neutral-900">{t('qrCode')}</p>
@@ -261,6 +374,11 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
 
           {/* Botón añadir a cesta */}
           <AddToCartButton producto={producto} />
+
+          {/* Productos relacionados - Mobile */}
+          <div className="mt-8">
+            <RelatedProducts currentProduct={producto} />
+          </div>
         </div>
       </div>
 
@@ -388,6 +506,9 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
                     productSlug={producto.slug}
                     size={100}
                     expandable
+                    productName={producto.nombre}
+                    productFormat={producto.formato}
+                    isProductPage
                   />
                   <div>
                     <h3 className="font-semibold text-neutral-900 mb-1">{t('qrCode')}</h3>
@@ -398,6 +519,9 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
               </div>
             </div>
           </div>
+
+          {/* Productos relacionados */}
+          <RelatedProducts currentProduct={producto} />
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ export type Aspecto =
   | 'Piedra'
   | 'Terracota'
 
-export type Acabado = 'Mate' | 'Pulido' | 'Satinado' | 'Texturizado'
+export type Acabado = 'Mate' | 'Pulido' | 'Satinado' | 'Texturizado' | 'Antideslizante'
 
 // Nuevos tipos de producto
 export type TipoPieza = 'base' | 'decorado' | 'multistep'
@@ -197,7 +197,7 @@ export interface EstadisticasAlmacen {
 export const OPCIONES_CALIDAD: Calidad[] = ['COM', 'PRIMERA']
 export const OPCIONES_MATERIA_PRIMA: MateriaPrima[] = ['Porcelánico', 'Gres', 'Azulejo']
 export const OPCIONES_ASPECTO: Aspecto[] = ['Blanco', 'Cemento', 'Colores', 'Madera', 'Mármol', 'Piedra', 'Terracota']
-export const OPCIONES_ACABADO: Acabado[] = ['Mate', 'Pulido', 'Satinado', 'Texturizado']
+export const OPCIONES_ACABADO: Acabado[] = ['Mate', 'Pulido', 'Satinado', 'Texturizado', 'Antideslizante']
 export const OPCIONES_TIPO_PIEZA: TipoPieza[] = ['base', 'decorado', 'multistep']
 export const OPCIONES_USO: Uso[] = ['pavimento', 'revestimiento', 'pavimento_revestimiento']
 export const OPCIONES_ESTADO_PRODUCTO: EstadoProducto[] = ['normal', 'oferta', 'novedad']

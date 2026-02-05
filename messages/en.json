@@ -152,7 +152,8 @@
     "deliveryNote": "for orders placed before 2:00 PM",
     "qrCode": "QR Code",
     "qrCodeDescription": "Scan to access this product",
-    "qrCodeClickToExpand": "Click to enlarge"
+    "qrCodeClickToExpand": "Click to enlarge",
+    "relatedProducts": "Related products"
   },
   "cart": {
     "title": "Cart",
@@ -255,6 +256,7 @@
     "polished": "Polished",
     "satin": "Satin",
     "textured": "Textured",
+    "nonSlip": "Non-slip",
     "use": "Use",
     "floor": "Floor",
     "wall": "Wall",

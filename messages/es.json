@@ -152,7 +152,8 @@
     "deliveryNote": "para pedidos realizados antes de las 14:00h",
     "qrCode": "Código QR",
     "qrCodeDescription": "Escanea para acceder a este producto",
-    "qrCodeClickToExpand": "Clic para ampliar"
+    "qrCodeClickToExpand": "Clic para ampliar",
+    "relatedProducts": "Productos relacionados"
   },
   "cart": {
     "title": "Cesta",
@@ -255,6 +256,7 @@
     "polished": "Pulido",
     "satin": "Satinado",
     "textured": "Texturizado",
+    "nonSlip": "Antideslizante",
     "use": "Uso",
     "floor": "Pavimento",
     "wall": "Revestimiento",

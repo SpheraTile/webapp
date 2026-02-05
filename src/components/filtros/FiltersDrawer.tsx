@@ -71,6 +71,7 @@ const LABELS_ACABADO: Record<string, string> = {
   'Pulido': 'polished',
   'Satinado': 'satin',
   'Texturizado': 'textured',
+  'Antideslizante': 'nonSlip',
 }
 
 export function FiltersDrawer({
@@ -146,14 +147,14 @@ export function FiltersDrawer({
 
         {/* Contenido de filtros */}
         <div className="overflow-y-auto h-[calc(100%-140px)] lg:h-auto p-4 lg:p-0">
-          {/* Estado del producto (Ofertas, Novedades) */}
-          <FilterSection titulo={t('status')} defaultOpen>
-            {OPCIONES_ESTADO_PRODUCTO.map((estado) => (
+          {/* Calidad */}
+          <FilterSection titulo={t('quality')} defaultOpen>
+            {OPCIONES_CALIDAD.map((calidad) => (
               <FilterCheckbox
-                key={estado}
-                label={t(LABELS_ESTADO_PRODUCTO[estado])}
-                checked={filtros.estado_producto.includes(estado)}
-                onChange={() => toggleFiltro('estado_producto', estado)}
+                key={calidad}
+                label={calidad}
+                checked={filtros.calidad.includes(calidad)}
+                onChange={() => toggleFiltro('calidad', calidad)}
               />
             ))}
           </FilterSection>
@@ -182,17 +183,19 @@ export function FiltersDrawer({
             ))}
           </FilterSection>
 
-          <FilterSection titulo={t('quality')}>
-            {OPCIONES_CALIDAD.map((calidad) => (
+          {/* Estado del producto (Ofertas, Novedades) */}
+          <FilterSection titulo={t('status')}>
+            {OPCIONES_ESTADO_PRODUCTO.map((estado) => (
               <FilterCheckbox
-                key={calidad}
-                label={calidad}
-                checked={filtros.calidad.includes(calidad)}
-                onChange={() => toggleFiltro('calidad', calidad)}
+                key={estado}
+                label={t(LABELS_ESTADO_PRODUCTO[estado])}
+                checked={filtros.estado_producto.includes(estado)}
+                onChange={() => toggleFiltro('estado_producto', estado)}
               />
             ))}
           </FilterSection>
 
+          {/* Materia Prima */}
           <FilterSection titulo={t('material')}>
             {OPCIONES_MATERIA_PRIMA.map((materia) => (
               <FilterCheckbox
@@ -204,6 +207,7 @@ export function FiltersDrawer({
             ))}
           </FilterSection>
 
+          {/* Aspecto */}
           <FilterSection titulo={t('aspect')}>
             {OPCIONES_ASPECTO.map((aspecto) => (
               <FilterCheckbox
@@ -215,6 +219,7 @@ export function FiltersDrawer({
             ))}
           </FilterSection>
 
+          {/* Acabado */}
           <FilterSection titulo={t('finish')}>
             {OPCIONES_ACABADO.map((acabado) => (
               <FilterCheckbox

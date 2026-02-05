@@ -160,127 +160,174 @@ export default function ProductosAlmacenPage() {
         </div>
       </div>
 
-      {/* Tabla de productos */}
+      {/* Lista de productos */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-neutral-50">
-              <tr>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Producto
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Referencia
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Serie
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Formato
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Precio/m²
-                </th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        {loading ? (
+          <div className="px-6 py-12 text-center">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            </div>
+          </div>
+        ) : productos.length === 0 ? (
+          <div className="px-6 py-12 text-center text-neutral-500">
+            No hay productos. <Link href="/almacen/productos/nuevo" className="text-primary-600 hover:underline">Crear uno</Link>
+          </div>
+        ) : (
+          <>
+            {/* Vista móvil - Cards */}
+            <div className="lg:hidden divide-y divide-neutral-200">
+              {productos.map((producto) => (
+                <div key={producto.id} className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
+                      <Image
+                        src={producto.imagen}
+                        alt={producto.nombre}
+                        fill
+                        className="object-cover"
+                      />
+                      {producto.estado_producto && estadoLabels[producto.estado_producto]?.text && (
+                        <span className={`absolute top-0 left-0 text-[8px] px-1 rounded-br ${estadoLabels[producto.estado_producto].color}`}>
+                          {estadoLabels[producto.estado_producto].text}
+                        </span>
+                      )}
                     </div>
-                  </td>
-                </tr>
-              ) : productos.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-neutral-500">
-                    No hay productos. <Link href="/almacen/productos/nuevo" className="text-primary-600 hover:underline">Crear uno</Link>
-                  </td>
-                </tr>
-              ) : (
-                productos.map((producto) => (
-                  <tr key={producto.id} className="hover:bg-neutral-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
-                          <Image
-                            src={producto.imagen}
-                            alt={producto.nombre}
-                            fill
-                            className="object-cover"
-                          />
-                          {producto.estado_producto && estadoLabels[producto.estado_producto]?.text && (
-                            <span className={`absolute top-0 left-0 text-[8px] px-1 rounded-br ${estadoLabels[producto.estado_producto].color}`}>
-                              {estadoLabels[producto.estado_producto].text}
-                            </span>
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-medium text-neutral-900">{producto.nombre}</div>
-                          <div className="text-sm text-neutral-500">{producto.calidad}</div>
-                        </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-neutral-900 truncate">{producto.nombre}</div>
+                      <div className="text-sm text-neutral-500">{producto.referencia} · {producto.formato}</div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="font-semibold text-neutral-900">{producto.precio_m2.toFixed(2)}€/m²</span>
+                        <span className={`text-sm ${producto.stock_m2 < 100 ? 'text-red-600' : 'text-neutral-500'}`}>
+                          {producto.stock_m2.toLocaleString('es-ES')} m²
+                        </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-neutral-500 font-mono text-sm">
-                      {producto.referencia}
-                    </td>
-                    <td className="px-6 py-4 text-neutral-500">
-                      {producto.serie}
-                    </td>
-                    <td className="px-6 py-4 text-neutral-500">
-                      {producto.formato}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-neutral-900">
-                      {producto.precio_m2.toFixed(2)}€
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className={`font-medium ${producto.stock_m2 < 100 ? 'text-red-600' : 'text-neutral-900'}`}>
-                        {producto.stock_m2.toLocaleString('es-ES')} m²
-                      </div>
-                      <div className="text-xs text-neutral-500">
-                        {Math.floor(producto.stock_m2 / producto.m2_caja)} cajas
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/almacen/productos/${producto.id}/editar`}
-                          className="p-2 text-neutral-400 hover:text-primary-600 transition-colors"
-                          title="Editar"
-                        >
-                          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(producto.id)}
-                          disabled={deleting === producto.id}
-                          className="p-2 text-neutral-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                          title="Eliminar"
-                        >
-                          {deleting === producto.id ? (
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
-                          ) : (
-                            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          )}
-                        </button>
-                      </div>
-                    </td>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Link
+                      href={`/almacen/productos/${producto.id}/editar`}
+                      className="flex-1 py-2 text-center text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors"
+                    >
+                      Editar
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(producto.id)}
+                      disabled={deleting === producto.id}
+                      className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
+                    >
+                      {deleting === producto.id ? '...' : 'Eliminar'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Vista desktop - Tabla */}
+            <div className="hidden lg:block">
+              <table className="w-full">
+                <thead className="bg-neutral-50">
+                  <tr>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Producto
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Referencia
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Serie
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Formato
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Precio/m²
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Stock
+                    </th>
+                    <th className="text-right px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Acciones
+                    </th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {productos.map((producto) => (
+                    <tr key={producto.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
+                            <Image
+                              src={producto.imagen}
+                              alt={producto.nombre}
+                              fill
+                              className="object-cover"
+                            />
+                            {producto.estado_producto && estadoLabels[producto.estado_producto]?.text && (
+                              <span className={`absolute top-0 left-0 text-[8px] px-1 rounded-br ${estadoLabels[producto.estado_producto].color}`}>
+                                {estadoLabels[producto.estado_producto].text}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium text-neutral-900">{producto.nombre}</div>
+                            <div className="text-sm text-neutral-500">{producto.calidad}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-neutral-500 font-mono text-sm">
+                        {producto.referencia}
+                      </td>
+                      <td className="px-6 py-4 text-neutral-500">
+                        {producto.serie}
+                      </td>
+                      <td className="px-6 py-4 text-neutral-500">
+                        {producto.formato}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-neutral-900">
+                        {producto.precio_m2.toFixed(2)}€
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className={`font-medium ${producto.stock_m2 < 100 ? 'text-red-600' : 'text-neutral-900'}`}>
+                          {producto.stock_m2.toLocaleString('es-ES')} m²
+                        </div>
+                        <div className="text-xs text-neutral-500">
+                          {Math.floor(producto.stock_m2 / producto.m2_caja)} cajas
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/almacen/productos/${producto.id}/editar`}
+                            className="p-2 text-neutral-400 hover:text-primary-600 transition-colors"
+                            title="Editar"
+                          >
+                            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(producto.id)}
+                            disabled={deleting === producto.id}
+                            className="p-2 text-neutral-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                            title="Eliminar"
+                          >
+                            {deleting === producto.id ? (
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
+                            ) : (
+                              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Resumen */}

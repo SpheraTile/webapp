@@ -14,9 +14,12 @@ export function CartItem({ item }: CartItemProps) {
   const { actualizarCantidad, eliminarItem } = useCesta()
   const { producto, cantidad_m2, cantidad_cajas } = item
 
-  // Calcular mínimo en cajas
+  // Calcular mínimo en cajas (evitar errores de precisión de punto flotante)
   const minimoM2 = producto.pedido_minimo_m2 || producto.m2_caja
-  const minimoCajas = Math.ceil(minimoM2 / producto.m2_caja)
+  const minimoCajasExacto = minimoM2 / producto.m2_caja
+  const minimoCajas = Math.abs(minimoCajasExacto - Math.round(minimoCajasExacto)) < 0.0001
+    ? Math.round(minimoCajasExacto)
+    : Math.ceil(minimoCajasExacto)
 
   // Calcular máximo en cajas
   const maxCajas = Math.floor(producto.stock_m2 / producto.m2_caja)

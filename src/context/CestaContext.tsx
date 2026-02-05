@@ -114,9 +114,12 @@ export function CestaProvider({ children }: { children: ReactNode }) {
 
   const agregarItem = useCallback(
     (producto: Producto, cantidad_cajas: number) => {
-      // Calcular mínimo en cajas
+      // Calcular mínimo en cajas (evitar errores de precisión de punto flotante)
       const minimoM2 = producto.pedido_minimo_m2 || producto.m2_caja
-      const minimoCajas = Math.ceil(minimoM2 / producto.m2_caja)
+      const minimoCajasExacto = minimoM2 / producto.m2_caja
+      const minimoCajas = Math.abs(minimoCajasExacto - Math.round(minimoCajasExacto)) < 0.0001
+        ? Math.round(minimoCajasExacto)
+        : Math.ceil(minimoCajasExacto)
 
       // Validar contra pedido mínimo
       if (cantidad_cajas < minimoCajas) {
@@ -152,9 +155,12 @@ export function CestaProvider({ children }: { children: ReactNode }) {
       const item = state.items.find((i) => i.producto.id === productoId)
       if (!item) return
 
-      // Calcular mínimo en cajas
+      // Calcular mínimo en cajas (evitar errores de precisión de punto flotante)
       const minimoM2 = item.producto.pedido_minimo_m2 || item.producto.m2_caja
-      const minimoCajas = Math.ceil(minimoM2 / item.producto.m2_caja)
+      const minimoCajasExacto = minimoM2 / item.producto.m2_caja
+      const minimoCajas = Math.abs(minimoCajasExacto - Math.round(minimoCajasExacto)) < 0.0001
+        ? Math.round(minimoCajasExacto)
+        : Math.ceil(minimoCajasExacto)
 
       // Validar contra pedido mínimo
       if (cantidad_cajas < minimoCajas) {

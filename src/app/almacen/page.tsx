@@ -3,18 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-interface Estadisticas {
-  pedidos_pendientes: number
-  pedidos_hoy: number
-  facturacion_mes: number
-  facturacion_pendiente: number
-  productos_bajo_stock: number
-  albaranes_pendientes: number
-  total_productos: number
-  total_clientes: number
-}
-
-interface PedidoReciente {
+interface PedidoPendiente {
   id: string
   numero_pedido: string
   total_m2: number
@@ -25,53 +14,6 @@ interface PedidoReciente {
     nombre: string
     empresa: string | null
   }
-}
-
-// Componente de tarjeta de estadística
-function StatCard({
-  title,
-  value,
-  subtitle,
-  icon,
-  color = 'primary',
-  href,
-}: {
-  title: string
-  value: string | number
-  subtitle?: string
-  icon: React.ReactNode
-  color?: 'primary' | 'success' | 'warning' | 'danger'
-  href?: string
-}) {
-  const colorClasses = {
-    primary: 'bg-primary-100 text-primary-600',
-    success: 'bg-green-100 text-green-600',
-    warning: 'bg-amber-100 text-amber-600',
-    danger: 'bg-red-100 text-red-600',
-  }
-
-  const content = (
-    <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-neutral-500 font-medium">{title}</p>
-          <p className="text-3xl font-bold text-neutral-900 mt-2">{value}</p>
-          {subtitle && (
-            <p className="text-sm text-neutral-500 mt-1">{subtitle}</p>
-          )}
-        </div>
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorClasses[color]}`}>
-          {icon}
-        </div>
-      </div>
-    </div>
-  )
-
-  if (href) {
-    return <Link href={href}>{content}</Link>
-  }
-
-  return content
 }
 
 // Formatear moneda
@@ -113,26 +55,16 @@ function EstadoBadge({ estado }: { estado: string }) {
 }
 
 export default function AlmacenDashboard() {
-  const [stats, setStats] = useState<Estadisticas | null>(null)
-  const [pedidosRecientes, setPedidosRecientes] = useState<PedidoReciente[]>([])
+  const [pedidosPendientes, setPedidosPendientes] = useState<PedidoPendiente[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, pedidosRes] = await Promise.all([
-          fetch('/api/estadisticas'),
-          fetch('/api/pedidos?limit=5'),
-        ])
-
-        if (statsRes.ok) {
-          const statsData = await statsRes.json()
-          setStats(statsData)
-        }
-
-        if (pedidosRes.ok) {
-          const pedidosData = await pedidosRes.json()
-          setPedidosRecientes(pedidosData.pedidos || [])
+        const response = await fetch('/api/pedidos?estado=PENDIENTE,CONFIRMADO,PREPARANDO&limit=10')
+        if (response.ok) {
+          const data = await response.json()
+          setPedidosPendientes(data.pedidos || [])
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
@@ -146,76 +78,86 @@ export default function AlmacenDashboard() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[400px]">
+      <div className="p-4 lg:p-8 flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
       </div>
     )
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 lg:p-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900">Dashboard</h1>
-        <p className="text-neutral-500 mt-1">Resumen de actividad del almacén</p>
+      <div className="mb-6 lg:mb-8">
+        <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900">Panel de Control</h1>
+        <p className="text-neutral-500 mt-1 text-sm lg:text-base">Gestión del almacén</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          title="Pedidos Pendientes"
-          value={stats?.pedidos_pendientes || 0}
-          subtitle="Requieren atención"
-          color="warning"
-          href="/almacen/pedidos?estado=pendiente"
-          icon={
+      {/* Acciones rápidas */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6 lg:mb-8">
+        <Link
+          href="/almacen/pedidos"
+          className="bg-white rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center gap-2 lg:gap-3"
+        >
+          <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-          }
-        />
-        <StatCard
-          title="Facturación del Mes"
-          value={formatCurrency(stats?.facturacion_mes || 0)}
-          color="success"
-          href="/almacen/facturas"
-          icon={
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          }
-        />
-        <StatCard
-          title="Pendiente de Cobro"
-          value={formatCurrency(stats?.facturacion_pendiente || 0)}
-          color="danger"
-          href="/almacen/facturas?estado=emitida"
-          icon={
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-          }
-        />
-        <StatCard
-          title="Productos Bajo Stock"
-          value={stats?.productos_bajo_stock || 0}
-          subtitle="Necesitan reposición"
-          color="danger"
-          href="/almacen/productos?stock=bajo"
-          icon={
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          }
-        />
-      </div>
-
-      {/* Pedidos recientes */}
-      <div className="bg-white rounded-xl shadow-sm">
-        <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
+          </div>
           <div>
-            <h2 className="text-lg font-semibold text-neutral-900">Pedidos Recientes</h2>
-            <p className="text-sm text-neutral-500">Últimos pedidos recibidos</p>
+            <h3 className="font-semibold text-neutral-900 text-sm lg:text-base">Pedidos</h3>
+            <p className="text-xs text-neutral-500 hidden lg:block">Ver todos los pedidos</p>
+          </div>
+        </Link>
+        <Link
+          href="/almacen/productos"
+          className="bg-white rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center gap-2 lg:gap-3"
+        >
+          <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center">
+            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-semibold text-neutral-900 text-sm lg:text-base">Productos</h3>
+            <p className="text-xs text-neutral-500 hidden lg:block">Gestionar catálogo</p>
+          </div>
+        </Link>
+        <Link
+          href="/almacen/usuarios"
+          className="bg-white rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center gap-2 lg:gap-3"
+        >
+          <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-semibold text-neutral-900 text-sm lg:text-base">Usuarios</h3>
+            <p className="text-xs text-neutral-500 hidden lg:block">Gestionar clientes</p>
+          </div>
+        </Link>
+        <Link
+          href="/almacen/pedidos/nuevo"
+          className="bg-white rounded-xl p-4 lg:p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center gap-2 lg:gap-3"
+        >
+          <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
+            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-semibold text-neutral-900 text-sm lg:text-base">Nuevo Pedido</h3>
+            <p className="text-xs text-neutral-500 hidden lg:block">Crear manualmente</p>
+          </div>
+        </Link>
+      </div>
+
+      {/* Pedidos pendientes */}
+      <div className="bg-white rounded-xl shadow-sm">
+        <div className="p-4 lg:p-6 border-b border-neutral-200 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900">Pedidos Pendientes</h2>
+            <p className="text-sm text-neutral-500">{pedidosPendientes.length} pedidos por procesar</p>
           </div>
           <Link
             href="/almacen/pedidos"
@@ -224,7 +166,38 @@ export default function AlmacenDashboard() {
             Ver todos →
           </Link>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Vista móvil - Tarjetas */}
+        <div className="lg:hidden divide-y divide-neutral-100">
+          {pedidosPendientes.length === 0 ? (
+            <div className="p-8 text-center text-neutral-500">
+              No hay pedidos pendientes
+            </div>
+          ) : (
+            pedidosPendientes.map((pedido) => (
+              <Link
+                key={pedido.id}
+                href={`/almacen/pedidos/${pedido.id}`}
+                className="block p-4 hover:bg-neutral-50 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <span className="font-semibold text-neutral-900">{pedido.numero_pedido}</span>
+                    <p className="text-sm text-neutral-500">{pedido.user.nombre}</p>
+                  </div>
+                  <EstadoBadge estado={pedido.estado} />
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-neutral-500">{formatDate(pedido.createdAt)}</span>
+                  <span className="font-medium text-neutral-900">{formatCurrency(pedido.total_euros)}</span>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+
+        {/* Vista desktop - Tabla */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full">
             <thead className="bg-neutral-50">
               <tr>
@@ -249,14 +222,14 @@ export default function AlmacenDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
-              {pedidosRecientes.length === 0 ? (
+              {pedidosPendientes.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
-                    No hay pedidos recientes
+                    No hay pedidos pendientes
                   </td>
                 </tr>
               ) : (
-                pedidosRecientes.map((pedido) => (
+                pedidosPendientes.map((pedido) => (
                   <tr key={pedido.id} className="hover:bg-neutral-50">
                     <td className="px-6 py-4">
                       <div className="font-medium text-neutral-900">{pedido.numero_pedido}</div>
@@ -289,52 +262,6 @@ export default function AlmacenDashboard() {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Acciones rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        <Link
-          href="/almacen/pedidos/nuevo"
-          className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4"
-        >
-          <div className="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center">
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-semibold text-neutral-900">Nuevo Pedido</h3>
-            <p className="text-sm text-neutral-500">Crear pedido manualmente</p>
-          </div>
-        </Link>
-        <Link
-          href="/almacen/albaranes/nuevo"
-          className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4"
-        >
-          <div className="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center">
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-semibold text-neutral-900">Generar Albarán</h3>
-            <p className="text-sm text-neutral-500">Crear albarán de entrega</p>
-          </div>
-        </Link>
-        <Link
-          href="/almacen/facturas/nueva"
-          className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4"
-        >
-          <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-semibold text-neutral-900">Nueva Factura</h3>
-            <p className="text-sm text-neutral-500">Emitir factura</p>
-          </div>
-        </Link>
       </div>
     </div>
   )

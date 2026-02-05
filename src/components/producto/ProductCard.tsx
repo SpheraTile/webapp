@@ -124,7 +124,7 @@ export function ProductCard({ producto, className = '', variant = 'grid' }: Prod
 
           <div className="flex items-center justify-between">
             {/* Badge de stock */}
-            <StockBadge stock_m2={producto.stock_m2} />
+            <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
 
             {/* Precio */}
             <PriceTag precio_m2={producto.precio_m2} size="lg" />
@@ -169,7 +169,7 @@ export function ProductCard({ producto, className = '', variant = 'grid' }: Prod
         </div>
 
         {/* Badge de stock */}
-        <StockBadge stock_m2={producto.stock_m2} />
+        <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
 
         {/* Precio */}
         <PriceTag precio_m2={producto.precio_m2} size="md" />

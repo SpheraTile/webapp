@@ -190,7 +190,7 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
           </div>
 
           {/* Stock */}
-          <StockBadge stock_m2={producto.stock_m2} />
+          <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
 
           {/* Precio */}
           <PriceTag precio_m2={producto.precio_m2} size="lg" />
@@ -302,7 +302,7 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
 
               {/* Stock badge */}
               <div className="mb-6">
-                <StockBadge stock_m2={producto.stock_m2} />
+                <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
               </div>
 
               {/* Precio destacado */}

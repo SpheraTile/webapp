@@ -108,7 +108,7 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
           = {m2Calculado.toFixed(2)} m² ({producto.m2_caja} m²/caja)
         </p>
         <p className="text-neutral-500">
-          Mínimo: {minimoCajas} {minimoCajas === 1 ? 'caja' : 'cajas'} · Disponible: {stockDisponibleCajas} cajas
+          Mínimo: {minimoCajas} {minimoCajas === 1 ? 'caja' : 'cajas'} ({minimoM2.toFixed(2)} m²) · Disponible: {stockDisponibleCajas} cajas ({stockDisponibleM2.toFixed(2)} m²)
         </p>
       </div>
 

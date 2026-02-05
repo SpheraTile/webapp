@@ -2,10 +2,11 @@ import { IconStock } from './Icons'
 
 interface StockBadgeProps {
   stock_m2: number
+  m2_caja?: number
   className?: string
 }
 
-export function StockBadge({ stock_m2, className = '' }: StockBadgeProps) {
+export function StockBadge({ stock_m2, m2_caja, className = '' }: StockBadgeProps) {
   const stockFormateado = stock_m2.toLocaleString('es-ES', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
@@ -13,6 +14,9 @@ export function StockBadge({ stock_m2, className = '' }: StockBadgeProps) {
 
   const sinStock = stock_m2 <= 0
   const stockBajo = stock_m2 > 0 && stock_m2 < 50
+
+  // Calcular cajas disponibles si se proporciona m2_caja
+  const cajasDisponibles = m2_caja ? Math.floor(stock_m2 / m2_caja) : null
 
   return (
     <div
@@ -31,7 +35,9 @@ export function StockBadge({ stock_m2, className = '' }: StockBadgeProps) {
       <span>
         {sinStock
           ? 'Sin stock'
-          : `Disponible: ${stockFormateado} m²`
+          : cajasDisponibles !== null
+            ? `Disponible: ${stockFormateado} m² (${cajasDisponibles} cajas)`
+            : `Disponible: ${stockFormateado} m²`
         }
       </span>
     </div>

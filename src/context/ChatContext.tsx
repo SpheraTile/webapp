@@ -19,25 +19,37 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   // Fetch chat_enabled setting from API
+  const fetchChatEnabled = async () => {
+    try {
+      const response = await fetch('/api/configuracion?clave=chat_enabled')
+      if (response.ok) {
+        const data = await response.json()
+        // If no config exists or value is 'true', enable chat
+        setIsEnabled(data.valor === null || data.valor === 'true')
+      }
+    } catch (error) {
+      console.error('Error fetching chat config:', error)
+      // Default to enabled on error
+      setIsEnabled(true)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const fetchChatEnabled = async () => {
-      try {
-        const response = await fetch('/api/configuracion?clave=chat_enabled')
-        if (response.ok) {
-          const data = await response.json()
-          // If no config exists or value is 'true', enable chat
-          setIsEnabled(data.valor === null || data.valor === 'true')
-        }
-      } catch (error) {
-        console.error('Error fetching chat config:', error)
-        // Default to enabled on error
-        setIsEnabled(true)
-      } finally {
-        setIsLoading(false)
+    fetchChatEnabled()
+  }, [])
+
+  // Refetch when page becomes visible (user returns from admin)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchChatEnabled()
       }
     }
 
-    fetchChatEnabled()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
   const openChat = () => setIsOpen(true)

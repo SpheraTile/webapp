@@ -26,10 +26,8 @@ export default function Chatbot() {
   const [error, setError] = useState<string | null>(null)
   const [showContactOptions, setShowContactOptions] = useState(false)
   const [initialized, setInitialized] = useState(false)
-  const [keyboardOffset, setKeyboardOffset] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   // Get welcome message content from translations
   const welcomeMessage = t('welcomeMessage')
@@ -57,27 +55,6 @@ export default function Chatbot() {
       inputRef.current?.focus()
     }
   }, [isOpen])
-
-  // Handle keyboard visibility on mobile
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.visualViewport) return
-
-    const viewport = window.visualViewport
-
-    const handleResize = () => {
-      // Calculate keyboard height by comparing viewport height to window height
-      const keyboardHeight = window.innerHeight - viewport.height
-      setKeyboardOffset(keyboardHeight > 50 ? keyboardHeight : 0)
-    }
-
-    viewport.addEventListener('resize', handleResize)
-    viewport.addEventListener('scroll', handleResize)
-
-    return () => {
-      viewport.removeEventListener('resize', handleResize)
-      viewport.removeEventListener('scroll', handleResize)
-    }
-  }, [])
 
   // Don't render if chat is disabled (must be after all hooks)
   if (!isEnabled) {
@@ -211,13 +188,11 @@ export default function Chatbot() {
 
       {/* Chat window */}
       <div
-        ref={chatContainerRef}
-        className={`fixed right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-neutral-200 transition-all duration-300 ${
+        className={`fixed bottom-20 lg:bottom-24 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-neutral-200 transition-all duration-300 ${
           isOpen
             ? 'opacity-100 translate-y-0 pointer-events-auto'
             : 'opacity-0 translate-y-4 pointer-events-none'
-        } ${keyboardOffset === 0 ? 'bottom-20 lg:bottom-24' : ''}`}
-        style={keyboardOffset > 0 ? { bottom: `${keyboardOffset + 8}px` } : undefined}
+        }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between gap-3 p-4 bg-gradient-to-r from-primary-600 to-primary-700 rounded-t-2xl">
@@ -234,10 +209,18 @@ export default function Chatbot() {
             {/* Contact human button */}
             <button
               onClick={handleContactHuman}
-              className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+              className={`p-2 rounded-full transition-colors ${
+                showContactOptions
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-white/20 hover:bg-white/30'
+              }`}
               title={t('contactHuman')}
             >
-              <Phone className="w-5 h-5 text-white" />
+              {showContactOptions ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <Phone className="w-5 h-5 text-white" />
+              )}
             </button>
             {/* Close button - visible on mobile */}
             <button

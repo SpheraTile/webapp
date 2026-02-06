@@ -11,6 +11,38 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
+// Rate limiting - store requests per IP
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+const RATE_LIMIT_MAX = 20 // Max requests per window
+const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute window
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now()
+  const record = rateLimitMap.get(ip)
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW })
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 }
+  }
+
+  if (record.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0 }
+  }
+
+  record.count++
+  return { allowed: true, remaining: RATE_LIMIT_MAX - record.count }
+}
+
+// Clean up old rate limit entries periodically
+setInterval(() => {
+  const now = Date.now()
+  for (const [ip, record] of rateLimitMap.entries()) {
+    if (now > record.resetTime) {
+      rateLimitMap.delete(ip)
+    }
+  }
+}, 60 * 1000)
+
 // Format product for display
 function formatProductForPrompt(product: {
   nombre: string
@@ -37,6 +69,19 @@ function formatProductForPrompt(product: {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown'
+    const rateLimit = checkRateLimit(ip)
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Demasiadas solicitudes. Por favor, espera un momento.' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      )
+    }
+
     // Check API key
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 })
@@ -99,9 +144,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Build system prompt
-    const systemPrompt = `Eres el asistente virtual de SPHERA TILE, especializado en cerámica y azulejos. Ayudas a encontrar productos, dar información de precios y stock, y resolver dudas.
+    const systemPrompt = `Eres el asistente virtual de SPHERA TILE, especializado EXCLUSIVAMENTE en cerámica, azulejos y productos de nuestra tienda.
 
-Sé amable, profesional y conciso. Responde en español.
+REGLAS ESTRICTAS:
+1. SOLO puedes responder preguntas sobre:
+   - Productos de cerámica, azulejos, porcelánico, gres
+   - Precios, stock y disponibilidad de productos
+   - Formatos, acabados, materiales y características técnicas
+   - Recomendaciones de productos para proyectos
+   - Información sobre pedidos y envíos
+   - Horarios y contacto de SPHERA TILE
+
+2. Si el usuario pregunta sobre CUALQUIER otro tema (política, deportes, recetas, programación, matemáticas, historia, etc.):
+   - Responde amablemente: "Lo siento, soy el asistente de SPHERA TILE y solo puedo ayudarte con temas relacionados con cerámica y nuestros productos. ¿Puedo ayudarte a encontrar algún producto?"
+
+3. NO generes contenido ofensivo, no des consejos médicos/legales/financieros.
+
+4. Sé amable, profesional y conciso. Responde en el idioma del usuario.
+
+5. Si no tienes información de un producto específico, sugiere contactar por teléfono (+34 633 909 095) o email.
 
 Usuario: ${userName} (${isAdmin ? 'Admin' : userId ? 'Cliente' : 'Visitante'})
 ${productContext}`

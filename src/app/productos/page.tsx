@@ -335,7 +335,7 @@ function ProductosContent() {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex lg:max-w-7xl lg:mx-auto">
+      <div className="flex lg:max-w-7xl lg:mx-auto lg:gap-8">
         {/* Sidebar de filtros (desktop) */}
         <aside className="hidden lg:block w-72 flex-shrink-0 border-r border-neutral-100 min-h-[calc(100vh-12rem)]">
           <div className="sticky top-28 p-6">

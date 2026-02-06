@@ -52,6 +52,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
+  // Poll for changes every 5 seconds when page is visible
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchChatEnabled()
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
+
   const openChat = () => setIsOpen(true)
   const closeChat = () => setIsOpen(false)
   const toggleChat = () => setIsOpen(prev => !prev)

@@ -154,7 +154,13 @@
     "qrCode": "QR Code",
     "qrCodeDescription": "Scan to access this product",
     "qrCodeClickToExpand": "Click to enlarge",
-    "relatedProducts": "Related products"
+    "relatedProducts": "Related products",
+    "sameSeries": "Same series",
+    "noStockAvailable": "No stock available",
+    "box": "box",
+    "m2PerBox": "m²/box",
+    "minimum": "Minimum",
+    "availableStock": "Available"
   },
   "cart": {
     "title": "Cart",
@@ -337,6 +343,7 @@
     "invoicesTitle": "Invoices",
     "invoicesDesc": "Invoices also include QR codes to facilitate reorders",
     "showroom": "Showroom",
-    "showroomName": "SPHERA TILE Exhibition"
+    "showroomName": "SPHERA TILE Exhibition",
+    "scanButton": "Scan QR"
   }
 }

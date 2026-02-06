@@ -115,6 +115,16 @@ const mapFromDBValue = (key: string, value: string): string => {
   return maps[key]?.[value] || value
 }
 
+interface Facets {
+  calidad: Record<string, number>
+  materia_prima: Record<string, number>
+  aspecto: Record<string, number>
+  acabado: Record<string, number>
+  tipo_pieza: Record<string, number>
+  uso: Record<string, number>
+  estado_producto: Record<string, number>
+}
+
 function ProductosContent() {
   const searchParams = useSearchParams()
   const t = useTranslations('products')
@@ -127,6 +137,7 @@ function ProductosContent() {
   const [productos, setProductos] = useState<Producto[]>([])
   const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
+  const [facets, setFacets] = useState<Facets | undefined>(undefined)
 
   // Leer filtros de la URL al cargar
   useEffect(() => {
@@ -204,6 +215,9 @@ function ProductosContent() {
 
       setProductos(productosNormalizados)
       setTotal(data.pagination.total)
+      if (data.facets) {
+        setFacets(data.facets)
+      }
     } catch (error) {
       console.error('Error fetching productos:', error)
     } finally {
@@ -341,6 +355,7 @@ function ProductosContent() {
               onClose={() => {}}
               filtros={filtrosActivos}
               onFiltrosChange={setFiltrosActivos}
+              facets={facets}
             />
           </div>
         </aside>
@@ -394,6 +409,7 @@ function ProductosContent() {
           onClose={() => setMostrarFiltros(false)}
           filtros={filtrosActivos}
           onFiltrosChange={setFiltrosActivos}
+          facets={facets}
         />
       </div>
     </div>

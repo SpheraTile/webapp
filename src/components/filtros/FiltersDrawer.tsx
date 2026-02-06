@@ -24,11 +24,22 @@ interface FiltrosActivos {
   estado_producto: string[]
 }
 
+interface Facets {
+  calidad: Record<string, number>
+  materia_prima: Record<string, number>
+  aspecto: Record<string, number>
+  acabado: Record<string, number>
+  tipo_pieza: Record<string, number>
+  uso: Record<string, number>
+  estado_producto: Record<string, number>
+}
+
 interface FiltersDrawerProps {
   isOpen: boolean
   onClose: () => void
   filtros: FiltrosActivos
   onFiltrosChange: (filtros: FiltrosActivos) => void
+  facets?: Facets
 }
 
 // Translation keys for filter labels
@@ -79,9 +90,16 @@ export function FiltersDrawer({
   onClose,
   filtros,
   onFiltrosChange,
+  facets,
 }: FiltersDrawerProps) {
   const t = useTranslations('filters')
   const tCommon = useTranslations('common')
+
+  // Helper to get count for a filter value
+  const getCount = (category: keyof Facets, value: string): number | undefined => {
+    if (!facets) return undefined
+    return facets[category]?.[value] ?? 0
+  }
 
   const toggleFiltro = (
     categoria: keyof FiltrosActivos,
@@ -149,12 +167,13 @@ export function FiltersDrawer({
         <div className="overflow-y-auto h-[calc(100%-140px)] lg:h-auto p-4 lg:p-0">
           {/* Calidad */}
           <FilterSection titulo={t('quality')} defaultOpen>
-            {OPCIONES_CALIDAD.map((calidad) => (
+            {OPCIONES_CALIDAD.map((cal) => (
               <FilterCheckbox
-                key={calidad}
-                label={calidad}
-                checked={filtros.calidad.includes(calidad)}
-                onChange={() => toggleFiltro('calidad', calidad)}
+                key={cal}
+                label={cal}
+                checked={filtros.calidad.includes(cal)}
+                onChange={() => toggleFiltro('calidad', cal)}
+                count={getCount('calidad', cal)}
               />
             ))}
           </FilterSection>
@@ -167,18 +186,20 @@ export function FiltersDrawer({
                 label={t(LABELS_TIPO_PIEZA[tipo])}
                 checked={filtros.tipo_pieza.includes(tipo)}
                 onChange={() => toggleFiltro('tipo_pieza', tipo)}
+                count={getCount('tipo_pieza', tipo.toUpperCase())}
               />
             ))}
           </FilterSection>
 
           {/* Uso */}
           <FilterSection titulo={t('use')}>
-            {OPCIONES_USO.map((uso) => (
+            {OPCIONES_USO.map((u) => (
               <FilterCheckbox
-                key={uso}
-                label={t(LABELS_USO[uso])}
-                checked={filtros.uso.includes(uso)}
-                onChange={() => toggleFiltro('uso', uso)}
+                key={u}
+                label={t(LABELS_USO[u])}
+                checked={filtros.uso.includes(u)}
+                onChange={() => toggleFiltro('uso', u)}
+                count={getCount('uso', u.toUpperCase())}
               />
             ))}
           </FilterSection>
@@ -191,6 +212,7 @@ export function FiltersDrawer({
                 label={t(LABELS_ESTADO_PRODUCTO[estado])}
                 checked={filtros.estado_producto.includes(estado)}
                 onChange={() => toggleFiltro('estado_producto', estado)}
+                count={getCount('estado_producto', estado.toUpperCase())}
               />
             ))}
           </FilterSection>
@@ -203,30 +225,33 @@ export function FiltersDrawer({
                 label={t(LABELS_MATERIA_PRIMA[materia])}
                 checked={filtros.materia_prima.includes(materia)}
                 onChange={() => toggleFiltro('materia_prima', materia)}
+                count={getCount('materia_prima', materia.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}
               />
             ))}
           </FilterSection>
 
           {/* Aspecto */}
           <FilterSection titulo={t('aspect')}>
-            {OPCIONES_ASPECTO.map((aspecto) => (
+            {OPCIONES_ASPECTO.map((asp) => (
               <FilterCheckbox
-                key={aspecto}
-                label={t(LABELS_ASPECTO[aspecto])}
-                checked={filtros.aspecto.includes(aspecto)}
-                onChange={() => toggleFiltro('aspecto', aspecto)}
+                key={asp}
+                label={t(LABELS_ASPECTO[asp])}
+                checked={filtros.aspecto.includes(asp)}
+                onChange={() => toggleFiltro('aspecto', asp)}
+                count={getCount('aspecto', asp.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}
               />
             ))}
           </FilterSection>
 
           {/* Acabado */}
           <FilterSection titulo={t('finish')}>
-            {OPCIONES_ACABADO.map((acabado) => (
+            {OPCIONES_ACABADO.map((acab) => (
               <FilterCheckbox
-                key={acabado}
-                label={t(LABELS_ACABADO[acabado])}
-                checked={filtros.acabado.includes(acabado)}
-                onChange={() => toggleFiltro('acabado', acabado)}
+                key={acab}
+                label={t(LABELS_ACABADO[acab])}
+                checked={filtros.acabado.includes(acab)}
+                onChange={() => toggleFiltro('acabado', acab)}
+                count={getCount('acabado', acab.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}
               />
             ))}
           </FilterSection>

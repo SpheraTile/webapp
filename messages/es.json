@@ -154,7 +154,13 @@
     "qrCode": "Código QR",
     "qrCodeDescription": "Escanea para acceder a este producto",
     "qrCodeClickToExpand": "Clic para ampliar",
-    "relatedProducts": "Productos relacionados"
+    "relatedProducts": "Productos relacionados",
+    "sameSeries": "Misma serie",
+    "noStockAvailable": "Sin stock disponible",
+    "box": "caja",
+    "m2PerBox": "m²/caja",
+    "minimum": "Mínimo",
+    "availableStock": "Disponible"
   },
   "cart": {
     "title": "Cesta",
@@ -337,6 +343,7 @@
     "invoicesTitle": "Facturas",
     "invoicesDesc": "Las facturas también incluyen códigos QR para facilitar las reposiciones",
     "showroom": "Showroom",
-    "showroomName": "Exposición SPHERA TILE"
+    "showroomName": "Exposición SPHERA TILE",
+    "scanButton": "Escanear QR"
   }
 }

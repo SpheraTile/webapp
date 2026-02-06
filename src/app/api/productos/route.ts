@@ -78,6 +78,7 @@ export async function GET(request: NextRequest) {
       where.stock_m2 = { gt: 0 }
     }
 
+    // Get products and total count
     const [productos, total] = await Promise.all([
       prisma.producto.findMany({
         where,
@@ -88,6 +89,103 @@ export async function GET(request: NextRequest) {
       prisma.producto.count({ where }),
     ])
 
+    // Calculate facets (counts for each filter option)
+    // We need to count products for each filter value, considering OTHER active filters
+    const calculateFacets = async () => {
+      // Build base where without each specific filter to get counts
+      const baseWhere: Prisma.ProductoWhereInput = {}
+
+      if (busqueda) {
+        baseWhere.OR = [
+          { nombre: { contains: busqueda, mode: 'insensitive' } },
+          { referencia: { contains: busqueda, mode: 'insensitive' } },
+          { serie: { contains: busqueda, mode: 'insensitive' } },
+        ]
+      }
+
+      if (precio_min) {
+        baseWhere.precio_m2 = { ...baseWhere.precio_m2 as any, gte: parseFloat(precio_min) }
+      }
+      if (precio_max) {
+        baseWhere.precio_m2 = { ...baseWhere.precio_m2 as any, lte: parseFloat(precio_max) }
+      }
+      if (solo_con_stock === 'true') {
+        baseWhere.stock_m2 = { gt: 0 }
+      }
+
+      // Helper to build where with all filters except one
+      const buildWhereExcept = (exclude: string): Prisma.ProductoWhereInput => {
+        const w: Prisma.ProductoWhereInput = { ...baseWhere }
+        if (exclude !== 'calidad' && calidad.length > 0) w.calidad = { in: calidad as any[] }
+        if (exclude !== 'materia_prima' && materia_prima.length > 0) w.materia_prima = { in: materia_prima as any[] }
+        if (exclude !== 'aspecto' && aspecto.length > 0) w.aspecto = { in: aspecto as any[] }
+        if (exclude !== 'acabado' && acabado.length > 0) w.acabado = { in: acabado as any[] }
+        if (exclude !== 'tipo_pieza' && tipo_pieza.length > 0) w.tipo_pieza = { in: tipo_pieza as any[] }
+        if (exclude !== 'uso' && uso.length > 0) w.uso = { in: uso as any[] }
+        if (exclude !== 'estado_producto' && estado_producto.length > 0) w.estado_producto = { in: estado_producto as any[] }
+        return w
+      }
+
+      // Get counts for each facet category
+      const [
+        calidadCounts,
+        materiaPrimaCounts,
+        aspectoCounts,
+        acabadoCounts,
+        tipoPiezaCounts,
+        usoCounts,
+        estadoProductoCounts,
+      ] = await Promise.all([
+        prisma.producto.groupBy({
+          by: ['calidad'],
+          where: buildWhereExcept('calidad'),
+          _count: { calidad: true },
+        }),
+        prisma.producto.groupBy({
+          by: ['materia_prima'],
+          where: buildWhereExcept('materia_prima'),
+          _count: { materia_prima: true },
+        }),
+        prisma.producto.groupBy({
+          by: ['aspecto'],
+          where: buildWhereExcept('aspecto'),
+          _count: { aspecto: true },
+        }),
+        prisma.producto.groupBy({
+          by: ['acabado'],
+          where: buildWhereExcept('acabado'),
+          _count: { acabado: true },
+        }),
+        prisma.producto.groupBy({
+          by: ['tipo_pieza'],
+          where: buildWhereExcept('tipo_pieza'),
+          _count: { tipo_pieza: true },
+        }),
+        prisma.producto.groupBy({
+          by: ['uso'],
+          where: buildWhereExcept('uso'),
+          _count: { uso: true },
+        }),
+        prisma.producto.groupBy({
+          by: ['estado_producto'],
+          where: buildWhereExcept('estado_producto'),
+          _count: { estado_producto: true },
+        }),
+      ])
+
+      return {
+        calidad: Object.fromEntries(calidadCounts.map(c => [c.calidad, c._count.calidad])),
+        materia_prima: Object.fromEntries(materiaPrimaCounts.map(c => [c.materia_prima, c._count.materia_prima])),
+        aspecto: Object.fromEntries(aspectoCounts.map(c => [c.aspecto, c._count.aspecto])),
+        acabado: Object.fromEntries(acabadoCounts.map(c => [c.acabado, c._count.acabado])),
+        tipo_pieza: Object.fromEntries(tipoPiezaCounts.map(c => [c.tipo_pieza, c._count.tipo_pieza])),
+        uso: Object.fromEntries(usoCounts.map(c => [c.uso, c._count.uso])),
+        estado_producto: Object.fromEntries(estadoProductoCounts.map(c => [c.estado_producto, c._count.estado_producto])),
+      }
+    }
+
+    const facets = await calculateFacets()
+
     return NextResponse.json({
       productos,
       pagination: {
@@ -96,6 +194,7 @@ export async function GET(request: NextRequest) {
         total,
         totalPages: Math.ceil(total / limit),
       },
+      facets,
     })
   } catch (error) {
     console.error('Error fetching productos:', error)

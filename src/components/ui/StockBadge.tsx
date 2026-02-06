@@ -1,3 +1,6 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
 import { IconStock } from './Icons'
 
 interface StockBadgeProps {
@@ -7,6 +10,7 @@ interface StockBadgeProps {
 }
 
 export function StockBadge({ stock_m2, m2_caja, className = '' }: StockBadgeProps) {
+  const t = useTranslations('products')
   const stockFormateado = stock_m2.toLocaleString('es-ES', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
@@ -34,10 +38,10 @@ export function StockBadge({ stock_m2, m2_caja, className = '' }: StockBadgeProp
       <IconStock size={16} />
       <span>
         {sinStock
-          ? 'Sin stock'
+          ? t('outOfStock')
           : cajasDisponibles !== null
-            ? `Disponible: ${stockFormateado} m² (${cajasDisponibles} cajas)`
-            : `Disponible: ${stockFormateado} m²`
+            ? `${t('availableStock')}: ${stockFormateado} m² (${cajasDisponibles} ${t('boxes')})`
+            : `${t('availableStock')}: ${stockFormateado} m²`
         }
       </span>
     </div>

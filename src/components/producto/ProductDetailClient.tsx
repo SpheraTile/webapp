@@ -136,6 +136,7 @@ function RelatedProducts({ currentProduct }: { currentProduct: Producto }) {
   const [related, setRelated] = useState<Producto[]>([])
   const [loading, setLoading] = useState(true)
   const t = useTranslations('products')
+  const sameSeries = t('sameSeries')
 
   useEffect(() => {
     const fetchRelated = async () => {
@@ -222,7 +223,7 @@ function RelatedProducts({ currentProduct }: { currentProduct: Producto }) {
               />
               {producto.serie === currentProduct.serie && (
                 <span className="absolute top-2 left-2 px-2 py-1 bg-primary-600 text-white text-xs font-medium rounded">
-                  Misma serie
+                  {sameSeries}
                 </span>
               )}
             </div>

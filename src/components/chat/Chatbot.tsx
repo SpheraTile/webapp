@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import { useTranslations } from 'next-intl'
+import { useSession } from 'next-auth/react'
 import { Send, X, MessageCircle, Loader2, Bot, User, Package, ShoppingCart, Phone } from 'lucide-react'
 import { useChat } from '@/context/ChatContext'
 
@@ -17,6 +18,7 @@ const CONTACT_WHATSAPP = '34633909095'
 
 export default function Chatbot() {
   const { isOpen, toggleChat, closeChat, isEnabled } = useChat()
+  const { data: session } = useSession()
   const t = useTranslations('chat')
 
   // All hooks must be declared before any conditional returns
@@ -29,8 +31,14 @@ export default function Chatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Get user's first name for personalized greeting
+  const userName = session?.user?.name?.split(' ')[0] || null
+
   // Get welcome message content from translations
-  const welcomeMessage = t('welcomeMessage')
+  const baseWelcomeMessage = t('welcomeMessage')
+  const welcomeMessage = userName
+    ? `¡Hola ${userName}! ${baseWelcomeMessage.replace(/^¡Hola!?\s*/i, '')}`
+    : baseWelcomeMessage
 
   // Initialize messages with translated welcome message
   useEffect(() => {

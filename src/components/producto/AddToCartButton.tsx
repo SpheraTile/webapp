@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Producto } from '@/types'
 import { useCesta } from '@/context/CestaContext'
 import { IconPlus, IconMinus, IconCart } from '@/components/ui/Icons'
@@ -11,6 +12,7 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ producto, className = '' }: AddToCartButtonProps) {
+  const t = useTranslations('products')
   const { agregarItem, items } = useCesta()
 
   // Calcular mínimo en cajas (redondeando hacia arriba)
@@ -61,7 +63,7 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
         disabled
         className={`btn-secondary opacity-50 cursor-not-allowed w-full ${className}`}
       >
-        Sin stock disponible
+        {t('noStockAvailable')}
       </button>
     )
   }
@@ -94,7 +96,7 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
             max={stockDisponibleCajas}
             step={1}
           />
-          <span className="text-neutral-500">cajas</span>
+          <span className="text-neutral-500">{t('boxes')}</span>
         </div>
 
         <button
@@ -109,17 +111,17 @@ export function AddToCartButton({ producto, className = '' }: AddToCartButtonPro
       {/* Info de m² calculados */}
       <div className="text-sm text-center space-y-1">
         <p className="text-neutral-700 font-medium">
-          = {m2Calculado.toFixed(2)} m² ({producto.m2_caja} m²/caja)
+          = {m2Calculado.toFixed(2)} m² ({producto.m2_caja} {t('m2PerBox')})
         </p>
         <p className="text-neutral-500">
-          Mínimo: {minimoCajas} {minimoCajas === 1 ? 'caja' : 'cajas'} ({minimoM2.toFixed(2)} m²) · Disponible: {stockDisponibleCajas} cajas ({stockDisponibleM2.toFixed(2)} m²)
+          {t('minimum')}: {minimoCajas} {minimoCajas === 1 ? t('box') : t('boxes')} ({minimoM2.toFixed(2)} m²) · {t('availableStock')}: {stockDisponibleCajas} {t('boxes')} ({stockDisponibleM2.toFixed(2)} m²)
         </p>
       </div>
 
       {/* Botón agregar */}
       <button onClick={handleAgregar} className="btn-primary w-full flex items-center justify-center gap-2">
         <IconCart size={20} />
-        <span>Añadir a la cesta</span>
+        <span>{t('addToCart')}</span>
         <span className="text-primary-200">
           ({(m2Calculado * producto.precio_m2).toFixed(2)}€)
         </span>

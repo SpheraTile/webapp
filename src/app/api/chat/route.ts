@@ -105,12 +105,75 @@ export async function POST(request: NextRequest) {
 
     // Prepare context based on user query
     let productContext = ''
+    let ordersContext = ''
+    let userContext = ''
+
+    // Build user context
+    if (userId) {
+      // Get user details
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { nombre: true, email: true, empresa: true, telefono: true }
+      })
+
+      if (user) {
+        userContext = `\n**INFORMACIÓN DEL USUARIO:**
+- Nombre: ${user.nombre || userName}
+- Email: ${user.email}
+${user.empresa ? `- Empresa: ${user.empresa}` : ''}
+${user.telefono ? `- Teléfono: ${user.telefono}` : ''}`
+      }
+
+      // Check if user is asking about orders
+      const ordersKeywords = ['pedido', 'pedidos', 'orden', 'ordenes', 'compra', 'compras', 'historial', 'mis pedidos', 'estado']
+      const wantsOrders = ordersKeywords.some(kw => userQuery.includes(kw))
+
+      if (wantsOrders) {
+        const orders = await prisma.pedido.findMany({
+          where: { userId: userId },
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            items: {
+              include: {
+                producto: {
+                  select: { nombre: true, referencia: true }
+                }
+              }
+            }
+          }
+        })
+
+        if (orders.length > 0) {
+          ordersContext = `\n\n**PEDIDOS DEL USUARIO:**\n${orders.map(o => {
+            const estadoLabel: Record<string, string> = {
+              'PENDIENTE': 'Pendiente',
+              'CONFIRMADO': 'Confirmado',
+              'PREPARANDO': 'Preparando',
+              'ENVIADO': 'Enviado',
+              'ENTREGADO': 'Entregado',
+              'CANCELADO': 'Cancelado'
+            }
+
+            const itemsStr = o.items.slice(0, 3).map((i: { producto: { nombre: string }; cantidad_cajas: number }) =>
+              `  - ${i.producto.nombre} (${i.cantidad_cajas} cajas)`
+            ).join('\n')
+
+            return `- **Pedido #${o.numero_pedido}** (${new Date(o.createdAt).toLocaleDateString('es-ES')})
+  Estado: ${estadoLabel[o.estado] || o.estado} | Total: ${o.total_euros.toFixed(2)}€
+${itemsStr}${o.items.length > 3 ? `\n  ... y ${o.items.length - 3} productos más` : ''}`
+          }).join('\n\n')}`
+        } else {
+          ordersContext = '\n\n**PEDIDOS DEL USUARIO:** No tiene pedidos todavía.'
+        }
+      }
+    }
 
     // Search for products if query seems product-related
     const productKeywords = ['producto', 'cerámica', 'azulejo', 'porcelánico', 'gres', 'madera',
       'mármol', 'piedra', 'mate', 'pulido', 'antideslizante', 'suelo', 'pared', 'baño',
       'cocina', 'exterior', 'precio', 'stock', 'busco', 'necesito', 'quiero', 'tienes',
-      'muestra', 'muéstrame', 'ver', 'disponible']
+      'muestra', 'muéstrame', 'ver', 'disponible', 'recomienda', 'recomendación']
 
     const wantsProducts = productKeywords.some(kw => userQuery.includes(kw))
 
@@ -144,28 +207,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Build system prompt
-    const systemPrompt = `Eres el asistente virtual de SPHERA TILE, especializado EXCLUSIVAMENTE en cerámica, azulejos y productos de nuestra tienda.
+    const systemPrompt = `Eres el asistente virtual de SPHERA TILE, una tienda especializada en cerámica, azulejos, porcelánico y gres de alta calidad para profesionales.
 
-REGLAS ESTRICTAS:
-1. SOLO puedes responder preguntas sobre:
-   - Productos de cerámica, azulejos, porcelánico, gres
-   - Precios, stock y disponibilidad de productos
-   - Formatos, acabados, materiales y características técnicas
-   - Recomendaciones de productos para proyectos
-   - Información sobre pedidos y envíos
-   - Horarios y contacto de SPHERA TILE
+SOBRE TI:
+- Eres amable, profesional y servicial
+- Ayudas con productos, pedidos, recomendaciones y cualquier consulta relacionada con SPHERA TILE
+- Respondes en el mismo idioma que usa el usuario
+- Sé conciso pero completo en tus respuestas
 
-2. Si el usuario pregunta sobre CUALQUIER otro tema (política, deportes, recetas, programación, matemáticas, historia, etc.):
-   - Responde amablemente: "Lo siento, soy el asistente de SPHERA TILE y solo puedo ayudarte con temas relacionados con cerámica y nuestros productos. ¿Puedo ayudarte a encontrar algún producto?"
+PUEDES AYUDAR CON:
+- Buscar y recomendar productos de cerámica
+- Consultar precios, stock y disponibilidad
+- Información sobre pedidos del usuario (si está logueado)
+- Características técnicas de productos
+- Consejos para proyectos de reforma o decoración
+- Información de contacto y horarios
+- Dudas sobre envíos y entregas
+- Calcular cuántas cajas necesita para ciertos m²
 
-3. NO generes contenido ofensivo, no des consejos médicos/legales/financieros.
+INFORMACIÓN DE CONTACTO:
+- Teléfono: +34 633 909 095
+- Horario: Lunes a Viernes 8:00 - 18:00
+- Dirección: Avenida Del Mediterráneo 113, 12200 Onda, Castellón
 
-4. Sé amable, profesional y conciso. Responde en el idioma del usuario.
+${userId ? `**USUARIO IDENTIFICADO:** ${userName}${isAdmin ? ' (Administrador)' : ' (Cliente registrado)'}` : '**VISITANTE:** No ha iniciado sesión'}
+${userContext}${ordersContext}${productContext}
 
-5. Si no tienes información de un producto específico, sugiere contactar por teléfono (+34 633 909 095) o email.
-
-Usuario: ${userName} (${isAdmin ? 'Admin' : userId ? 'Cliente' : 'Visitante'})
-${productContext}`
+Si el usuario pregunta sobre temas completamente ajenos a cerámica/construcción/decoración, redirige amablemente la conversación hacia cómo puedes ayudarle con productos o proyectos.`
 
     // Call OpenAI API with streaming
     const stream = await openai.chat.completions.create({

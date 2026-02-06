@@ -1,20 +1,27 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
+import { Camera } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
 import { DesktopNav } from '@/components/layout/DesktopNav'
 import { IconQR } from '@/components/ui/Icons'
 import { QRCode } from '@/components/ui/QRCode'
+import { QRScanner } from '@/components/ui/QRScanner'
 
 export default function CeramotecaPage() {
   const t = useTranslations('ceramoteca')
+  const [showScanner, setShowScanner] = useState(false)
 
   // URL del showroom/exposición en Google Maps
   const showroomUrl = 'https://maps.google.com/?q=Avenida+Del+Mediterráneo+113,+12200+Onda,+Castellón,+Spain'
 
   return (
     <div className="min-h-screen bg-white lg:bg-neutral-50">
+      {/* QR Scanner Modal */}
+      <QRScanner isOpen={showScanner} onClose={() => setShowScanner(false)} />
+
       <DesktopNav />
       <div className="lg:hidden">
         <Header titulo={t('title')} />
@@ -45,9 +52,18 @@ export default function CeramotecaPage() {
           <h2 className="text-xl font-semibold text-neutral-900 mb-2">
             {t('title')}
           </h2>
-          <p className="text-neutral-600 text-sm">
+          <p className="text-neutral-600 text-sm mb-6">
             {t('mobileSubtitle')}
           </p>
+
+          {/* Scan button */}
+          <button
+            onClick={() => setShowScanner(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-full font-semibold hover:bg-primary-700 active:scale-95 transition-all"
+          >
+            <Camera className="w-5 h-5" />
+            {t('scanButton')}
+          </button>
         </div>
 
         {/* Steps mobile */}

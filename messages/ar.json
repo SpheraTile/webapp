@@ -154,7 +154,13 @@
     "qrCode": "رمز QR",
     "qrCodeDescription": "امسح للوصول إلى هذا المنتج",
     "qrCodeClickToExpand": "انقر للتكبير",
-    "relatedProducts": "منتجات ذات صلة"
+    "relatedProducts": "منتجات ذات صلة",
+    "sameSeries": "نفس السلسلة",
+    "noStockAvailable": "غير متوفر في المخزون",
+    "box": "صندوق",
+    "m2PerBox": "م²/صندوق",
+    "minimum": "الحد الأدنى",
+    "availableStock": "متاح"
   },
   "cart": {
     "title": "السلة",
@@ -337,6 +343,7 @@
     "invoicesTitle": "الفواتير",
     "invoicesDesc": "تتضمن الفواتير أيضاً رموز QR لتسهيل إعادة الطلب",
     "showroom": "صالة العرض",
-    "showroomName": "معرض SPHERA TILE"
+    "showroomName": "معرض SPHERA TILE",
+    "scanButton": "مسح QR"
   }
 }

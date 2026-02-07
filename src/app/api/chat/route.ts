@@ -280,9 +280,13 @@ Si el usuario pregunta sobre temas completamente ajenos a cerámica/construcció
         'Transfer-Encoding': 'chunked',
       },
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in chat API:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    // Extract detailed error info for debugging
+    const err = error as { message?: string; status?: number; statusText?: string; errorDetails?: unknown }
+    const errorMessage = err.message || 'Unknown error'
+    const details = err.errorDetails ? JSON.stringify(err.errorDetails) : undefined
+    console.error('Gemini error details:', { message: errorMessage, status: err.status, details })
     return NextResponse.json({ error: `Error: ${errorMessage}` }, { status: 500 })
   }
 }

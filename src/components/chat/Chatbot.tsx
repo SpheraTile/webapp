@@ -91,7 +91,12 @@ export default function Chatbot() {
         body: JSON.stringify({ messages: updatedMessages }),
       })
 
-      if (!response.ok) throw new Error(t('errorSending'))
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        const serverError = errorData?.error || response.statusText
+        console.error('Chat API error:', response.status, serverError)
+        throw new Error(serverError || t('errorSending'))
+      }
 
       const reader = response.body?.getReader()
       if (!reader) throw new Error('No response body')

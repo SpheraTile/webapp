@@ -26,6 +26,11 @@ export async function GET(
             user: {
               select: {
                 id: true,
+                nombre: true,
+                codigo_cliente: true,
+                pais: true,
+                nif_cif: true,
+                telefono: true,
               },
             },
             items: {
@@ -34,6 +39,11 @@ export async function GET(
                   select: {
                     slug: true,
                     imagen: true,
+                    formato: true,
+                    calidad: true,
+                    hs_code: true,
+                    cajas_palet: true,
+                    peso_caja_kg: true,
                   },
                 },
               },
@@ -60,6 +70,11 @@ export async function GET(
         producto_referencia: item.producto_referencia,
         producto_slug: item.producto?.slug || null,
         producto_imagen: item.producto?.imagen || null,
+        producto_formato: item.producto?.formato || null,
+        producto_calidad: item.producto?.calidad || null,
+        producto_hs_code: item.producto?.hs_code || null,
+        producto_cajas_palet: item.producto?.cajas_palet || null,
+        producto_peso_caja_kg: item.producto?.peso_caja_kg || null,
         cantidad_m2: item.cantidad_m2,
         cantidad_cajas: item.cantidad_cajas,
         precio_m2: item.precio_m2,
@@ -75,6 +90,13 @@ export async function GET(
       pedido: {
         id: pedido.id,
         numero_pedido: pedido.numero_pedido,
+        user: {
+          nombre: pedido.user.nombre,
+          codigo_cliente: pedido.user.codigo_cliente,
+          pais: pedido.user.pais,
+          nif_cif: pedido.user.nif_cif,
+          telefono: pedido.user.telefono,
+        },
       },
     }
 

@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ShareActions } from '@/components/ui/ShareActions'
-import { ProductQRCode } from '@/components/ui/QRCode'
+import { ProformaDocument } from '@/components/ui/ProformaDocument'
+import type { ProformaItem } from '@/components/ui/ProformaDocument'
 
 interface ItemFactura {
   id: string
@@ -12,6 +13,11 @@ interface ItemFactura {
   producto_referencia: string
   producto_slug: string | null
   producto_imagen: string | null
+  producto_formato?: string | null
+  producto_calidad?: string | null
+  producto_hs_code?: string | null
+  producto_cajas_palet?: number | null
+  producto_peso_caja_kg?: number | null
   cantidad_m2: number
   cantidad_cajas: number
   precio_m2: number
@@ -46,17 +52,20 @@ interface Factura {
       ciudad: string | null
       provincia: string | null
       codigo_postal: string | null
+      codigo_cliente?: string | null
+      pais?: string | null
     }
   }
 }
 
 const ESTADOS_FACTURA = ['BORRADOR', 'EMITIDA', 'PAGADA', 'VENCIDA', 'ANULADA']
 const METODOS_PAGO: Record<string, string> = {
-  TRANSFERENCIA: 'Transferencia bancaria',
-  TARJETA: 'Tarjeta de crédito/débito',
-  EFECTIVO: 'Efectivo',
-  PAGARE: 'Pagaré',
-  DOMICILIACION: 'Domiciliación bancaria',
+  TRANSFERENCIA: 'TRANSFERENCIA BANCARIA',
+  TARJETA: 'TARJETA',
+  EFECTIVO: 'EFECTIVO',
+  PAGARE: 'PAGARÉ',
+  DOMICILIACION: 'DOMICILIACIÓN BANCARIA',
+  PAGO_ANTICIPADO: 'PAGO ANTICIPADO',
 }
 
 function formatCurrency(amount: number): string {
@@ -85,6 +94,28 @@ function EstadoBadge({ estado }: { estado: string }) {
       {label}
     </span>
   )
+}
+
+function mapItemsToProforma(items: ItemFactura[]): ProformaItem[] {
+  return items.map((item) => ({
+    formato: item.producto_formato || '-',
+    descripcion: `${item.producto_nombre} (Ref: ${item.producto_referencia})`,
+    calidad: item.producto_calidad === 'COM' ? 'COM' : item.producto_calidad === 'PRIMERA' ? '1ª' : '-',
+    m2: item.cantidad_m2,
+    cajas: item.cantidad_cajas,
+    pallets: item.producto_cajas_palet ? item.cantidad_cajas / item.producto_cajas_palet : 0,
+    precioM2: item.precio_m2,
+    importe: item.subtotal,
+    qrSlug: item.producto_slug,
+    hsCode: item.producto_hs_code || null,
+  }))
+}
+
+function calcWeight(items: ItemFactura[]): { net: number; gross: number } {
+  const net = items.reduce((sum, item) => {
+    return sum + (item.cantidad_cajas * (item.producto_peso_caja_kg || 25))
+  }, 0)
+  return { net, gross: Math.ceil(net * 1.02) }
 }
 
 export default function FacturaDetallePage() {
@@ -205,22 +236,6 @@ export default function FacturaDetallePage() {
     }
   }
 
-  // Calcular totales temporales cuando se editan precios
-  const subtotalTemp = editandoPrecios && factura
-    ? factura.items.reduce((sum, item) => {
-        const precio = preciosEditados[item.id] ?? item.precio_m2
-        return sum + (item.cantidad_m2 * precio)
-      }, 0)
-    : null
-
-  const ivaTemp = subtotalTemp !== null && factura
-    ? subtotalTemp * (factura.iva_porcentaje / 100)
-    : null
-
-  const totalTemp = subtotalTemp !== null && ivaTemp !== null
-    ? subtotalTemp + ivaTemp
-    : null
-
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
@@ -240,6 +255,9 @@ export default function FacturaDetallePage() {
   const diasHastaVencimiento = Math.ceil(
     (new Date(factura.fecha_vencimiento).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   )
+
+  const proformaItems = mapItemsToProforma(factura.items)
+  const weight = calcWeight(factura.items)
 
   return (
     <div className="p-4 lg:p-8 max-w-4xl mx-auto">
@@ -270,7 +288,6 @@ export default function FacturaDetallePage() {
           />
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 lg:gap-4">
-            {/* Botón marcar como pagada */}
             {factura.estado === 'EMITIDA' && (
               <button
                 onClick={handleMarcarPagada}
@@ -280,7 +297,6 @@ export default function FacturaDetallePage() {
               </button>
             )}
 
-            {/* Selector de estado */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-neutral-500 hidden sm:inline">Estado:</span>
               <select
@@ -312,281 +328,98 @@ export default function FacturaDetallePage() {
         </div>
       )}
 
-      {/* Documento imprimible */}
-      <div ref={printRef} className="bg-white rounded-xl shadow-sm overflow-hidden print:shadow-none">
-        {/* Cabecera del documento */}
-        <div className="p-4 lg:p-6 border-b border-neutral-200 print:border-black">
-          <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
-            <div>
-              <h2 className="text-xl lg:text-2xl font-bold text-neutral-900">FACTURA</h2>
-              <p className="text-base lg:text-lg font-medium text-primary-600">{factura.numero_factura}</p>
-              <div className="mt-2 text-xs lg:text-sm">
-                <p><span className="text-neutral-500">Fecha emisión:</span> {formatDate(factura.createdAt)}</p>
-                <p><span className="text-neutral-500">Fecha vencimiento:</span> {formatDate(factura.fecha_vencimiento)}</p>
-                {factura.fecha_pago && (
-                  <p><span className="text-neutral-500">Fecha pago:</span> {formatDate(factura.fecha_pago)}</p>
-                )}
-              </div>
-            </div>
-            <div className="sm:text-right">
-              <p className="font-bold text-base lg:text-lg">SPHERA TILE S.L.</p>
-              <p className="text-xs lg:text-sm text-neutral-500">CIF: B12345678</p>
-              <p className="text-xs lg:text-sm text-neutral-500">Av. Del Mediterráneo 113</p>
-              <p className="text-xs lg:text-sm text-neutral-500">12200 Onda, Castellón</p>
-              <p className="text-xs lg:text-sm text-neutral-500">Tel: +34 633 909 095</p>
-              <p className="text-xs lg:text-sm text-neutral-500">info@spheratile.es</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Datos del cliente */}
-        <div className="p-4 lg:p-6 border-b border-neutral-200 bg-neutral-50">
-          <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-3">DATOS DEL CLIENTE</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
-            <div className="text-sm lg:text-base">
-              <p className="font-medium text-neutral-900">{factura.pedido.user.nombre}</p>
-              {factura.pedido.user.empresa && (
-                <p className="text-neutral-700">{factura.pedido.user.empresa}</p>
-              )}
-              {factura.pedido.user.nif_cif && (
-                <p className="text-neutral-700">NIF/CIF: {factura.pedido.user.nif_cif}</p>
-              )}
-            </div>
-            <div className="text-sm lg:text-base">
-              <p className="text-neutral-700 whitespace-pre-line">{factura.direccion_facturacion}</p>
-              <p className="text-neutral-500 mt-2">{factura.pedido.user.email}</p>
-              {factura.pedido.user.telefono && (
-                <p className="text-neutral-500">Tel: {factura.pedido.user.telefono}</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Detalle de la factura */}
-        <div className="p-4 lg:p-6">
+      {/* Editar precios (fuera del PDF) */}
+      {editandoPrecios && (
+        <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6 mb-4 lg:mb-6 print:hidden">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs lg:text-sm font-medium text-neutral-500">DETALLE</h3>
-            {!editandoPrecios ? (
-              <button
-                onClick={iniciarEdicionPrecios}
-                className="text-primary-600 hover:text-primary-700 text-xs lg:text-sm font-medium print:hidden"
-              >
-                Editar precios
+            <h3 className="text-sm font-medium text-neutral-900">Editar precios</h3>
+            <div className="flex items-center gap-2">
+              <button onClick={cancelarEdicionPrecios} className="px-3 py-1 text-sm text-neutral-600 hover:text-neutral-800" disabled={guardando}>
+                Cancelar
               </button>
-            ) : (
-              <div className="flex items-center gap-2 print:hidden">
-                <button
-                  onClick={cancelarEdicionPrecios}
-                  className="px-2 lg:px-3 py-1 text-xs lg:text-sm text-neutral-600 hover:text-neutral-800"
-                  disabled={guardando}
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleGuardarPrecios}
-                  disabled={guardando}
-                  className="px-2 lg:px-3 py-1 bg-primary-600 text-white rounded text-xs lg:text-sm hover:bg-primary-700 disabled:opacity-50"
-                >
-                  {guardando ? 'Guardando...' : 'Guardar'}
-                </button>
-              </div>
-            )}
+              <button onClick={handleGuardarPrecios} disabled={guardando} className="px-3 py-1 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50">
+                {guardando ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
           </div>
-
-          {/* Mobile view - card layout */}
-          <div className="lg:hidden space-y-3">
-            {factura.items.map((item) => {
-              const precioActual = editandoPrecios ? (preciosEditados[item.id] ?? item.precio_m2) : item.precio_m2
-              const subtotalActual = editandoPrecios ? (item.cantidad_m2 * precioActual) : item.subtotal
-              return (
-                <div key={item.id} className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
-                  <div className="flex items-start gap-3 mb-2">
-                    {item.producto_imagen && (
-                      <img
-                        src={item.producto_imagen}
-                        alt={item.producto_nombre}
-                        className="w-12 h-12 object-cover rounded flex-shrink-0"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-neutral-900 text-sm truncate">{item.producto_nombre}</p>
-                      <p className="text-xs text-neutral-500">Ref: {item.producto_referencia}</p>
-                    </div>
-                    {item.producto_slug && (
-                      <ProductQRCode productSlug={item.producto_slug} size={40} expandable />
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div>
-                      <span className="text-neutral-500 block">Cantidad</span>
-                      <span className="font-medium">{item.cantidad_m2.toFixed(2)} m²</span>
-                      <span className="text-neutral-500 block">({item.cantidad_cajas} cajas)</span>
-                    </div>
-                    <div>
-                      <span className="text-neutral-500 block">Precio</span>
-                      {editandoPrecios ? (
-                        <div className="flex items-center gap-1 print:hidden">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={preciosEditados[item.id] ?? item.precio_m2}
-                            onChange={(e) => setPreciosEditados({
-                              ...preciosEditados,
-                              [item.id]: parseFloat(e.target.value) || 0
-                            })}
-                            className="w-16 px-1 py-0.5 border border-neutral-300 rounded text-right text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
-                          />
-                          <span>€</span>
-                        </div>
-                      ) : (
-                        <span className="font-medium">{formatCurrency(item.precio_m2)}€/m²</span>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <span className="text-neutral-500 block">Importe</span>
-                      <span className="font-medium text-primary-600">{formatCurrency(subtotalActual)}€</span>
-                    </div>
-                  </div>
+          <div className="space-y-2">
+            {factura.items.map((item) => (
+              <div key={item.id} className="flex items-center justify-between gap-4 p-2 bg-neutral-50 rounded">
+                <span className="text-sm text-neutral-900 truncate flex-1">{item.producto_nombre}</span>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={preciosEditados[item.id] ?? item.precio_m2}
+                    onChange={(e) => setPreciosEditados({ ...preciosEditados, [item.id]: parseFloat(e.target.value) || 0 })}
+                    className="w-24 px-2 py-1 border border-neutral-300 rounded text-right text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <span className="text-sm text-neutral-500">€/m²</span>
                 </div>
-              )
-            })}
-          </div>
-
-          {/* Desktop view - table layout */}
-          <table className="hidden lg:table w-full">
-            <thead className="bg-neutral-100">
-              <tr>
-                <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Descripción</th>
-                <th className="text-center px-4 py-2 text-xs font-medium text-neutral-500 uppercase">QR</th>
-                <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Cantidad</th>
-                <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Precio unit.</th>
-                <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Importe</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {factura.items.map((item) => {
-                const precioActual = editandoPrecios ? (preciosEditados[item.id] ?? item.precio_m2) : item.precio_m2
-                const subtotalActual = editandoPrecios ? (item.cantidad_m2 * precioActual) : item.subtotal
-                return (
-                  <tr key={item.id}>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        {item.producto_imagen && (
-                          <img
-                            src={item.producto_imagen}
-                            alt={item.producto_nombre}
-                            className="w-10 h-10 object-cover rounded"
-                          />
-                        )}
-                        <div>
-                          <p className="font-medium text-neutral-900">{item.producto_nombre}</p>
-                          <p className="text-sm text-neutral-500">Ref: {item.producto_referencia}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {item.producto_slug && (
-                        <ProductQRCode productSlug={item.producto_slug} size={56} expandable />
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right text-neutral-900">
-                      {item.cantidad_m2.toFixed(2)} m²
-                      <span className="block text-sm text-neutral-500">({item.cantidad_cajas} cajas)</span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-neutral-900">
-                      {editandoPrecios ? (
-                        <div className="flex items-center justify-end gap-1 print:hidden">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={preciosEditados[item.id] ?? item.precio_m2}
-                            onChange={(e) => setPreciosEditados({
-                              ...preciosEditados,
-                              [item.id]: parseFloat(e.target.value) || 0
-                            })}
-                            className="w-20 px-2 py-1 border border-neutral-300 rounded text-right text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          />
-                          <span className="text-sm">€/m²</span>
-                        </div>
-                      ) : (
-                        <span>{formatCurrency(item.precio_m2)}€/m²</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-neutral-900">
-                      {formatCurrency(subtotalActual)}€
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-
-          {/* Totales */}
-          <div className="mt-4 lg:mt-6 flex justify-end">
-            <div className="w-full sm:w-64">
-              <div className="flex justify-between py-2 border-b border-neutral-200 text-sm lg:text-base">
-                <span className="text-neutral-500">Base imponible</span>
-                <span className={`text-neutral-900 ${editandoPrecios && subtotalTemp !== factura.subtotal_euros ? 'text-primary-600 font-medium' : ''}`}>
-                  {formatCurrency(subtotalTemp ?? factura.subtotal_euros)}€
+                <span className="text-sm font-medium w-24 text-right">
+                  {formatCurrency(item.cantidad_m2 * (preciosEditados[item.id] ?? item.precio_m2))}€
                 </span>
               </div>
-              <div className="flex justify-between py-2 border-b border-neutral-200 text-sm lg:text-base">
-                <span className="text-neutral-500">IVA ({factura.iva_porcentaje}%)</span>
-                <span className={`text-neutral-900 ${editandoPrecios && ivaTemp !== factura.iva_euros ? 'text-primary-600 font-medium' : ''}`}>
-                  {formatCurrency(ivaTemp ?? factura.iva_euros)}€
-                </span>
-              </div>
-              <div className="flex justify-between py-3 font-bold text-base lg:text-lg">
-                <span>TOTAL</span>
-                <span className={editandoPrecios && totalTemp !== factura.total_euros ? 'text-primary-600' : ''}>
-                  {formatCurrency(totalTemp ?? factura.total_euros)}€
-                </span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
+      )}
 
-        {/* Información de pago */}
-        <div className="p-4 lg:p-6 border-t border-neutral-200 bg-neutral-50">
-          <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-3">FORMA DE PAGO</h3>
-          <p className="text-neutral-900 text-sm lg:text-base">{METODOS_PAGO[factura.metodo_pago] || factura.metodo_pago}</p>
-          {factura.metodo_pago === 'TRANSFERENCIA' && (
-            <div className="mt-3 p-3 bg-white rounded border border-neutral-200">
-              <p className="text-xs lg:text-sm text-neutral-500">Datos bancarios:</p>
-              <p className="font-mono text-neutral-900 text-xs lg:text-sm break-all">ES12 3456 7890 1234 5678 9012</p>
-              <p className="text-xs lg:text-sm text-neutral-500 mt-1">Concepto: {factura.numero_factura}</p>
-            </div>
-          )}
-          {factura.notas && (
-            <div className="mt-4">
-              <p className="text-xs lg:text-sm text-neutral-500">Notas:</p>
-              <p className="text-neutral-700 text-sm lg:text-base">{factura.notas}</p>
-            </div>
-          )}
+      {!editandoPrecios && (
+        <div className="mb-4 print:hidden">
+          <button onClick={iniciarEdicionPrecios} className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+            Editar precios
+          </button>
         </div>
+      )}
 
-        {/* Pie de página legal */}
-        <div className="p-4 lg:p-6 border-t border-neutral-200 text-[10px] lg:text-xs text-neutral-500 text-center">
-          <p>SPHERA TILE S.L. - CIF: B12345678 - Inscrita en el Registro Mercantil de Castellón</p>
-          <p>Tomo 1234, Libro 567, Folio 89, Sección 8, Hoja CS-12345</p>
-        </div>
+      {/* Documento imprimible (PDF) */}
+      <div ref={printRef} className="bg-white rounded-xl shadow-sm overflow-hidden print:shadow-none">
+        <ProformaDocument
+          type="FACTURA"
+          documentNumber={factura.numero_factura}
+          date={factura.createdAt}
+          client={{
+            codigo: factura.pedido.user.codigo_cliente,
+            nombre: factura.pedido.user.nombre,
+            empresa: factura.pedido.user.empresa,
+            pais: factura.pedido.user.pais,
+            nif: factura.pedido.user.nif_cif,
+            telefono: factura.pedido.user.telefono,
+            direccion: factura.direccion_facturacion,
+          }}
+          items={proformaItems}
+          totals={{
+            totalM2: proformaItems.reduce((s, i) => s + i.m2, 0),
+            totalCajas: proformaItems.reduce((s, i) => s + i.cajas, 0),
+            totalPallets: proformaItems.reduce((s, i) => s + i.pallets, 0),
+            subtotal: factura.subtotal_euros,
+            ivaPorcentaje: factura.iva_porcentaje,
+            ivaEuros: factura.iva_euros,
+            total: factura.total_euros,
+          }}
+          weight={weight}
+          payment={{
+            method: METODOS_PAGO[factura.metodo_pago] || factura.metodo_pago,
+          }}
+          observations={factura.notas || 'MERCANCIA DE ORIGEN ESPAÑOL'}
+        />
+      </div>
 
-        {/* Pedido relacionado */}
-        <div className="p-4 lg:p-6 border-t border-neutral-200 bg-neutral-50 print:hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <p className="text-xs lg:text-sm text-neutral-500">Pedido relacionado</p>
-              <p className="font-medium text-neutral-900 text-sm lg:text-base">{factura.pedido.numero_pedido}</p>
-            </div>
-            <Link
-              href={`/almacen/pedidos/${factura.pedido.id}`}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm text-center"
-            >
-              Ver pedido
-            </Link>
+      {/* Pedido relacionado */}
+      <div className="mt-4 bg-white rounded-xl shadow-sm p-4 lg:p-6 print:hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-xs lg:text-sm text-neutral-500">Pedido relacionado</p>
+            <p className="font-medium text-neutral-900 text-sm lg:text-base">{factura.pedido.numero_pedido}</p>
           </div>
+          <Link
+            href={`/almacen/pedidos/${factura.pedido.id}`}
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm text-center"
+          >
+            Ver pedido
+          </Link>
         </div>
       </div>
     </div>

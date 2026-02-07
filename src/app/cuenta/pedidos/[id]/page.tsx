@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
 import { DesktopNav } from '@/components/layout/DesktopNav'
-import { IconPackage, IconCalendar, IconMapPin } from '@/components/ui/Icons'
+import { ProformaDocument } from '@/components/ui/ProformaDocument'
+import type { ProformaItem } from '@/components/ui/ProformaDocument'
+import { downloadPDF } from '@/lib/pdf'
 
 interface ItemPedido {
   id: string
@@ -19,6 +21,11 @@ interface ItemPedido {
   producto: {
     imagen: string
     slug: string
+    formato?: string
+    calidad?: string
+    hs_code?: string | null
+    cajas_palet?: number | null
+    peso_caja_kg?: number | null
   }
 }
 
@@ -38,6 +45,13 @@ interface Pedido {
   total_euros: number
   createdAt: string
   items: ItemPedido[]
+  user: {
+    nombre: string
+    codigo_cliente?: string | null
+    pais?: string | null
+    nif_cif?: string | null
+    telefono?: string | null
+  }
 }
 
 const ESTADOS_LABELS: Record<string, { label: string; color: string }> = {
@@ -49,12 +63,36 @@ const ESTADOS_LABELS: Record<string, { label: string; color: string }> = {
   CANCELADO: { label: 'Cancelado', color: 'bg-red-100 text-red-800' },
 }
 
+function mapItemsToProforma(items: ItemPedido[]): ProformaItem[] {
+  return items.map((item) => ({
+    formato: item.producto?.formato || '-',
+    descripcion: `${item.producto_nombre} (Ref: ${item.producto_referencia})`,
+    calidad: item.producto?.calidad === 'COM' ? 'COM' : item.producto?.calidad === 'PRIMERA' ? '1ª' : '-',
+    m2: item.cantidad_m2,
+    cajas: item.cantidad_cajas,
+    pallets: item.producto?.cajas_palet ? item.cantidad_cajas / item.producto.cajas_palet : 0,
+    precioM2: item.precio_m2,
+    importe: item.subtotal,
+    qrSlug: item.producto?.slug || null,
+    hsCode: item.producto?.hs_code || null,
+  }))
+}
+
+function calcWeight(items: ItemPedido[]): { net: number; gross: number } {
+  const net = items.reduce((sum, item) => {
+    return sum + (item.cantidad_cajas * (item.producto?.peso_caja_kg || 25))
+  }, 0)
+  return { net, gross: Math.ceil(net * 1.02) }
+}
+
 export default function DetallePedidoPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const params = useParams()
+  const printRef = useRef<HTMLDivElement>(null)
   const [pedido, setPedido] = useState<Pedido | null>(null)
   const [loading, setLoading] = useState(true)
+  const [generatingPDF, setGeneratingPDF] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -87,6 +125,28 @@ export default function DetallePedidoPage() {
     }
   }, [session, params.id, router])
 
+  const handlePrint = () => {
+    window.print()
+  }
+
+  const handleDownloadPDF = async () => {
+    if (!printRef.current || !pedido) return
+
+    setGeneratingPDF(true)
+    try {
+      await downloadPDF({
+        filename: `Pedido_${pedido.numero_pedido}`,
+        element: printRef.current as HTMLElement,
+        orientation: 'portrait',
+      })
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      alert('Error al descargar el PDF')
+    } finally {
+      setGeneratingPDF(false)
+    }
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -108,16 +168,31 @@ export default function DetallePedidoPage() {
     minute: '2-digit',
   })
 
+  const proformaItems = mapItemsToProforma(pedido.items)
+  const weight = calcWeight(pedido.items)
+
   return (
-    <div className="min-h-screen bg-white lg:bg-neutral-50">
-      <DesktopNav />
-      <div className="lg:hidden">
-        <Header titulo="Detalle del Pedido" showBack />
+    <div className="min-h-screen bg-white lg:bg-neutral-50 print:bg-white">
+      <div className="print:hidden">
+        <DesktopNav />
+        <div className="lg:hidden">
+          <Header titulo="Detalle del Pedido" showBack />
+        </div>
       </div>
 
-      <div className="lg:pt-20 lg:max-w-4xl lg:mx-auto lg:px-6 lg:py-12">
-        <div className="hidden lg:flex lg:items-center lg:justify-between lg:mb-8">
+      <div className="lg:pt-20 lg:max-w-4xl lg:mx-auto lg:px-6 lg:py-12 print:pt-0 print:max-w-none print:px-0 print:py-0">
+        {/* Header desktop */}
+        <div className="hidden lg:flex lg:items-center lg:justify-between lg:mb-8 print:hidden">
           <div>
+            <Link
+              href="/cuenta/pedidos"
+              className="text-primary-600 hover:text-primary-700 font-medium text-sm mb-2 inline-flex items-center gap-1"
+            >
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+              Volver a mis pedidos
+            </Link>
             <h1 className="text-3xl font-bold text-neutral-900">{pedido.numero_pedido}</h1>
             <div className="flex items-center gap-4 mt-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${estado.color}`}>
@@ -126,116 +201,81 @@ export default function DetallePedidoPage() {
               <span className="text-neutral-500">{fecha}</span>
             </div>
           </div>
-          <Link
-            href="/cuenta/pedidos"
-            className="text-primary-600 hover:text-primary-700 font-medium"
-          >
-            ← Volver a mis pedidos
-          </Link>
         </div>
 
         {/* Info móvil */}
-        <div className="lg:hidden p-4 border-b border-neutral-100">
+        <div className="lg:hidden p-4 border-b border-neutral-100 print:hidden">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-lg">{pedido.numero_pedido}</h2>
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${estado.color}`}>
               {estado.label}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2">
-            <IconCalendar size={14} />
-            <span>{fecha}</span>
+          <p className="text-sm text-neutral-500 mt-1">{fecha}</p>
+        </div>
+
+        {/* Actions */}
+        <div className="p-4 lg:p-0 lg:mb-6 print:hidden">
+          <div className="flex gap-3">
+            <button
+              onClick={handleDownloadPDF}
+              disabled={generatingPDF}
+              className="flex-1 lg:flex-initial flex items-center justify-center gap-2 py-3 px-6 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
+            >
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {generatingPDF ? 'Generando...' : 'Descargar PDF'}
+            </button>
+            <button
+              onClick={handlePrint}
+              className="flex-1 lg:flex-initial flex items-center justify-center gap-2 py-3 px-6 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors font-medium"
+            >
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+              Imprimir
+            </button>
           </div>
         </div>
 
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
-          {/* Productos */}
-          <div className="lg:col-span-2">
-            <div className="lg:bg-white lg:rounded-2xl lg:shadow-sm lg:overflow-hidden">
-              <div className="p-4 lg:p-6 border-b border-neutral-100">
-                <h3 className="font-semibold text-neutral-900">Productos ({pedido.items.length})</h3>
-              </div>
-              <div className="divide-y divide-neutral-100">
-                {pedido.items.map((item) => (
-                  <div key={item.id} className="p-4 lg:p-6 flex gap-4">
-                    <div className="w-20 h-20 flex-shrink-0 bg-neutral-100 rounded-lg overflow-hidden">
-                      {item.producto?.imagen ? (
-                        <img
-                          src={item.producto.imagen}
-                          alt={item.producto_nombre}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-neutral-400">
-                          <IconPackage size={32} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-neutral-900 truncate">{item.producto_nombre}</h4>
-                      <p className="text-sm text-neutral-500">Ref: {item.producto_referencia}</p>
-                      <div className="flex items-center gap-4 mt-2 text-sm">
-                        <span className="text-neutral-600">{item.cantidad_m2.toFixed(2)} m²</span>
-                        <span className="text-neutral-400">·</span>
-                        <span className="text-neutral-600">{item.cantidad_cajas} cajas</span>
-                      </div>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-sm text-neutral-500">{item.precio_m2.toFixed(2)} €/m²</span>
-                        <span className="font-semibold text-neutral-900">{item.subtotal.toFixed(2)} €</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* Documento imprimible (PDF) */}
+        <div ref={printRef} className="bg-white lg:rounded-xl lg:shadow-sm overflow-hidden print:shadow-none print:rounded-none">
+          <ProformaDocument
+            type="PEDIDO"
+            documentNumber={pedido.numero_pedido}
+            date={pedido.createdAt}
+            client={{
+              codigo: pedido.user?.codigo_cliente,
+              nombre: pedido.user?.nombre || session.user.name || '',
+              pais: pedido.user?.pais,
+              nif: pedido.user?.nif_cif,
+              telefono: pedido.user?.telefono,
+              direccion: `${pedido.direccion_envio}, ${pedido.codigo_postal} ${pedido.ciudad}`,
+            }}
+            items={proformaItems}
+            totals={{
+              totalM2: proformaItems.reduce((s, i) => s + i.m2, 0),
+              totalCajas: proformaItems.reduce((s, i) => s + i.cajas, 0),
+              totalPallets: proformaItems.reduce((s, i) => s + i.pallets, 0),
+              subtotal: pedido.subtotal_euros,
+              ivaPorcentaje: pedido.iva_porcentaje,
+              ivaEuros: pedido.iva_euros,
+              total: pedido.total_euros,
+            }}
+            weight={weight}
+            observations={pedido.notas || 'MERCANCIA DE ORIGEN ESPAÑOL'}
+          />
+        </div>
 
-          {/* Resumen y dirección */}
-          <div className="lg:col-span-1 space-y-4 lg:space-y-6">
-            {/* Dirección de envío */}
-            <div className="p-4 lg:p-6 lg:bg-white lg:rounded-2xl lg:shadow-sm border-b border-neutral-100 lg:border-none">
-              <div className="flex items-center gap-2 mb-3">
-                <IconMapPin size={18} className="text-neutral-500" />
-                <h3 className="font-semibold text-neutral-900">Dirección de envío</h3>
-              </div>
-              <p className="text-neutral-600">{pedido.direccion_envio}</p>
-              <p className="text-neutral-600">
-                {pedido.codigo_postal} {pedido.ciudad}
-                {pedido.provincia && `, ${pedido.provincia}`}
-              </p>
-            </div>
-
-            {/* Notas */}
-            {pedido.notas && (
-              <div className="p-4 lg:p-6 lg:bg-white lg:rounded-2xl lg:shadow-sm border-b border-neutral-100 lg:border-none">
-                <h3 className="font-semibold text-neutral-900 mb-2">Notas</h3>
-                <p className="text-neutral-600 text-sm">{pedido.notas}</p>
-              </div>
-            )}
-
-            {/* Resumen de precios */}
-            <div className="p-4 lg:p-6 lg:bg-white lg:rounded-2xl lg:shadow-sm">
-              <h3 className="font-semibold text-neutral-900 mb-4">Resumen</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Total m²</span>
-                  <span className="text-neutral-900">{pedido.total_m2.toFixed(2)} m²</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Subtotal</span>
-                  <span className="text-neutral-900">{pedido.subtotal_euros.toFixed(2)} €</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">IVA ({pedido.iva_porcentaje}%)</span>
-                  <span className="text-neutral-900">{pedido.iva_euros.toFixed(2)} €</span>
-                </div>
-                <div className="flex justify-between pt-3 border-t border-neutral-200">
-                  <span className="font-semibold text-neutral-900">Total</span>
-                  <span className="font-bold text-lg text-neutral-900">{pedido.total_euros.toFixed(2)} €</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Dirección de envío */}
+        <div className="p-4 lg:mt-4 lg:p-6 lg:bg-white lg:rounded-xl lg:shadow-sm print:hidden">
+          <h3 className="font-semibold text-neutral-900 mb-2">Dirección de envío</h3>
+          <p className="text-neutral-600">{pedido.direccion_envio}</p>
+          <p className="text-neutral-600">
+            {pedido.codigo_postal} {pedido.ciudad}
+            {pedido.provincia && `, ${pedido.provincia}`}
+          </p>
         </div>
       </div>
     </div>

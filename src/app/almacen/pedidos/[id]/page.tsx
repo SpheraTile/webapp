@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ShareActions } from '@/components/ui/ShareActions'
-import { ProductQRCode } from '@/components/ui/QRCode'
+import { ProformaDocument } from '@/components/ui/ProformaDocument'
+import type { ProformaItem } from '@/components/ui/ProformaDocument'
 
 interface ItemPedido {
   id: string
@@ -17,6 +18,11 @@ interface ItemPedido {
   producto: {
     slug: string
     imagen: string
+    formato?: string
+    calidad?: string
+    hs_code?: string | null
+    cajas_palet?: number | null
+    peso_caja_kg?: number | null
   }
 }
 
@@ -43,6 +49,8 @@ interface Pedido {
     telefono: string | null
     empresa: string | null
     nif_cif: string | null
+    codigo_cliente?: string | null
+    pais?: string | null
   }
   albaran: { id: string; numero_albaran: string } | null
   factura: { id: string; numero_factura: string } | null
@@ -81,9 +89,32 @@ function EstadoBadge({ estado }: { estado: string }) {
   )
 }
 
+function mapItemsToProforma(items: ItemPedido[]): ProformaItem[] {
+  return items.map((item) => ({
+    formato: item.producto?.formato || '-',
+    descripcion: `${item.producto_nombre} (Ref: ${item.producto_referencia})`,
+    calidad: item.producto?.calidad === 'COM' ? 'COM' : item.producto?.calidad === 'PRIMERA' ? '1ª' : '-',
+    m2: item.cantidad_m2,
+    cajas: item.cantidad_cajas,
+    pallets: item.producto?.cajas_palet ? item.cantidad_cajas / item.producto.cajas_palet : 0,
+    precioM2: item.precio_m2,
+    importe: item.subtotal,
+    qrSlug: item.producto?.slug || null,
+    hsCode: item.producto?.hs_code || null,
+  }))
+}
+
+function calcWeight(items: ItemPedido[]): { net: number; gross: number } {
+  const net = items.reduce((sum, item) => {
+    return sum + (item.cantidad_cajas * (item.producto?.peso_caja_kg || 25))
+  }, 0)
+  return { net, gross: Math.ceil(net * 1.02) }
+}
+
 export default function PedidoDetallePage() {
   const params = useParams()
   const router = useRouter()
+  const printRef = useRef<HTMLDivElement>(null)
   const [pedido, setPedido] = useState<Pedido | null>(null)
   const [loading, setLoading] = useState(true)
   const [creatingAlbaran, setCreatingAlbaran] = useState(false)
@@ -146,7 +177,7 @@ export default function PedidoDetallePage() {
           direccion_entrega: `${pedido.direccion_envio}, ${pedido.codigo_postal} ${pedido.ciudad}`,
           total_m2: pedido.total_m2,
           total_cajas: pedido.items.reduce((sum, item) => sum + item.cantidad_cajas, 0),
-          peso_total_kg: pedido.items.reduce((sum, item) => sum + item.cantidad_cajas * 20, 0), // Estimado 20kg/caja
+          peso_total_kg: pedido.items.reduce((sum, item) => sum + item.cantidad_cajas * 20, 0),
         }),
       })
       if (response.ok) {
@@ -169,7 +200,7 @@ export default function PedidoDetallePage() {
     setCreatingFactura(true)
     try {
       const fechaVencimiento = new Date()
-      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30) // Vencimiento a 30 días
+      fechaVencimiento.setDate(fechaVencimiento.getDate() + 30)
 
       const response = await fetch('/api/facturas', {
         method: 'POST',
@@ -299,10 +330,13 @@ export default function PedidoDetallePage() {
     )
   }
 
+  const proformaItems = mapItemsToProforma(pedido.items)
+  const weight = calcWeight(pedido.items)
+
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-4 lg:p-8 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 lg:mb-8 print:hidden">
         <div>
           <Link href="/almacen/pedidos" className="text-primary-600 hover:text-primary-700 text-sm mb-2 inline-flex items-center gap-1">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -310,29 +344,30 @@ export default function PedidoDetallePage() {
             </svg>
             Volver a pedidos
           </Link>
-          <h1 className="text-3xl font-bold text-neutral-900">{pedido.numero_pedido}</h1>
-          <p className="text-neutral-500 mt-1">{formatDate(pedido.createdAt)}</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900">{pedido.numero_pedido}</h1>
+          <p className="text-neutral-500 mt-1 text-sm lg:text-base">{formatDate(pedido.createdAt)}</p>
         </div>
         <EstadoBadge estado={pedido.estado} />
       </div>
 
       {/* Acciones de compartir */}
-      <div className="bg-white rounded-xl shadow-sm p-4 mb-6 print:hidden">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-xl shadow-sm p-3 lg:p-4 mb-4 lg:mb-6 print:hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4">
           <ShareActions
             documentNumber={pedido.numero_pedido}
             documentType="pedido"
             clientEmail={pedido.user.email}
             clientPhone={pedido.user.telefono || undefined}
+            printRef={printRef}
           />
 
           {/* Selector de estado */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-neutral-500">Cambiar estado:</span>
+            <span className="text-sm text-neutral-500 hidden sm:inline">Cambiar estado:</span>
             <select
               value={pedido.estado}
               onChange={(e) => handleCambiarEstado(e.target.value)}
-              className="border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex-1 sm:flex-initial border border-neutral-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
             >
               {ESTADOS_PEDIDO.map((estado) => (
                 <option key={estado} value={estado}>
@@ -344,203 +379,103 @@ export default function PedidoDetallePage() {
         </div>
       </div>
 
-      {/* Datos del cliente */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">Datos del Cliente</h2>
-          <dl className="space-y-3">
-            <div>
-              <dt className="text-sm text-neutral-500">Nombre</dt>
-              <dd className="text-neutral-900 font-medium">{pedido.user.nombre}</dd>
-            </div>
-            {pedido.user.empresa && (
-              <div>
-                <dt className="text-sm text-neutral-500">Empresa</dt>
-                <dd className="text-neutral-900">{pedido.user.empresa}</dd>
-              </div>
-            )}
-            {pedido.user.nif_cif && (
-              <div>
-                <dt className="text-sm text-neutral-500">NIF/CIF</dt>
-                <dd className="text-neutral-900">{pedido.user.nif_cif}</dd>
-              </div>
-            )}
-            <div>
-              <dt className="text-sm text-neutral-500">Email</dt>
-              <dd className="text-neutral-900">{pedido.user.email}</dd>
-            </div>
-            {pedido.user.telefono && (
-              <div>
-                <dt className="text-sm text-neutral-500">Teléfono</dt>
-                <dd className="text-neutral-900">{pedido.user.telefono}</dd>
-              </div>
-            )}
-          </dl>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">Dirección de Envío</h2>
-          <address className="not-italic text-neutral-700">
-            {pedido.direccion_envio}<br />
-            {pedido.codigo_postal} {pedido.ciudad}<br />
-            {pedido.provincia}
-          </address>
-          {pedido.notas && (
-            <div className="mt-4 pt-4 border-t border-neutral-100">
-              <dt className="text-sm text-neutral-500 mb-1">Notas</dt>
-              <dd className="text-neutral-700">{pedido.notas}</dd>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Productos */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-        <div className="p-6 border-b border-neutral-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-neutral-900">Productos</h2>
-          {!pedido.factura && (
+      {/* Editar precios (fuera del PDF) */}
+      {editandoPrecios && (
+        <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6 mb-4 lg:mb-6 print:hidden">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-neutral-900">Editar precios</h3>
             <div className="flex items-center gap-2">
-              {editandoPrecios ? (
-                <>
-                  <button
-                    onClick={cancelarEdicionPrecios}
-                    className="px-3 py-1.5 text-sm text-neutral-600 hover:text-neutral-800"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={guardarPrecios}
-                    disabled={guardando}
-                    className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-                  >
-                    {guardando ? 'Guardando...' : 'Guardar precios'}
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={iniciarEdicionPrecios}
-                  className="px-3 py-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  Editar precios
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-neutral-50">
-              <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-neutral-500 uppercase">Producto</th>
-                <th className="text-center px-6 py-3 text-xs font-medium text-neutral-500 uppercase print:hidden">QR</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-neutral-500 uppercase">Cantidad</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-neutral-500 uppercase">Precio/m²</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-neutral-500 uppercase">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {pedido.items.map((item) => (
-                <tr key={item.id}>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      {item.producto?.imagen && (
-                        <img
-                          src={item.producto.imagen}
-                          alt={item.producto_nombre}
-                          className="w-12 h-12 object-cover rounded-lg"
-                        />
-                      )}
-                      <div>
-                        <div className="font-medium text-neutral-900">{item.producto_nombre}</div>
-                        <div className="text-sm text-neutral-500">{item.producto_referencia}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center print:hidden">
-                    {item.producto?.slug && (
-                      <ProductQRCode productSlug={item.producto.slug} size={64} expandable />
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="text-neutral-900">{item.cantidad_m2.toFixed(2)} m²</div>
-                    <div className="text-sm text-neutral-500">{item.cantidad_cajas} cajas</div>
-                  </td>
-                  <td className="px-6 py-4 text-right text-neutral-900">
-                    {editandoPrecios ? (
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={preciosEditados[item.id] ?? item.precio_m2}
-                        onChange={(e) => handlePrecioChange(item.id, parseFloat(e.target.value) || 0)}
-                        className="w-24 text-right border border-neutral-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    ) : (
-                      <>{formatCurrency(item.precio_m2)}€</>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-right font-medium text-neutral-900">
-                    {editandoPrecios
-                      ? <>{formatCurrency(calcularSubtotalTemp(item))}€</>
-                      : <>{formatCurrency(item.subtotal)}€</>
-                    }
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Totales */}
-        <div className="p-6 bg-neutral-50 border-t border-neutral-200">
-          <div className="max-w-xs ml-auto space-y-2">
-            {editandoPrecios ? (
-              <>
-                {(() => {
-                  const totales = calcularTotalesTemp()
-                  return (
-                    <>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Subtotal</span>
-                        <span className="text-amber-600 font-medium">{formatCurrency(totales.subtotal)}€</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">IVA ({pedido.iva_porcentaje}%)</span>
-                        <span className="text-amber-600 font-medium">{formatCurrency(totales.iva)}€</span>
-                      </div>
-                      <div className="flex justify-between pt-2 border-t border-neutral-200">
-                        <span className="font-semibold text-neutral-900">Total</span>
-                        <span className="font-bold text-xl text-amber-600">{formatCurrency(totales.total)}€</span>
-                      </div>
-                    </>
-                  )
-                })()}
-              </>
-            ) : (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">Subtotal</span>
-                  <span className="text-neutral-900">{formatCurrency(pedido.subtotal_euros)}€</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-500">IVA ({pedido.iva_porcentaje}%)</span>
-                  <span className="text-neutral-900">{formatCurrency(pedido.iva_euros)}€</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-neutral-200">
-                  <span className="font-semibold text-neutral-900">Total</span>
-                  <span className="font-bold text-xl text-neutral-900">{formatCurrency(pedido.total_euros)}€</span>
-                </div>
-              </>
-            )}
-            <div className="text-right text-sm text-neutral-500">
-              Total: {pedido.total_m2.toFixed(2)} m²
+              <button onClick={cancelarEdicionPrecios} className="px-3 py-1 text-sm text-neutral-600 hover:text-neutral-800" disabled={guardando}>
+                Cancelar
+              </button>
+              <button onClick={guardarPrecios} disabled={guardando} className="px-3 py-1 bg-primary-600 text-white rounded text-sm hover:bg-primary-700 disabled:opacity-50">
+                {guardando ? 'Guardando...' : 'Guardar'}
+              </button>
             </div>
           </div>
+          <div className="space-y-2">
+            {pedido.items.map((item) => (
+              <div key={item.id} className="flex items-center justify-between gap-4 p-2 bg-neutral-50 rounded">
+                <span className="text-sm text-neutral-900 truncate flex-1">{item.producto_nombre}</span>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={preciosEditados[item.id] ?? item.precio_m2}
+                    onChange={(e) => handlePrecioChange(item.id, parseFloat(e.target.value) || 0)}
+                    className="w-24 px-2 py-1 border border-neutral-300 rounded text-right text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <span className="text-sm text-neutral-500">€/m²</span>
+                </div>
+                <span className="text-sm font-medium w-24 text-right">
+                  {formatCurrency(calcularSubtotalTemp(item))}€
+                </span>
+              </div>
+            ))}
+            {(() => {
+              const totales = calcularTotalesTemp()
+              return (
+                <div className="pt-2 border-t border-neutral-200 space-y-1">
+                  <div className="flex justify-end gap-4 text-sm">
+                    <span className="text-neutral-500">Subtotal:</span>
+                    <span className="font-medium text-amber-600 w-24 text-right">{formatCurrency(totales.subtotal)}€</span>
+                  </div>
+                  <div className="flex justify-end gap-4 text-sm">
+                    <span className="text-neutral-500">IVA ({pedido.iva_porcentaje}%):</span>
+                    <span className="font-medium text-amber-600 w-24 text-right">{formatCurrency(totales.iva)}€</span>
+                  </div>
+                  <div className="flex justify-end gap-4 text-sm font-bold">
+                    <span>Total:</span>
+                    <span className="text-amber-600 w-24 text-right">{formatCurrency(totales.total)}€</span>
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
         </div>
+      )}
+
+      {!editandoPrecios && !pedido.factura && (
+        <div className="mb-4 print:hidden">
+          <button onClick={iniciarEdicionPrecios} className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+            Editar precios
+          </button>
+        </div>
+      )}
+
+      {/* Documento imprimible (PDF) */}
+      <div ref={printRef} className="bg-white rounded-xl shadow-sm overflow-hidden print:shadow-none">
+        <ProformaDocument
+          type="PEDIDO"
+          documentNumber={pedido.numero_pedido}
+          date={pedido.createdAt}
+          client={{
+            codigo: pedido.user.codigo_cliente,
+            nombre: pedido.user.nombre,
+            empresa: pedido.user.empresa,
+            pais: pedido.user.pais,
+            nif: pedido.user.nif_cif,
+            telefono: pedido.user.telefono,
+            direccion: `${pedido.direccion_envio}, ${pedido.codigo_postal} ${pedido.ciudad}`,
+          }}
+          items={proformaItems}
+          totals={{
+            totalM2: proformaItems.reduce((s, i) => s + i.m2, 0),
+            totalCajas: proformaItems.reduce((s, i) => s + i.cajas, 0),
+            totalPallets: proformaItems.reduce((s, i) => s + i.pallets, 0),
+            subtotal: pedido.subtotal_euros,
+            ivaPorcentaje: pedido.iva_porcentaje,
+            ivaEuros: pedido.iva_euros,
+            total: pedido.total_euros,
+          }}
+          weight={weight}
+          observations={pedido.notas || 'MERCANCIA DE ORIGEN ESPAÑOL'}
+        />
       </div>
 
       {/* Documentos relacionados */}
-      <div className="bg-white rounded-xl shadow-sm p-6 print:hidden">
+      <div className="mt-4 bg-white rounded-xl shadow-sm p-4 lg:p-6 print:hidden">
         <h2 className="text-lg font-semibold text-neutral-900 mb-4">Documentos</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Albarán */}
@@ -644,7 +579,7 @@ export default function PedidoDetallePage() {
 
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
               <p className="text-sm text-red-800">
-                <strong>⚠️ Advertencia:</strong> Esta acción eliminará permanentemente el pedido y todos sus datos asociados. No se puede deshacer.
+                <strong>Advertencia:</strong> Esta acción eliminará permanentemente el pedido y todos sus datos asociados. No se puede deshacer.
               </p>
             </div>
 

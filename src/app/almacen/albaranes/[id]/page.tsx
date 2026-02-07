@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ShareActions } from '@/components/ui/ShareActions'
-import { ProductQRCode } from '@/components/ui/QRCode'
+import { ProformaDocument } from '@/components/ui/ProformaDocument'
+import type { ProformaItem } from '@/components/ui/ProformaDocument'
 
 interface ItemPedido {
   id: string
@@ -15,6 +16,11 @@ interface ItemPedido {
   producto: {
     slug: string
     imagen: string
+    formato?: string
+    calidad?: string
+    hs_code?: string | null
+    cajas_palet?: number | null
+    peso_caja_kg?: number | null
   }
 }
 
@@ -41,6 +47,8 @@ interface Albaran {
       telefono: string | null
       empresa: string | null
       nif_cif: string | null
+      codigo_cliente?: string | null
+      pais?: string | null
     }
   }
 }
@@ -68,6 +76,28 @@ function EstadoBadge({ estado }: { estado: string }) {
       {label}
     </span>
   )
+}
+
+function mapItemsToProforma(items: ItemPedido[]): ProformaItem[] {
+  return items.map((item) => ({
+    formato: item.producto?.formato || '-',
+    descripcion: `${item.producto_nombre} (Ref: ${item.producto_referencia})`,
+    calidad: item.producto?.calidad === 'COM' ? 'COM' : item.producto?.calidad === 'PRIMERA' ? '1ª' : '-',
+    m2: item.cantidad_m2,
+    cajas: item.cantidad_cajas,
+    pallets: item.producto?.cajas_palet ? item.cantidad_cajas / item.producto.cajas_palet : 0,
+    precioM2: 0,
+    importe: 0,
+    qrSlug: item.producto?.slug || null,
+    hsCode: item.producto?.hs_code || null,
+  }))
+}
+
+function calcWeight(items: ItemPedido[]): { net: number; gross: number } {
+  const net = items.reduce((sum, item) => {
+    return sum + (item.cantidad_cajas * (item.producto?.peso_caja_kg || 25))
+  }, 0)
+  return { net, gross: Math.ceil(net * 1.02) }
 }
 
 export default function AlbaranDetallePage() {
@@ -163,6 +193,9 @@ export default function AlbaranDetallePage() {
     )
   }
 
+  const proformaItems = mapItemsToProforma(albaran.pedido.items)
+  const weight = calcWeight(albaran.pedido.items)
+
   return (
     <div className="p-4 lg:p-8 max-w-4xl mx-auto">
       {/* Header - hidden when printing */}
@@ -209,246 +242,124 @@ export default function AlbaranDetallePage() {
         </div>
       </div>
 
-      {/* Documento imprimible */}
-      <div ref={printRef} className="bg-white rounded-xl shadow-sm overflow-hidden print:shadow-none">
-        {/* Cabecera del documento */}
-        <div className="p-4 lg:p-6 border-b border-neutral-200 print:border-black">
-          <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
-            <div>
-              <h2 className="text-xl lg:text-2xl font-bold text-neutral-900">ALBARÁN DE ENTREGA</h2>
-              <p className="text-base lg:text-lg font-medium text-primary-600">{albaran.numero_albaran}</p>
-            </div>
-            <div className="sm:text-right">
-              <p className="font-bold text-base lg:text-lg">SPHERA TILE</p>
-              <p className="text-xs lg:text-sm text-neutral-500">CIF: B12345678</p>
-              <p className="text-xs lg:text-sm text-neutral-500">Tel: +34 633 909 095</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Datos del cliente y envío */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6 border-b border-neutral-200">
-          <div className="text-sm lg:text-base">
-            <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-2">CLIENTE</h3>
-            <p className="font-medium text-neutral-900">{albaran.pedido.user.nombre}</p>
-            {albaran.pedido.user.empresa && (
-              <p className="text-neutral-700">{albaran.pedido.user.empresa}</p>
-            )}
-            {albaran.pedido.user.nif_cif && (
-              <p className="text-neutral-500">NIF/CIF: {albaran.pedido.user.nif_cif}</p>
-            )}
-            <p className="text-neutral-500">{albaran.pedido.user.email}</p>
-            {albaran.pedido.user.telefono && (
-              <p className="text-neutral-500">Tel: {albaran.pedido.user.telefono}</p>
-            )}
-          </div>
-          <div className="text-sm lg:text-base">
-            <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-2">DIRECCIÓN DE ENTREGA</h3>
-            <p className="text-neutral-900 whitespace-pre-line">{albaran.direccion_entrega}</p>
-          </div>
-        </div>
-
-        {/* Datos de transporte */}
-        <div className="p-4 lg:p-6 border-b border-neutral-200 bg-neutral-50">
-          <div className="flex items-center justify-between mb-4 print:hidden">
-            <h3 className="text-xs lg:text-sm font-medium text-neutral-500">DATOS DE TRANSPORTE</h3>
-            {!editando && (
-              <button
-                onClick={() => setEditando(true)}
-                className="text-primary-600 hover:text-primary-700 text-xs lg:text-sm"
-              >
-                Editar
-              </button>
-            )}
-          </div>
-          {editando ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
-              <div>
-                <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Transportista</label>
-                <input
-                  type="text"
-                  value={transportista}
-                  onChange={(e) => setTransportista(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Matrícula</label>
-                <input
-                  type="text"
-                  value={matricula}
-                  onChange={(e) => setMatricula(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Notas</label>
-                <input
-                  type="text"
-                  value={notasAlbaran}
-                  onChange={(e) => setNotasAlbaran(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
-                />
-              </div>
-              <div className="sm:col-span-3 flex justify-end gap-2">
-                <button
-                  onClick={() => setEditando(false)}
-                  className="px-3 lg:px-4 py-2 text-neutral-600 hover:text-neutral-800 text-sm"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleGuardarDatos}
-                  className="px-3 lg:px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
-                >
-                  Guardar
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 lg:gap-4 text-xs lg:text-sm">
-              <div>
-                <span className="text-neutral-500">Transportista:</span>
-                <span className="ml-2 text-neutral-900">{albaran.transportista || '-'}</span>
-              </div>
-              <div>
-                <span className="text-neutral-500">Matrícula:</span>
-                <span className="ml-2 text-neutral-900">{albaran.matricula || '-'}</span>
-              </div>
-              <div>
-                <span className="text-neutral-500">Notas:</span>
-                <span className="ml-2 text-neutral-900">{albaran.notas || '-'}</span>
-              </div>
-            </div>
+      {/* Datos de transporte (fuera del PDF) */}
+      <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6 mb-4 lg:mb-6 print:hidden">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xs lg:text-sm font-medium text-neutral-500">DATOS DE TRANSPORTE</h3>
+          {!editando && (
+            <button
+              onClick={() => setEditando(true)}
+              className="text-primary-600 hover:text-primary-700 text-xs lg:text-sm"
+            >
+              Editar
+            </button>
           )}
         </div>
-
-        {/* Mercancía */}
-        <div className="p-4 lg:p-6">
-          <h3 className="text-xs lg:text-sm font-medium text-neutral-500 mb-4">MERCANCÍA</h3>
-
-          {/* Mobile view - card layout */}
-          <div className="lg:hidden space-y-3">
-            {albaran.pedido.items.map((item) => (
-              <div key={item.id} className="bg-neutral-50 rounded-lg p-3 border border-neutral-200">
-                <div className="flex items-start gap-3 mb-2">
-                  {item.producto?.imagen && (
-                    <img
-                      src={item.producto.imagen}
-                      alt={item.producto_nombre}
-                      className="w-12 h-12 object-cover rounded flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-neutral-900 text-sm truncate">{item.producto_nombre}</p>
-                    <p className="text-xs text-neutral-500">Ref: {item.producto_referencia}</p>
-                  </div>
-                  {item.producto?.slug && (
-                    <ProductQRCode productSlug={item.producto.slug} size={40} expandable />
-                  )}
-                </div>
-                <div className="flex justify-between text-xs pt-2 border-t border-neutral-200">
-                  <span className="text-neutral-500">Cajas: <span className="font-medium text-neutral-900">{item.cantidad_cajas}</span></span>
-                  <span className="text-neutral-500">m²: <span className="font-medium text-neutral-900">{item.cantidad_m2.toFixed(2)}</span></span>
-                </div>
-              </div>
-            ))}
-            {/* Mobile totals */}
-            <div className="bg-neutral-100 rounded-lg p-3 mt-4">
-              <div className="flex justify-between text-sm font-bold">
-                <span>TOTAL</span>
-                <span>{albaran.total_cajas} cajas / {albaran.total_m2.toFixed(2)} m²</span>
-              </div>
-              <p className="text-xs text-neutral-500 text-right mt-1">
-                Peso estimado: {albaran.peso_total_kg.toFixed(2)} kg
-              </p>
-            </div>
-          </div>
-
-          {/* Desktop view - table layout */}
-          <table className="hidden lg:table w-full">
-            <thead className="bg-neutral-100">
-              <tr>
-                <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Producto</th>
-                <th className="text-center px-4 py-2 text-xs font-medium text-neutral-500 uppercase">QR</th>
-                <th className="text-left px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Referencia</th>
-                <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">Cajas</th>
-                <th className="text-right px-4 py-2 text-xs font-medium text-neutral-500 uppercase">m²</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {albaran.pedido.items.map((item) => (
-                <tr key={item.id}>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {item.producto?.imagen && (
-                        <img
-                          src={item.producto.imagen}
-                          alt={item.producto_nombre}
-                          className="w-10 h-10 object-cover rounded"
-                        />
-                      )}
-                      <span className="font-medium text-neutral-900">{item.producto_nombre}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {item.producto?.slug && (
-                      <ProductQRCode productSlug={item.producto.slug} size={56} expandable />
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-neutral-500">{item.producto_referencia}</td>
-                  <td className="px-4 py-3 text-right text-neutral-900">{item.cantidad_cajas}</td>
-                  <td className="px-4 py-3 text-right text-neutral-900">{item.cantidad_m2.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot className="border-t-2 border-neutral-300">
-              <tr className="font-bold">
-                <td colSpan={3} className="px-4 py-3 text-right">TOTAL</td>
-                <td className="px-4 py-3 text-right">{albaran.total_cajas}</td>
-                <td className="px-4 py-3 text-right">{albaran.total_m2.toFixed(2)} m²</td>
-              </tr>
-              <tr>
-                <td colSpan={5} className="px-4 py-2 text-right text-neutral-500">
-                  Peso total estimado: {albaran.peso_total_kg.toFixed(2)} kg
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        {/* Firmas */}
-        <div className="p-4 lg:p-6 border-t border-neutral-200">
-          <div className="grid grid-cols-2 gap-4 lg:gap-8">
+        {editando ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
             <div>
-              <p className="text-xs lg:text-sm text-neutral-500 mb-8 lg:mb-12">Entregado por:</p>
-              <div className="border-t border-neutral-300 pt-2">
-                <p className="text-xs lg:text-sm text-neutral-500">Firma y sello</p>
-              </div>
+              <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Transportista</label>
+              <input
+                type="text"
+                value={transportista}
+                onChange={(e) => setTransportista(e.target.value)}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
+              />
             </div>
             <div>
-              <p className="text-xs lg:text-sm text-neutral-500 mb-8 lg:mb-12">Recibido por:</p>
-              <div className="border-t border-neutral-300 pt-2">
-                <p className="text-xs lg:text-sm text-neutral-500">Firma, nombre y DNI</p>
-              </div>
+              <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Matrícula</label>
+              <input
+                type="text"
+                value={matricula}
+                onChange={(e) => setMatricula(e.target.value)}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
+              />
             </div>
-          </div>
-        </div>
-
-        {/* Pedido relacionado */}
-        <div className="p-4 lg:p-6 border-t border-neutral-200 bg-neutral-50 print:hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <p className="text-xs lg:text-sm text-neutral-500">Pedido relacionado</p>
-              <p className="font-medium text-neutral-900 text-sm lg:text-base">{albaran.pedido.numero_pedido}</p>
+              <label className="block text-xs lg:text-sm text-neutral-600 mb-1">Notas</label>
+              <input
+                type="text"
+                value={notasAlbaran}
+                onChange={(e) => setNotasAlbaran(e.target.value)}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm"
+              />
             </div>
-            <Link
-              href={`/almacen/pedidos/${albaran.pedido.id}`}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm text-center"
-            >
-              Ver pedido
-            </Link>
+            <div className="sm:col-span-3 flex justify-end gap-2">
+              <button
+                onClick={() => setEditando(false)}
+                className="px-3 lg:px-4 py-2 text-neutral-600 hover:text-neutral-800 text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGuardarDatos}
+                className="px-3 lg:px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+              >
+                Guardar
+              </button>
+            </div>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 lg:gap-4 text-xs lg:text-sm">
+            <div>
+              <span className="text-neutral-500">Transportista:</span>
+              <span className="ml-2 text-neutral-900">{albaran.transportista || '-'}</span>
+            </div>
+            <div>
+              <span className="text-neutral-500">Matrícula:</span>
+              <span className="ml-2 text-neutral-900">{albaran.matricula || '-'}</span>
+            </div>
+            <div>
+              <span className="text-neutral-500">Notas:</span>
+              <span className="ml-2 text-neutral-900">{albaran.notas || '-'}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Documento imprimible (PDF) */}
+      <div ref={printRef} className="bg-white rounded-xl shadow-sm overflow-hidden print:shadow-none">
+        <ProformaDocument
+          type="ALBARÁN DE ENTREGA"
+          documentNumber={albaran.numero_albaran}
+          date={albaran.createdAt}
+          client={{
+            codigo: albaran.pedido.user.codigo_cliente,
+            nombre: albaran.pedido.user.nombre,
+            empresa: albaran.pedido.user.empresa,
+            pais: albaran.pedido.user.pais,
+            nif: albaran.pedido.user.nif_cif,
+            telefono: albaran.pedido.user.telefono,
+            direccion: albaran.direccion_entrega,
+          }}
+          items={proformaItems}
+          totals={{
+            totalM2: proformaItems.reduce((s, i) => s + i.m2, 0),
+            totalCajas: proformaItems.reduce((s, i) => s + i.cajas, 0),
+            totalPallets: proformaItems.reduce((s, i) => s + i.pallets, 0),
+            subtotal: 0,
+            total: 0,
+          }}
+          weight={weight}
+          observations={albaran.notas || 'MERCANCIA DE ORIGEN ESPAÑOL'}
+          showSignatures
+          showPrices={false}
+        />
+      </div>
+
+      {/* Pedido relacionado */}
+      <div className="mt-4 bg-white rounded-xl shadow-sm p-4 lg:p-6 print:hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-xs lg:text-sm text-neutral-500">Pedido relacionado</p>
+            <p className="font-medium text-neutral-900 text-sm lg:text-base">{albaran.pedido.numero_pedido}</p>
+          </div>
+          <Link
+            href={`/almacen/pedidos/${albaran.pedido.id}`}
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm text-center"
+          >
+            Ver pedido
+          </Link>
         </div>
       </div>
     </div>

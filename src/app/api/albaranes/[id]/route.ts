@@ -19,7 +19,17 @@ export async function GET(
             user: true,
             items: {
               include: {
-                producto: true,
+                producto: {
+                  select: {
+                    slug: true,
+                    imagen: true,
+                    formato: true,
+                    calidad: true,
+                    hs_code: true,
+                    cajas_palet: true,
+                    peso_caja_kg: true,
+                  },
+                },
               },
             },
           },

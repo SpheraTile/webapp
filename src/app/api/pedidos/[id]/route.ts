@@ -14,10 +14,35 @@ export async function GET(
     const pedido = await prisma.pedido.findUnique({
       where: { id },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            telefono: true,
+            empresa: true,
+            nif_cif: true,
+            codigo_cliente: true,
+            pais: true,
+            direccion: true,
+            ciudad: true,
+            provincia: true,
+            codigo_postal: true,
+          },
+        },
         items: {
           include: {
-            producto: true,
+            producto: {
+              select: {
+                slug: true,
+                imagen: true,
+                formato: true,
+                calidad: true,
+                hs_code: true,
+                cajas_palet: true,
+                peso_caja_kg: true,
+              },
+            },
           },
         },
         albaran: true,

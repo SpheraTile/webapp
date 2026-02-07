@@ -29,6 +29,7 @@
     "next": "^16.1.6",
     "next-auth": "^4.24.13",
     "next-intl": "^4.8.1",
+    "openai": "^6.18.0",
     "prisma": "^5.22.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",

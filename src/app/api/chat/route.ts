@@ -232,7 +232,10 @@ ${userContext}${ordersContext}${productContext}
 Si el usuario pregunta sobre temas completamente ajenos a cerámica/construcción/decoración, redirige amablemente la conversación hacia cómo puedes ayudarle con productos o proyectos.`
 
     // Build Gemini conversation history
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash',
+      systemInstruction: systemPrompt,
+    })
 
     const geminiHistory = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
@@ -241,7 +244,6 @@ Si el usuario pregunta sobre temas completamente ajenos a cerámica/construcció
 
     const chat = model.startChat({
       history: geminiHistory,
-      systemInstruction: { role: 'user', parts: [{ text: systemPrompt }] },
     })
 
     const lastMessage = messages[messages.length - 1]

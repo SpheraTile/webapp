@@ -163,7 +163,7 @@ export async function PUT(
   }
 }
 
-// DELETE - Eliminar usuario (desactivar)
+// DELETE - Eliminar usuario permanentemente
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -193,13 +193,28 @@ export async function DELETE(
       )
     }
 
-    // En lugar de eliminar, desactivamos el usuario
-    await prisma.user.update({
+    // Verificar que el usuario existe
+    const targetUser = await prisma.user.findUnique({
       where: { id },
-      data: { activo: false },
+      include: { _count: { select: { pedidos: true } } },
     })
 
-    return NextResponse.json({ message: 'Usuario desactivado correctamente' })
+    if (!targetUser) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
+    }
+
+    // No permitir eliminar si tiene pedidos
+    if (targetUser._count.pedidos > 0) {
+      return NextResponse.json(
+        { error: `No se puede eliminar: el usuario tiene ${targetUser._count.pedidos} pedido(s). Desactívalo en su lugar.` },
+        { status: 400 }
+      )
+    }
+
+    // Eliminar usuario (ResetTokens se eliminan por cascade)
+    await prisma.user.delete({ where: { id } })
+
+    return NextResponse.json({ message: 'Usuario eliminado correctamente' })
   } catch (error) {
     console.error('Error deleting usuario:', error)
     return NextResponse.json({ error: 'Error al eliminar usuario' }, { status: 500 })

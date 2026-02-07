@@ -290,6 +290,30 @@ export default function UsuariosPage() {
     }
   }
 
+  const handleDelete = async (usuario: Usuario) => {
+    const confirmed = window.confirm(
+      `¿Estás seguro de que quieres eliminar a "${usuario.nombre}"?\n\nEsta acción no se puede deshacer.`
+    )
+    if (!confirmed) return
+
+    try {
+      const response = await fetch(`/api/usuarios/${usuario.id}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        fetchUsuarios()
+      } else {
+        alert(data.error || 'Error al eliminar usuario')
+      }
+    } catch (error) {
+      console.error('Error deleting usuario:', error)
+      alert('Error al eliminar usuario')
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
@@ -413,6 +437,15 @@ export default function UsuariosPage() {
                 >
                   {usuario.activo ? 'Desactivar' : 'Activar'}
                 </button>
+                <button
+                  onClick={() => handleDelete(usuario)}
+                  className="py-2 px-3 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                  title="Eliminar"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
             </div>
           ))
@@ -518,6 +551,15 @@ export default function UsuariosPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         )}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(usuario)}
+                        className="p-2 text-neutral-400 hover:text-red-600 transition-colors"
+                        title="Eliminar"
+                      >
+                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                     </div>
                   </td>

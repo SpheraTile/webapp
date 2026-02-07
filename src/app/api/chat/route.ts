@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 
-// Initialize Gemini client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || '',
+})
 
 // Rate limiting - store requests per IP
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
@@ -79,8 +81,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check API key
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 })
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 })
     }
 
     const session = await getServerSession(authOptions)
@@ -231,38 +233,33 @@ ${userContext}${ordersContext}${productContext}
 
 Si el usuario pregunta sobre temas completamente ajenos a cerámica/construcción/decoración, redirige amablemente la conversación hacia cómo puedes ayudarle con productos o proyectos.`
 
-    // Build Gemini conversation history
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      systemInstruction: systemPrompt,
+    // Filter out welcome assistant message (first message is always the bot greeting)
+    const chatMessages = messages.filter((m: { role: string; id?: string }) =>
+      !(m.role === 'assistant' && m.id === 'welcome')
+    )
+
+    // Build OpenAI messages
+    const openaiMessages: OpenAI.ChatCompletionMessageParam[] = [
+      { role: 'system', content: systemPrompt },
+      ...chatMessages.map((m: { role: string; content: string }) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      })),
+    ]
+
+    const stream = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: openaiMessages,
+      stream: true,
     })
-
-    // Filter history: remove all messages before the first user message
-    // (the frontend includes a welcome assistant message that would make
-    // Gemini fail since history must start with 'user', not 'model')
-    const previousMessages = messages.slice(0, -1)
-    const firstUserIndex = previousMessages.findIndex((m: { role: string }) => m.role === 'user')
-    const relevantMessages = firstUserIndex >= 0 ? previousMessages.slice(firstUserIndex) : []
-
-    const geminiHistory = relevantMessages.map((m: { role: string; content: string }) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }))
-
-    const chat = model.startChat({
-      history: geminiHistory,
-    })
-
-    const lastMessage = messages[messages.length - 1]
-    const result = await chat.sendMessageStream(lastMessage.content)
 
     // Create a ReadableStream for the response
     const encoder = new TextEncoder()
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of result.stream) {
-            const text = chunk.text()
+          for await (const chunk of stream) {
+            const text = chunk.choices[0]?.delta?.content || ''
             if (text) {
               controller.enqueue(encoder.encode(text))
             }
@@ -280,13 +277,9 @@ Si el usuario pregunta sobre temas completamente ajenos a cerámica/construcció
         'Transfer-Encoding': 'chunked',
       },
     })
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error in chat API:', error)
-    // Extract detailed error info for debugging
-    const err = error as { message?: string; status?: number; statusText?: string; errorDetails?: unknown }
-    const errorMessage = err.message || 'Unknown error'
-    const details = err.errorDetails ? JSON.stringify(err.errorDetails) : undefined
-    console.error('Gemini error details:', { message: errorMessage, status: err.status, details })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json({ error: `Error: ${errorMessage}` }, { status: 500 })
   }
 }

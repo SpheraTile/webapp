@@ -130,10 +130,7 @@ export function ProformaDocument({
 
   return (
     <div className="bg-white w-full" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4' }}>
-      <div className="p-6 flex flex-col" style={{ maxWidth: '210mm', minHeight: '277mm' }}>
-
-        {/* Content area - grows to push footer down */}
-        <div className="flex-1">
+      <div className="px-3 py-4 lg:px-5" style={{ maxWidth: '210mm' }}>
 
         {/* Header: Logo left + Company info center + Doc type right */}
         <div className="flex items-start justify-between pb-3">
@@ -355,10 +352,8 @@ export function ProformaDocument({
           </div>
         )}
 
-        </div>{/* End flex-1 content */}
-
-        {/* Footer line - pushed to bottom of page */}
-        <div className="text-center border-t border-neutral-300 pt-1 mt-auto">
+        {/* Footer line */}
+        <div className="text-center border-t border-neutral-300 pt-1 mt-2">
           <p className="text-[7px] text-neutral-500" style={{ margin: 0 }}>
             Solo se reservará el material durante 20 días. — {COMPANY.registry}
           </p>

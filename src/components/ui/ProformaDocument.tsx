@@ -124,22 +124,22 @@ export function ProformaDocument({
     : 'Total €'
 
   // Cell style helpers
-  const cb = 'border border-neutral-400 px-1 py-px'
-  const hc = `${cb} bg-neutral-100 text-[8px] font-bold text-neutral-800 uppercase`
-  const dc = `${cb} text-[8px] text-neutral-900`
+  const cb = 'border border-neutral-400 px-1.5 py-0.5'
+  const hc = `${cb} bg-neutral-100 text-[9px] font-bold text-neutral-800 uppercase`
+  const dc = `${cb} text-[9px] text-neutral-900`
 
   return (
-    <div className="bg-white w-full" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '8px', lineHeight: '1.2' }}>
+    <div className="bg-white w-full" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.3' }}>
       <div className="p-4" style={{ maxWidth: '210mm' }}>
 
         {/* Header: Logo left + Company info center + Doc type right */}
         <div className="flex items-start justify-between pb-2">
-          <img src="/logo-sphera.png" alt="SPHERA TILE" className="h-7" />
+          <img src="/logo-sphera.png" alt="SPHERA TILE" className="h-8" />
           <div className="text-center flex-1 px-3">
-            <p className="text-[7px] text-neutral-700 font-medium leading-tight">
+            <p className="text-[8px] text-neutral-700 font-medium leading-tight">
               {COMPANY.name} - {COMPANY.address} - NIF: {COMPANY.nif}
             </p>
-            <p className="text-[7px] text-neutral-600 leading-tight">
+            <p className="text-[8px] text-neutral-600 leading-tight">
               {COMPANY.email} | TEL: {COMPANY.tel} | MOB: {COMPANY.mob}
             </p>
           </div>
@@ -166,13 +166,13 @@ export function ProformaDocument({
               <tr>
                 <td className={dc}>
                   <div className="font-semibold">{client.nombre}</div>
-                  {client.codigo && <div className="text-[7px] text-neutral-500">Cód: {client.codigo}</div>}
+                  {client.codigo && <div className="text-[8px] text-neutral-500">Cód: {client.codigo}</div>}
                 </td>
                 <td className={`${dc} font-medium`}>{documentNumber}</td>
                 <td className={dc}>{formatDateShort(date)}</td>
                 <td className={dc}>{page}</td>
                 <td className={dc}>
-                  <div className="text-[7px] leading-tight">
+                  <div className="text-[8px] leading-tight">
                     {client.pais && <span>({client.pais}) </span>}
                     {client.nif && <span>NIF: {client.nif} </span>}
                     {client.telefono && <span>Tel: {client.telefono}</span>}
@@ -208,7 +208,7 @@ export function ProformaDocument({
               {items.map((item, i) => (
                 <tr key={i}>
                   <td className={dc}>{item.formato}</td>
-                  <td className={`${dc} text-[7px]`}>{item.descripcion}</td>
+                  <td className={`${dc} text-[8px]`}>{item.descripcion}</td>
                   <td className={`${dc} text-center`}>{item.calidad}</td>
                   <td className={`${dc} text-center`} style={{ padding: '1px' }}>
                     {item.qrSlug && (
@@ -234,15 +234,15 @@ export function ProformaDocument({
               ))}
               {/* Totals row inside table */}
               <tr className="bg-neutral-50">
-                <td className={`${cb} font-bold text-[8px]`} colSpan={4}>TOTALES</td>
-                <td className={`${cb} text-right font-bold text-[8px]`}>{fmt(totals.totalM2)}</td>
-                <td className={`${cb} text-right font-bold text-[8px]`}>{fmt(totals.totalCajas, 0)}</td>
-                <td className={`${cb} text-right font-bold text-[8px]`}>{fmt(totals.totalPallets, 1)}</td>
+                <td className={`${cb} font-bold text-[9px]`} colSpan={4}>TOTALES</td>
+                <td className={`${cb} text-right font-bold text-[9px]`}>{fmt(totals.totalM2)}</td>
+                <td className={`${cb} text-right font-bold text-[9px]`}>{fmt(totals.totalCajas, 0)}</td>
+                <td className={`${cb} text-right font-bold text-[9px]`}>{fmt(totals.totalPallets, 1)}</td>
                 {showPrices && (
                   <>
                     <td className={cb}></td>
                     <td className={cb}></td>
-                    <td className={`${cb} text-right font-bold text-[8px]`}>{fmt(totals.subtotal)}</td>
+                    <td className={`${cb} text-right font-bold text-[9px]`}>{fmt(totals.subtotal)}</td>
                   </>
                 )}
               </tr>
@@ -252,13 +252,13 @@ export function ProformaDocument({
 
         {/* Weight + Financial totals row */}
         <div className="flex items-start justify-between pb-1">
-          <div className="text-[8px]">
+          <div className="text-[9px]">
             <span className="font-bold">NET: {Math.round(weight.net)} KG</span>
             <span className="ml-3 font-bold">GROSS: {Math.round(weight.gross)} KG</span>
           </div>
 
           {showPrices && (
-            <table className="border-collapse text-[8px]">
+            <table className="border-collapse text-[9px]">
               <tbody>
                 <tr>
                   <td className={`${cb} bg-neutral-100 font-bold`}>Subtotal €</td>
@@ -269,8 +269,8 @@ export function ProformaDocument({
                       <td className={`${dc} text-right`}>{fmt(totals.ivaEuros || 0)}</td>
                     </>
                   )}
-                  <td className={`${cb} bg-neutral-100 font-bold text-[9px]`}>{totalLabel}</td>
-                  <td className={`${dc} text-right font-bold text-[10px]`}>{fmt(totals.total)}</td>
+                  <td className={`${cb} bg-neutral-100 font-bold text-[10px]`}>{totalLabel}</td>
+                  <td className={`${dc} text-right font-bold text-[11px]`}>{fmt(totals.total)}</td>
                 </tr>
               </tbody>
             </table>
@@ -280,7 +280,7 @@ export function ProformaDocument({
         {/* Exporter declaration */}
         {Object.keys(hsCodes).length > 0 && (
           <div className="pb-1">
-            <p className="text-[6px] font-bold text-neutral-700 leading-tight">
+            <p className="text-[7px] font-bold text-neutral-700 leading-tight">
               THE EXPORTER OF THE PRODUCTS COVERED BY THIS DOCUMENT (CUSTOMS AUTH. NO. ESEAOR 19000455 - ESREX3575),
               DECLARES THAT EXCEPT WHERE OTHERWISE CLEARLY INDICATED, THESE PRODUCTS ARE OF SPANISH PREFERENTIAL ORIGIN.
             </p>
@@ -289,14 +289,14 @@ export function ProformaDocument({
 
         {/* Footer: Payment + Bank + Terms + Stamp - all in one compact row */}
         <div className="pb-1">
-          <table className="w-full border-collapse text-[8px]">
+          <table className="w-full border-collapse text-[9px]">
             <tbody>
               {payment && (
                 <tr>
                   <td className={`${cb} font-bold bg-neutral-100`} style={{ width: '22%' }}>PAYMENT</td>
                   <td className={dc} colSpan={2}>{payment.method}</td>
                   <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={4} style={{ width: '22%', verticalAlign: 'middle' }}>
-                    <div className="text-[7px] text-neutral-600">
+                    <div className="text-[8px] text-neutral-600">
                       <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
                       <p>CIF: B12945796</p>
                     </div>
@@ -310,7 +310,7 @@ export function ProformaDocument({
                 </td>
                 {!payment && (
                   <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={3} style={{ width: '22%', verticalAlign: 'middle' }}>
-                    <div className="text-[7px] text-neutral-600">
+                    <div className="text-[8px] text-neutral-600">
                       <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
                       <p>CIF: B12945796</p>
                     </div>
@@ -337,15 +337,15 @@ export function ProformaDocument({
           <div className="pb-1">
             <div className="flex gap-4">
               <div className="flex-1">
-                <p className="text-[8px] text-neutral-600 mb-4">Entregado por / Delivered by:</p>
+                <p className="text-[9px] text-neutral-600 mb-4">Entregado por / Delivered by:</p>
                 <div className="border-t border-neutral-400 pt-px">
-                  <p className="text-[7px] text-neutral-500">Firma y sello</p>
+                  <p className="text-[8px] text-neutral-500">Firma y sello</p>
                 </div>
               </div>
               <div className="flex-1">
-                <p className="text-[8px] text-neutral-600 mb-4">Recibido por / Received by:</p>
+                <p className="text-[9px] text-neutral-600 mb-4">Recibido por / Received by:</p>
                 <div className="border-t border-neutral-400 pt-px">
-                  <p className="text-[7px] text-neutral-500">Firma, nombre y DNI</p>
+                  <p className="text-[8px] text-neutral-500">Firma, nombre y DNI</p>
                 </div>
               </div>
             </div>
@@ -354,7 +354,7 @@ export function ProformaDocument({
 
         {/* Footer line */}
         <div className="text-center border-t border-neutral-200" style={{ paddingTop: '2px' }}>
-          <p className="text-[6px] text-neutral-500" style={{ margin: 0 }}>
+          <p className="text-[7px] text-neutral-500" style={{ margin: 0 }}>
             Solo se reservará el material durante 20 días. — {COMPANY.registry}
           </p>
         </div>

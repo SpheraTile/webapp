@@ -353,9 +353,10 @@ export function ProformaDocument({
         )}
 
         {/* Footer line */}
-        <div className="text-center pt-1 border-t border-neutral-200">
-          <p className="text-[7px] italic font-medium text-neutral-600">Solo se reservará el material durante 20 días.</p>
-          <p className="text-[6px] text-neutral-400 mt-px">{COMPANY.registry}</p>
+        <div className="text-center border-t border-neutral-200" style={{ paddingTop: '2px' }}>
+          <p className="text-[6px] text-neutral-500" style={{ margin: 0 }}>
+            Solo se reservará el material durante 20 días. — {COMPANY.registry}
+          </p>
         </div>
 
       </div>

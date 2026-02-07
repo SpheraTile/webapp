@@ -124,16 +124,19 @@ export function ProformaDocument({
     : 'Total €'
 
   // Cell style helpers
-  const cb = 'border border-neutral-400 px-1.5 py-0.5'
+  const cb = 'border border-neutral-400 px-2 py-1'
   const hc = `${cb} bg-neutral-100 text-[9px] font-bold text-neutral-800 uppercase`
   const dc = `${cb} text-[9px] text-neutral-900`
 
   return (
-    <div className="bg-white w-full" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.3' }}>
-      <div className="p-4" style={{ maxWidth: '210mm' }}>
+    <div className="bg-white w-full" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4' }}>
+      <div className="p-6 flex flex-col" style={{ maxWidth: '210mm', minHeight: '277mm' }}>
+
+        {/* Content area - grows to push footer down */}
+        <div className="flex-1">
 
         {/* Header: Logo left + Company info center + Doc type right */}
-        <div className="flex items-start justify-between pb-2">
+        <div className="flex items-start justify-between pb-3">
           <img src="/logo-sphera.png" alt="SPHERA TILE" className="h-8" />
           <div className="text-center flex-1 px-3">
             <p className="text-[8px] text-neutral-700 font-medium leading-tight">
@@ -149,7 +152,7 @@ export function ProformaDocument({
         </div>
 
         {/* Client + Doc info row */}
-        <div className="pb-1.5">
+        <div className="pb-2">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -184,7 +187,7 @@ export function ProformaDocument({
         </div>
 
         {/* Products Table */}
-        <div className="pb-1">
+        <div className="pb-2">
           <table className="w-full border-collapse">
             <thead>
               <tr>
@@ -251,7 +254,7 @@ export function ProformaDocument({
         </div>
 
         {/* Weight + Financial totals row */}
-        <div className="flex items-start justify-between pb-1">
+        <div className="flex items-start justify-between pb-2">
           <div className="text-[9px]">
             <span className="font-bold">NET: {Math.round(weight.net)} KG</span>
             <span className="ml-3 font-bold">GROSS: {Math.round(weight.gross)} KG</span>
@@ -288,7 +291,7 @@ export function ProformaDocument({
         )}
 
         {/* Footer: Payment + Bank + Terms + Stamp - all in one compact row */}
-        <div className="pb-1">
+        <div className="pb-2">
           <table className="w-full border-collapse text-[9px]">
             <tbody>
               {payment && (
@@ -334,16 +337,16 @@ export function ProformaDocument({
 
         {/* Signatures (albaranes only) */}
         {showSignatures && (
-          <div className="pb-1">
+          <div className="pb-2">
             <div className="flex gap-4">
               <div className="flex-1">
-                <p className="text-[9px] text-neutral-600 mb-4">Entregado por / Delivered by:</p>
+                <p className="text-[9px] text-neutral-600 mb-6">Entregado por / Delivered by:</p>
                 <div className="border-t border-neutral-400 pt-px">
                   <p className="text-[8px] text-neutral-500">Firma y sello</p>
                 </div>
               </div>
               <div className="flex-1">
-                <p className="text-[9px] text-neutral-600 mb-4">Recibido por / Received by:</p>
+                <p className="text-[9px] text-neutral-600 mb-6">Recibido por / Received by:</p>
                 <div className="border-t border-neutral-400 pt-px">
                   <p className="text-[8px] text-neutral-500">Firma, nombre y DNI</p>
                 </div>
@@ -352,8 +355,10 @@ export function ProformaDocument({
           </div>
         )}
 
-        {/* Footer line */}
-        <div className="text-center border-t border-neutral-200" style={{ paddingTop: '2px' }}>
+        </div>{/* End flex-1 content */}
+
+        {/* Footer line - pushed to bottom of page */}
+        <div className="text-center border-t border-neutral-300 pt-1 mt-auto">
           <p className="text-[7px] text-neutral-500" style={{ margin: 0 }}>
             Solo se reservará el material durante 20 días. — {COMPANY.registry}
           </p>

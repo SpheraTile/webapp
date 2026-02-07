@@ -195,7 +195,7 @@ ${itemsStr}${o.items.length > 3 ? `\n  ... y ${o.items.length - 3} productos má
 
       const products = await prisma.producto.findMany({
         where: filters,
-        take: 5,
+        take: 15,
         orderBy: { stock_m2: 'desc' },
       })
 

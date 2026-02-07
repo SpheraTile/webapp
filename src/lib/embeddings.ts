@@ -1,15 +1,13 @@
-import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { neon } from '@neondatabase/serverless'
 
 // Lazy initialization to avoid errors during build
-let openaiClient: OpenAI | null = null
-function getOpenAI(): OpenAI {
-  if (!openaiClient) {
-    openaiClient = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
+let genAIClient: GoogleGenerativeAI | null = null
+function getGenAI(): GoogleGenerativeAI {
+  if (!genAIClient) {
+    genAIClient = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
   }
-  return openaiClient
+  return genAIClient
 }
 
 // Create Neon SQL client for raw queries (pgvector) - lazy
@@ -21,14 +19,12 @@ function getSQL() {
   return sqlClient
 }
 
-// Generate embedding for a text
+// Generate embedding for a text using Gemini
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const openai = getOpenAI()
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: text,
-  })
-  return response.data[0].embedding
+  const genAI = getGenAI()
+  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' })
+  const result = await model.embedContent(text)
+  return result.embedding.values
 }
 
 // Create searchable text from product data
@@ -292,9 +288,88 @@ export async function getRecommendationsForUser(userId: string, limit = 5): Prom
   }>
 }
 
-// Batch update all product embeddings
-export async function updateAllProductEmbeddings(): Promise<{ updated: number; errors: string[] }> {
+// Migrate vector column from 1536 (OpenAI) to 768 (Gemini) dimensions
+async function migrateVectorDimensions(): Promise<void> {
   const sql = getSQL()
+  // Clear existing embeddings (they're incompatible with new dimensions)
+  await sql`UPDATE "Producto" SET embedding = NULL`
+  // Drop old index
+  await sql`DROP INDEX IF EXISTS "Producto_embedding_idx"`
+  // Alter column to new dimension
+  await sql`ALTER TABLE "Producto" ALTER COLUMN embedding TYPE vector(768)`
+  // Recreate index
+  await sql`CREATE INDEX IF NOT EXISTS "Producto_embedding_idx" ON "Producto" USING ivfflat ("embedding" vector_cosine_ops) WITH (lists = 100)`
+  // Update the search function
+  await sql`
+    CREATE OR REPLACE FUNCTION search_products_by_embedding(
+      query_embedding vector(768),
+      match_threshold float DEFAULT 0.7,
+      match_count int DEFAULT 10
+    )
+    RETURNS TABLE (
+      id text,
+      nombre text,
+      referencia text,
+      serie text,
+      descripcion text,
+      formato text,
+      precio_m2 float,
+      stock_m2 float,
+      imagen text,
+      similarity float
+    )
+    LANGUAGE plpgsql
+    AS $func$
+    BEGIN
+      RETURN QUERY
+      SELECT
+        p.id,
+        p.nombre,
+        p.referencia,
+        p.serie,
+        p.descripcion,
+        p.formato,
+        p.precio_m2,
+        p.stock_m2,
+        p.imagen,
+        1 - (p.embedding <=> query_embedding) as similarity
+      FROM "Producto" p
+      WHERE p.embedding IS NOT NULL
+        AND 1 - (p.embedding <=> query_embedding) > match_threshold
+      ORDER BY p.embedding <=> query_embedding
+      LIMIT match_count;
+    END;
+    $func$
+  `
+}
+
+// Batch update all product embeddings
+export async function updateAllProductEmbeddings(): Promise<{ updated: number; errors: string[]; migrated: boolean }> {
+  const sql = getSQL()
+
+  // Check current vector dimension and migrate if needed
+  let migrated = false
+  try {
+    const dimCheck = await sql`
+      SELECT atttypmod FROM pg_attribute
+      WHERE attrelid = '"Producto"'::regclass
+        AND attname = 'embedding'
+    ` as Record<string, number>[]
+    // atttypmod for vector(1536) is 1540 (dim + 4), for vector(768) is 772
+    if (dimCheck.length > 0 && dimCheck[0].atttypmod !== 772) {
+      await migrateVectorDimensions()
+      migrated = true
+    }
+  } catch {
+    // If check fails, try migration anyway
+    try {
+      await migrateVectorDimensions()
+      migrated = true
+    } catch {
+      // Column might already be correct
+    }
+  }
+
   const productsResult = await sql`
     SELECT id, nombre, serie, descripcion, formato, calidad, materia_prima, aspecto, acabado, tipo_pieza, uso
     FROM "Producto"
@@ -313,5 +388,5 @@ export async function updateAllProductEmbeddings(): Promise<{ updated: number; e
     }
   }
 
-  return { updated, errors }
+  return { updated, errors, migrated }
 }

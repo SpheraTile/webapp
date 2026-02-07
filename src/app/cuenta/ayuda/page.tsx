@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -113,6 +113,9 @@ export default function AyudaPage() {
             ))}
           </div>
         </div>
+
+        {/* GDPR / Privacidad */}
+        <DataDeletionSection />
       </div>
     </div>
   )
@@ -132,5 +135,107 @@ function FAQItem({ pregunta, respuesta }: { pregunta: string; respuesta: string 
         <p className="text-neutral-600 text-sm">{respuesta}</p>
       </div>
     </details>
+  )
+}
+
+function DataDeletionSection() {
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleRequest = async () => {
+    setSending(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/gdpr/solicitar-borrado', {
+        method: 'POST',
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Error al enviar la solicitud')
+      }
+
+      setSent(true)
+      setShowConfirm(false)
+    } catch (err: any) {
+      setError(err.message || 'Error al enviar la solicitud')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="mt-6 lg:bg-white lg:rounded-2xl lg:shadow-sm lg:overflow-hidden">
+      <div className="p-4 lg:p-6 border-b border-neutral-100">
+        <h2 className="font-semibold text-neutral-900">Privacidad y datos personales</h2>
+      </div>
+      <div className="p-4 lg:p-6">
+        <p className="text-sm text-neutral-600 mb-4">
+          Conforme al Reglamento General de Protección de Datos (RGPD), tienes derecho a solicitar
+          la eliminación de tus datos personales. Al realizar esta solicitud, nuestro equipo
+          revisará tu petición y te contactará para confirmar el proceso.
+        </p>
+
+        {sent ? (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            Solicitud enviada correctamente. Nos pondremos en contacto contigo para gestionar tu petición.
+          </div>
+        ) : (
+          <>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+            <button
+              onClick={() => setShowConfirm(true)}
+              className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+            >
+              Solicitar borrado de mis datos
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Modal de confirmación */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md">
+            <div className="p-6">
+              <h3 className="text-lg font-bold text-neutral-900 mb-3">
+                Confirmar solicitud de borrado
+              </h3>
+              <p className="text-sm text-neutral-600 mb-2">
+                Estás a punto de solicitar el borrado de tus datos personales.
+              </p>
+              <p className="text-sm text-neutral-600 mb-4">
+                Nuestro equipo revisará la solicitud teniendo en cuenta las obligaciones legales
+                de conservación de datos (facturas, contratos, etc.) y te contactará para
+                informarte del resultado.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="flex-1 py-2 px-4 border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleRequest}
+                  disabled={sending}
+                  className="flex-1 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {sending ? 'Enviando...' : 'Confirmar solicitud'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

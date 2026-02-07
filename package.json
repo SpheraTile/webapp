@@ -16,8 +16,8 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.25",
     "@ai-sdk/react": "^3.0.74",
+    "@google/generative-ai": "^0.24.1",
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/client": "^5.22.0",
     "ai": "^6.0.72",
@@ -29,7 +29,6 @@
     "next": "^16.1.6",
     "next-auth": "^4.24.13",
     "next-intl": "^4.8.1",
-    "openai": "^6.18.0",
     "prisma": "^5.22.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",

@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
     const precio_min = searchParams.get('precio_min')
     const precio_max = searchParams.get('precio_max')
     const solo_con_stock = searchParams.get('solo_con_stock')
+    const serie = searchParams.get('serie')
 
     // Paginación
     const page = parseInt(searchParams.get('page') || '1')
@@ -36,6 +37,10 @@ export async function GET(request: NextRequest) {
         { referencia: { contains: busqueda, mode: 'insensitive' } },
         { serie: { contains: busqueda, mode: 'insensitive' } },
       ]
+    }
+
+    if (serie) {
+      where.serie = serie
     }
 
     if (calidad.length > 0) {

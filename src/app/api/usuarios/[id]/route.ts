@@ -36,10 +36,21 @@ export async function GET(
         telefono: true,
         empresa: true,
         nif_cif: true,
+        tipo_identificacion: true,
         direccion: true,
         ciudad: true,
         provincia: true,
         codigo_postal: true,
+        pais: true,
+        codigo_cliente: true,
+        subcuenta: true,
+        moneda: true,
+        forma_cobro: true,
+        canal_cobro: true,
+        iban: true,
+        bic: true,
+        referencia_mandato: true,
+        idioma: true,
         activo: true,
         createdAt: true,
         updatedAt: true,
@@ -108,10 +119,21 @@ export async function PUT(
     if (data.telefono !== undefined) updateData.telefono = data.telefono || null
     if (data.empresa !== undefined) updateData.empresa = data.empresa || null
     if (data.nif_cif !== undefined) updateData.nif_cif = data.nif_cif || null
+    if (data.tipo_identificacion !== undefined) updateData.tipo_identificacion = data.tipo_identificacion || null
     if (data.direccion !== undefined) updateData.direccion = data.direccion || null
     if (data.ciudad !== undefined) updateData.ciudad = data.ciudad || null
     if (data.provincia !== undefined) updateData.provincia = data.provincia || null
     if (data.codigo_postal !== undefined) updateData.codigo_postal = data.codigo_postal || null
+    if (data.pais !== undefined) updateData.pais = data.pais || null
+    if (data.codigo_cliente !== undefined) updateData.codigo_cliente = data.codigo_cliente || null
+    if (data.subcuenta !== undefined) updateData.subcuenta = data.subcuenta || null
+    if (data.moneda !== undefined) updateData.moneda = data.moneda || null
+    if (data.forma_cobro !== undefined) updateData.forma_cobro = data.forma_cobro || null
+    if (data.canal_cobro !== undefined) updateData.canal_cobro = data.canal_cobro || null
+    if (data.iban !== undefined) updateData.iban = data.iban || null
+    if (data.bic !== undefined) updateData.bic = data.bic || null
+    if (data.referencia_mandato !== undefined) updateData.referencia_mandato = data.referencia_mandato || null
+    if (data.idioma !== undefined) updateData.idioma = data.idioma || 'es'
     if (data.role) updateData.role = data.role
     if (data.activo !== undefined) updateData.activo = data.activo
 

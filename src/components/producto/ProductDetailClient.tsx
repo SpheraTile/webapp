@@ -136,41 +136,22 @@ function RelatedProducts({ currentProduct }: { currentProduct: Producto }) {
   const [related, setRelated] = useState<Producto[]>([])
   const [loading, setLoading] = useState(true)
   const t = useTranslations('products')
-  const sameSeries = t('sameSeries')
 
   useEffect(() => {
     const fetchRelated = async () => {
       try {
-        // Fetch products from same series first
-        const response = await fetch(`/api/productos?limit=8`)
+        // Buscar productos de la misma serie
+        const params = new URLSearchParams()
+        params.append('serie', currentProduct.serie)
+        params.append('limit', '5')
+
+        const response = await fetch(`/api/productos?${params}`)
         if (response.ok) {
           const data = await response.json()
-          const productos = data.productos || []
-
-          // Filter out current product
-          const filtered = productos.filter((p: Producto) => p.id !== currentProduct.id)
-
-          // Sort: same series first, then same aspecto, then same materia_prima
-          const sorted = filtered.sort((a: Producto, b: Producto) => {
-            // Same series gets highest priority
-            const aSerieMatch = a.serie === currentProduct.serie ? 3 : 0
-            const bSerieMatch = b.serie === currentProduct.serie ? 3 : 0
-
-            // Same aspecto gets second priority
-            const aAspectoMatch = a.aspecto === currentProduct.aspecto ? 2 : 0
-            const bAspectoMatch = b.aspecto === currentProduct.aspecto ? 2 : 0
-
-            // Same materia_prima gets third priority
-            const aMateriaMatch = a.materia_prima === currentProduct.materia_prima ? 1 : 0
-            const bMateriaMatch = b.materia_prima === currentProduct.materia_prima ? 1 : 0
-
-            const aScore = aSerieMatch + aAspectoMatch + aMateriaMatch
-            const bScore = bSerieMatch + bAspectoMatch + bMateriaMatch
-
-            return bScore - aScore
-          })
-
-          setRelated(sorted.slice(0, 4))
+          const productos = (data.productos || []).filter(
+            (p: Producto) => p.id !== currentProduct.id
+          )
+          setRelated(productos.slice(0, 4))
         }
       } catch (error) {
         console.error('Error fetching related products:', error)
@@ -221,11 +202,9 @@ function RelatedProducts({ currentProduct }: { currentProduct: Producto }) {
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                 sizes="(max-width: 768px) 50vw, 25vw"
               />
-              {producto.serie === currentProduct.serie && (
-                <span className="absolute top-2 left-2 px-2 py-1 bg-primary-600 text-white text-xs font-medium rounded">
-                  {sameSeries}
-                </span>
-              )}
+              <span className="absolute top-2 left-2 px-2 py-1 bg-primary-600/80 text-white text-xs font-medium rounded">
+                {currentProduct.serie}
+              </span>
             </div>
             <div className="p-4">
               <h3 className="font-semibold text-neutral-900 truncate group-hover:text-primary-600 transition-colors">

@@ -2,14 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import OpenAI from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const BUNNY_CDN_URL = process.env.BUNNY_CDN_URL || 'https://spheratile.b-cdn.net'
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Initialize Gemini client
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 // Rate limiting - store requests per IP
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
@@ -83,8 +79,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check API key
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 })
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 })
     }
 
     const session = await getServerSession(authOptions)
@@ -235,28 +231,31 @@ ${userContext}${ordersContext}${productContext}
 
 Si el usuario pregunta sobre temas completamente ajenos a cerámica/construcción/decoración, redirige amablemente la conversación hacia cómo puedes ayudarle con productos o proyectos.`
 
-    // Call OpenAI API with streaming
-    const stream = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages.map((m: { role: string; content: string }) => ({
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-        })),
-      ],
-      stream: true,
+    // Build Gemini conversation history
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+
+    const geminiHistory = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }))
+
+    const chat = model.startChat({
+      history: geminiHistory,
+      systemInstruction: { role: 'user', parts: [{ text: systemPrompt }] },
     })
+
+    const lastMessage = messages[messages.length - 1]
+    const result = await chat.sendMessageStream(lastMessage.content)
 
     // Create a ReadableStream for the response
     const encoder = new TextEncoder()
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || ''
-            if (content) {
-              controller.enqueue(encoder.encode(content))
+          for await (const chunk of result.stream) {
+            const text = chunk.text()
+            if (text) {
+              controller.enqueue(encoder.encode(text))
             }
           }
           controller.close()

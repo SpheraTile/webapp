@@ -9,23 +9,34 @@ generator client {
 
 // ==================== USUARIOS ====================
 model User {
-  id            String       @id @default(cuid())
-  email         String       @unique
-  password      String
-  nombre        String
-  role          Role         @default(CLIENTE)
-  telefono      String?
-  empresa       String?
-  nif_cif       String?
-  direccion     String?
-  ciudad        String?
-  provincia     String?
-  codigo_postal String?
-  activo        Boolean      @default(true)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  pedidos       Pedido[]
-  resetTokens   ResetToken[]
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  password            String
+  nombre              String
+  role                Role                @default(CLIENTE)
+  telefono            String?
+  empresa             String?
+  nif_cif             String?
+  tipo_identificacion TipoIdentificacion?
+  direccion           String?
+  ciudad              String?
+  provincia           String?
+  codigo_postal       String?
+  pais                String?
+  codigo_cliente      String?             @unique
+  subcuenta           String?
+  moneda              String?             @default("EUR")
+  forma_cobro         FormaCobro?
+  canal_cobro         String?
+  iban                String?
+  bic                 String?
+  referencia_mandato  String?
+  idioma              String              @default("es") // es, en, ar
+  activo              Boolean             @default(true)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  pedidos             Pedido[]
+  resetTokens         ResetToken[]
 }
 
 // Token para resetear contraseña
@@ -42,6 +53,23 @@ model ResetToken {
 enum Role {
   ADMIN
   CLIENTE
+}
+
+enum TipoIdentificacion {
+  NIF
+  CIF
+  NIF_IVA
+  PASAPORTE
+  OTRO
+}
+
+enum FormaCobro {
+  PAGO_ANTICIPADO
+  TRANSFERENCIA
+  DOMICILIACION
+  TARJETA
+  PAGARE
+  EFECTIVO
 }
 
 // ==================== PRODUCTOS ====================

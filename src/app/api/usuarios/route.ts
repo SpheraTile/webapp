@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
         { nombre: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
         { empresa: { contains: search, mode: 'insensitive' } },
+        { codigo_cliente: { contains: search, mode: 'insensitive' } },
       ]
     }
 
@@ -51,6 +52,9 @@ export async function GET(request: NextRequest) {
         telefono: true,
         empresa: true,
         nif_cif: true,
+        codigo_cliente: true,
+        pais: true,
+        idioma: true,
         activo: true,
         createdAt: true,
         _count: {
@@ -120,16 +124,28 @@ export async function POST(request: NextRequest) {
         telefono: data.telefono || null,
         empresa: data.empresa || null,
         nif_cif: data.nif_cif || null,
+        tipo_identificacion: data.tipo_identificacion || null,
         direccion: data.direccion || null,
         ciudad: data.ciudad || null,
         provincia: data.provincia || null,
         codigo_postal: data.codigo_postal || null,
+        pais: data.pais || null,
+        codigo_cliente: data.codigo_cliente || null,
+        subcuenta: data.subcuenta || null,
+        moneda: data.moneda || 'EUR',
+        forma_cobro: data.forma_cobro || null,
+        canal_cobro: data.canal_cobro || null,
+        iban: data.iban || null,
+        bic: data.bic || null,
+        referencia_mandato: data.referencia_mandato || null,
+        idioma: data.idioma || 'es',
       },
       select: {
         id: true,
         email: true,
         nombre: true,
         role: true,
+        codigo_cliente: true,
       },
     })
 
@@ -137,7 +153,7 @@ export async function POST(request: NextRequest) {
     if (data.sendWelcomeEmail) {
       try {
         const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-        const emailContent = getWelcomeEmail(usuario.nombre, `${baseUrl}/login`)
+        const emailContent = getWelcomeEmail(usuario.nombre, `${baseUrl}/login`, data.idioma || 'es')
         await sendEmail({
           to: usuario.email,
           subject: emailContent.subject,

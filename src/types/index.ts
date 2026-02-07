@@ -77,18 +77,30 @@ export interface Cesta {
   total_euros: number
 }
 
+export type TipoIdentificacion = 'NIF' | 'CIF' | 'NIF_IVA' | 'PASAPORTE' | 'OTRO'
+export type FormaCobro = 'PAGO_ANTICIPADO' | 'TRANSFERENCIA' | 'DOMICILIACION' | 'TARJETA' | 'PAGARE' | 'EFECTIVO'
+
 export interface Cliente {
   id: string
+  codigo_cliente?: string
   nombre: string
   email: string
   telefono: string
   empresa?: string
   nif_cif: string
+  tipo_identificacion?: TipoIdentificacion
   direccion: string
   ciudad: string
   provincia: string
   codigo_postal: string
   pais: string
+  subcuenta?: string
+  moneda?: string
+  forma_cobro?: FormaCobro
+  canal_cobro?: string
+  iban?: string
+  bic?: string
+  referencia_mandato?: string
   notas?: string
   fecha_alta: Date
 }

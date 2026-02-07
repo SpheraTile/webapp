@@ -27,6 +27,8 @@ export default function ProductosAlmacenPage() {
   const [productos, setProductos] = useState<Producto[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [editingStock, setEditingStock] = useState<string | null>(null)
+  const [editStockValue, setEditStockValue] = useState('')
   const { showToast } = useToast()
   const confirm = useConfirm()
 
@@ -82,6 +84,32 @@ export default function ProductosAlmacenPage() {
     } finally {
       setDeleting(null)
     }
+  }
+
+  const handleStockSave = async (id: string) => {
+    const newStock = parseFloat(editStockValue)
+    if (isNaN(newStock) || newStock < 0) {
+      setEditingStock(null)
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/productos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stock_m2: newStock }),
+      })
+
+      if (res.ok) {
+        setProductos(productos.map((p) => p.id === id ? { ...p, stock_m2: newStock } : p))
+        showToast('Stock actualizado', 'success')
+      } else {
+        showToast('Error al actualizar stock', 'error')
+      }
+    } catch {
+      showToast('Error al actualizar stock', 'error')
+    }
+    setEditingStock(null)
   }
 
   const productosConBajoStock = productos.filter((p) => p.stock_m2 < 100).length
@@ -287,12 +315,44 @@ export default function ProductosAlmacenPage() {
                         {producto.precio_m2.toFixed(2)}€
                       </td>
                       <td className="px-6 py-4">
-                        <div className={`font-medium ${producto.stock_m2 < 100 ? 'text-red-600' : 'text-neutral-900'}`}>
-                          {producto.stock_m2.toLocaleString('es-ES')} m²
-                        </div>
-                        <div className="text-xs text-neutral-500">
-                          {Math.floor(producto.stock_m2 / producto.m2_caja)} cajas
-                        </div>
+                        {editingStock === producto.id ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              value={editStockValue}
+                              onChange={(e) => setEditStockValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleStockSave(producto.id)
+                                if (e.key === 'Escape') setEditingStock(null)
+                              }}
+                              onBlur={() => handleStockSave(producto.id)}
+                              autoFocus
+                              step="0.01"
+                              min="0"
+                              className="w-24 px-2 py-1 text-sm border border-primary-400 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                            <span className="text-xs text-neutral-500">m²</span>
+                          </div>
+                        ) : (
+                          <div
+                            className="cursor-pointer group"
+                            onClick={() => {
+                              setEditingStock(producto.id)
+                              setEditStockValue(String(producto.stock_m2))
+                            }}
+                            title="Clic para editar stock"
+                          >
+                            <div className={`font-medium ${producto.stock_m2 < 100 ? 'text-red-600' : 'text-neutral-900'} group-hover:text-primary-600 transition-colors`}>
+                              {producto.stock_m2.toLocaleString('es-ES')} m²
+                              <svg className="inline-block ml-1 opacity-0 group-hover:opacity-100 transition-opacity" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                              </svg>
+                            </div>
+                            <div className="text-xs text-neutral-500">
+                              {Math.floor(producto.stock_m2 / producto.m2_caja)} cajas
+                            </div>
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">

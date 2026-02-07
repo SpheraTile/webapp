@@ -5,18 +5,18 @@ import { QRCodeSVG } from 'qrcode.react'
 // Company info (from proforma)
 const COMPANY = {
   name: 'SPHERA TILE S.L.',
-  address: 'AVDA. DEL MEDITERRÁNEO, 113  12200 ONDA, CASTELLÓN, SPAIN',
+  address: 'AVDA. DEL MEDITERRÁNEO, 113 - 12200 ONDA, CASTELLÓN, SPAIN',
   nif: 'ESB12945796',
   email: 'info@spheratile.es',
   tel: '+34 964 744 246',
   mob: '+34 633 220 225',
   bank: {
     name: 'CAJAMAR CAJA RURAL',
-    address: 'CARRER DE MONTCADA, 14, 12005\nCASTELLÓN, ESPAÑA',
+    address: 'CARRER DE MONTCADA, 14, 12005 CASTELLÓN',
     iban: 'ES33 3058 7304 6527 2040 4063',
     swift: 'CCRIES2AXXX',
   },
-  registry: 'Inscrita en el Reg. Mercantil de Castellón, Tomo 1669, Libro 1230, Folio 210, Hoja CS-37423, Inscripción 1ª - N.I.F. B-12945796',
+  registry: 'Reg. Mercantil Castellón, Tomo 1669, Libro 1230, Folio 210, Hoja CS-37423 - N.I.F. B-12945796',
 }
 
 export interface ProformaItem {
@@ -113,10 +113,10 @@ export function ProformaDocument({
 
   const hsCodesStr = Object.entries(hsCodes)
     .map(([code, m2]) => `${code} - ${fmt(m2)} M2`)
-    .join('\n')
+    .join(', ')
 
   const typeLabel = type === 'FACTURA' ? 'FACTURA / INVOICE'
-    : type === 'ALBARÁN DE ENTREGA' ? 'ALBARÁN DE ENTREGA / DELIVERY NOTE'
+    : type === 'ALBARÁN DE ENTREGA' ? 'ALBARÁN / DELIVERY NOTE'
     : 'PEDIDO / ORDER'
 
   const totalLabel = type === 'FACTURA' ? 'Total Factura €'
@@ -124,88 +124,82 @@ export function ProformaDocument({
     : 'Total €'
 
   // Cell style helpers
-  const cellBorder = 'border border-neutral-400 px-1.5 py-0.5'
-  const headerCell = `${cellBorder} bg-neutral-100 text-[9px] font-bold text-neutral-800 uppercase`
-  const dataCell = `${cellBorder} text-[9px] text-neutral-900`
+  const cb = 'border border-neutral-400 px-1 py-px'
+  const hc = `${cb} bg-neutral-100 text-[8px] font-bold text-neutral-800 uppercase`
+  const dc = `${cb} text-[8px] text-neutral-900`
 
   return (
-    <div
-      className="bg-white w-full mx-auto overflow-x-auto"
-      style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.2' }}
-    >
-      {/* A4-sized inner container */}
-      <div className="min-w-[680px]" style={{ maxWidth: '210mm' }}>
-        {/* Logo + Company Info */}
-        <div className="text-center pt-3 pb-1 px-5">
-          <img src="/logo-sphera.png" alt="SPHERA TILE" className="mx-auto h-10 mb-1" />
-          <p className="text-[8px] text-neutral-700 font-medium leading-tight">
-            {COMPANY.address}  NIF:{COMPANY.nif}
-          </p>
-          <p className="text-[8px] text-neutral-700 leading-tight">
-            EMAIL:{COMPANY.email}  TEL: {COMPANY.tel}  MOB: {COMPANY.mob}
-          </p>
+    <div className="bg-white w-full" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '8px', lineHeight: '1.2' }}>
+      <div className="p-4" style={{ maxWidth: '210mm' }}>
+
+        {/* Header: Logo left + Company info center + Doc type right */}
+        <div className="flex items-start justify-between pb-2">
+          <img src="/logo-sphera.png" alt="SPHERA TILE" className="h-7" />
+          <div className="text-center flex-1 px-3">
+            <p className="text-[7px] text-neutral-700 font-medium leading-tight">
+              {COMPANY.name} - {COMPANY.address} - NIF: {COMPANY.nif}
+            </p>
+            <p className="text-[7px] text-neutral-600 leading-tight">
+              {COMPANY.email} | TEL: {COMPANY.tel} | MOB: {COMPANY.mob}
+            </p>
+          </div>
+          <div className="text-right">
+            <h1 className="text-sm font-bold text-red-700 leading-tight whitespace-nowrap">{typeLabel}</h1>
+          </div>
         </div>
 
-        {/* Document Title */}
-        <div className="text-right px-5 pb-1">
-          <h1 className="text-lg font-bold text-red-700 tracking-wide">{typeLabel}</h1>
-        </div>
-
-        {/* Client Name */}
-        <div className="px-5 pb-1">
-          <p className="text-xs font-semibold text-neutral-900">{client.nombre}</p>
-        </div>
-
-        {/* Info Table: CLIENT | DOC NUMBER | DATE | PAGE + Client details */}
-        <div className="px-5 pb-2">
+        {/* Client + Doc info row */}
+        <div className="pb-1.5">
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className={headerCell} style={{ width: '20%' }}>CLIENT</th>
-                <th className={headerCell} style={{ width: '25%' }}>
+                <th className={hc} style={{ width: '25%' }}>CLIENTE / CLIENT</th>
+                <th className={hc} style={{ width: '20%' }}>
                   {type === 'FACTURA' ? 'FACTURA' : type === 'ALBARÁN DE ENTREGA' ? 'ALBARÁN' : 'PEDIDO'}
                 </th>
-                <th className={headerCell} style={{ width: '20%' }}>DATE</th>
-                <th className={headerCell} style={{ width: '10%' }}>PAGE</th>
-                <th className={cellBorder} rowSpan={2} style={{ width: '25%', verticalAlign: 'top', fontSize: '9px' }}>
-                  <div className="text-[9px] leading-tight">
-                    {client.pais && <span>({client.pais})</span>}
-                    <br />
-                    N.I.F. {client.nif || ''}
-                    <br />
-                    Telf.: {client.telefono || ''}
-                  </div>
-                </th>
+                <th className={hc} style={{ width: '12%' }}>FECHA / DATE</th>
+                <th className={hc} style={{ width: '8%' }}>PÁG.</th>
+                <th className={hc} style={{ width: '35%' }}>DATOS CLIENTE</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td className={dataCell}>{client.codigo || '-'}</td>
-                <td className={dataCell}>{documentNumber}</td>
-                <td className={dataCell}>{formatDateShort(date)}</td>
-                <td className={dataCell}>{page}</td>
+                <td className={dc}>
+                  <div className="font-semibold">{client.nombre}</div>
+                  {client.codigo && <div className="text-[7px] text-neutral-500">Cód: {client.codigo}</div>}
+                </td>
+                <td className={`${dc} font-medium`}>{documentNumber}</td>
+                <td className={dc}>{formatDateShort(date)}</td>
+                <td className={dc}>{page}</td>
+                <td className={dc}>
+                  <div className="text-[7px] leading-tight">
+                    {client.pais && <span>({client.pais}) </span>}
+                    {client.nif && <span>NIF: {client.nif} </span>}
+                    {client.telefono && <span>Tel: {client.telefono}</span>}
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
 
         {/* Products Table */}
-        <div className="px-5 pb-1">
+        <div className="pb-1">
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className={headerCell} style={{ width: '10%' }}>FORMAT</th>
-                <th className={headerCell}>DESCRIPTION</th>
-                <th className={headerCell} style={{ width: '6%' }}>CLASS</th>
-                <th className={headerCell} style={{ width: '36px' }}>QR</th>
-                <th className={`${headerCell} text-right`} style={{ width: '8%' }}>M2</th>
-                <th className={`${headerCell} text-right`} style={{ width: '7%' }}>BOX</th>
-                <th className={`${headerCell} text-right`} style={{ width: '7%' }}>PALLET</th>
+                <th className={hc} style={{ width: '9%' }}>FORMAT</th>
+                <th className={hc}>DESCRIPTION</th>
+                <th className={hc} style={{ width: '5%' }}>CLASS</th>
+                <th className={hc} style={{ width: '30px' }}>QR</th>
+                <th className={`${hc} text-right`} style={{ width: '8%' }}>M2</th>
+                <th className={`${hc} text-right`} style={{ width: '6%' }}>BOX</th>
+                <th className={`${hc} text-right`} style={{ width: '7%' }}>PALLET</th>
                 {showPrices && (
                   <>
-                    <th className={`${headerCell} text-right`} style={{ width: '8%' }}>PRICE €</th>
-                    <th className={`${headerCell} text-right`} style={{ width: '6%' }}>% DTO.</th>
-                    <th className={`${headerCell} text-right`} style={{ width: '9%' }}>AMOUNT</th>
+                    <th className={`${hc} text-right`} style={{ width: '8%' }}>PRICE €</th>
+                    <th className={`${hc} text-right`} style={{ width: '6%' }}>% DTO.</th>
+                    <th className={`${hc} text-right`} style={{ width: '9%' }}>AMOUNT</th>
                   </>
                 )}
               </tr>
@@ -213,174 +207,157 @@ export function ProformaDocument({
             <tbody>
               {items.map((item, i) => (
                 <tr key={i}>
-                  <td className={dataCell}>{item.formato}</td>
-                  <td className={`${dataCell} text-[8px]`}>{item.descripcion}</td>
-                  <td className={`${dataCell} text-center`}>{item.calidad}</td>
-                  <td className={`${dataCell} text-center`} style={{ padding: '1px' }}>
+                  <td className={dc}>{item.formato}</td>
+                  <td className={`${dc} text-[7px]`}>{item.descripcion}</td>
+                  <td className={`${dc} text-center`}>{item.calidad}</td>
+                  <td className={`${dc} text-center`} style={{ padding: '1px' }}>
                     {item.qrSlug && (
                       <QRCodeSVG
                         value={`${baseUrl}/productos/${item.qrSlug}`}
-                        size={28}
-                        level="M"
+                        size={24}
+                        level="L"
                         includeMargin={false}
                       />
                     )}
                   </td>
-                  <td className={`${dataCell} text-right`}>{fmt(item.m2)}</td>
-                  <td className={`${dataCell} text-right`}>{fmt(item.cajas)}</td>
-                  <td className={`${dataCell} text-right`}>{fmt(item.pallets)}</td>
+                  <td className={`${dc} text-right`}>{fmt(item.m2)}</td>
+                  <td className={`${dc} text-right`}>{fmt(item.cajas, 0)}</td>
+                  <td className={`${dc} text-right`}>{fmt(item.pallets, 1)}</td>
                   {showPrices && (
                     <>
-                      <td className={`${dataCell} text-right`}>{fmt(item.precioM2)}</td>
-                      <td className={`${dataCell} text-right`}>{item.descuento ? fmt(item.descuento) : ''}</td>
-                      <td className={`${dataCell} text-right font-medium`}>{fmt(item.importe)}</td>
+                      <td className={`${dc} text-right`}>{fmt(item.precioM2)}</td>
+                      <td className={`${dc} text-right`}>{item.descuento ? fmt(item.descuento) : ''}</td>
+                      <td className={`${dc} text-right font-medium`}>{fmt(item.importe)}</td>
                     </>
                   )}
                 </tr>
               ))}
+              {/* Totals row inside table */}
+              <tr className="bg-neutral-50">
+                <td className={`${cb} font-bold text-[8px]`} colSpan={4}>TOTALES</td>
+                <td className={`${cb} text-right font-bold text-[8px]`}>{fmt(totals.totalM2)}</td>
+                <td className={`${cb} text-right font-bold text-[8px]`}>{fmt(totals.totalCajas, 0)}</td>
+                <td className={`${cb} text-right font-bold text-[8px]`}>{fmt(totals.totalPallets, 1)}</td>
+                {showPrices && (
+                  <>
+                    <td className={cb}></td>
+                    <td className={cb}></td>
+                    <td className={`${cb} text-right font-bold text-[8px]`}>{fmt(totals.subtotal)}</td>
+                  </>
+                )}
+              </tr>
             </tbody>
           </table>
         </div>
 
-        {/* Totals Row: Weight left, sums center, financial right */}
-        <div className="px-5 pb-1">
-          <div className="flex items-start justify-between gap-2">
-            {/* Weight */}
-            <div className="text-[9px]">
-              <p className="font-bold leading-tight">NET WEIGHT: {Math.round(weight.net)} KG</p>
-              <p className="font-bold leading-tight">GROSS WEIGHT: {Math.round(weight.gross)} KG</p>
-            </div>
-
-            {/* Totals row with M2 + BOX + PALLET sums */}
-            <div className="flex items-end gap-3 text-[9px] font-bold">
-              <span>{fmt(totals.totalM2)} m²</span>
-              <span>{fmt(totals.totalCajas)} cajas</span>
-              <span>{fmt(totals.totalPallets)} pallets</span>
-            </div>
-
-            {/* Financial totals */}
-            {showPrices && (
-              <table className="border-collapse text-[9px]">
-                <thead>
-                  <tr>
-                    <th className={`${cellBorder} bg-neutral-100 font-bold text-center`}>Total €</th>
-                    <th className={`${cellBorder} bg-neutral-100 font-bold text-center`}>Cuota I.V.A. €</th>
-                    <th className={`${cellBorder} bg-neutral-100 font-bold text-center text-[10px]`}>{totalLabel}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className={`${dataCell} text-center font-medium`}>{fmt(totals.subtotal)}</td>
-                    <td className={`${dataCell} text-center`}>
-                      {totals.ivaPorcentaje != null && totals.ivaPorcentaje > 0
-                        ? `${fmt(totals.ivaEuros || 0)}`
-                        : ''
-                      }
-                      {totals.ivaPorcentaje != null && totals.ivaPorcentaje > 0 && (
-                        <span className="block text-[7px] text-neutral-500">{totals.ivaPorcentaje}%</span>
-                      )}
-                    </td>
-                    <td className={`${dataCell} text-center font-bold text-[11px]`}>{fmt(totals.total)}</td>
-                  </tr>
-                </tbody>
-              </table>
-            )}
+        {/* Weight + Financial totals row */}
+        <div className="flex items-start justify-between pb-1">
+          <div className="text-[8px]">
+            <span className="font-bold">NET: {Math.round(weight.net)} KG</span>
+            <span className="ml-3 font-bold">GROSS: {Math.round(weight.gross)} KG</span>
           </div>
+
+          {showPrices && (
+            <table className="border-collapse text-[8px]">
+              <tbody>
+                <tr>
+                  <td className={`${cb} bg-neutral-100 font-bold`}>Subtotal €</td>
+                  <td className={`${dc} text-right`}>{fmt(totals.subtotal)}</td>
+                  {totals.ivaPorcentaje != null && totals.ivaPorcentaje > 0 && (
+                    <>
+                      <td className={`${cb} bg-neutral-100 font-bold`}>IVA {totals.ivaPorcentaje}%</td>
+                      <td className={`${dc} text-right`}>{fmt(totals.ivaEuros || 0)}</td>
+                    </>
+                  )}
+                  <td className={`${cb} bg-neutral-100 font-bold text-[9px]`}>{totalLabel}</td>
+                  <td className={`${dc} text-right font-bold text-[10px]`}>{fmt(totals.total)}</td>
+                </tr>
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Exporter declaration */}
         {Object.keys(hsCodes).length > 0 && (
-          <div className="px-5 pb-1">
-            <p className="text-[7px] font-bold text-neutral-800 leading-tight">
-              THE EXPORTER OF THE PRODUCTS COVERED BY THIS DOCUMENT (CUSTOMS AUTHORISATION NO. ESEAOR 19000455 - ESREX3575 ),
-              DECLARES THAT EXCEPT WHERE OTHERWISE CLEARLY INDICATED, THESE PRODUCT OF SPANISH PREFERENTIAL ORIGIN.
+          <div className="pb-1">
+            <p className="text-[6px] font-bold text-neutral-700 leading-tight">
+              THE EXPORTER OF THE PRODUCTS COVERED BY THIS DOCUMENT (CUSTOMS AUTH. NO. ESEAOR 19000455 - ESREX3575),
+              DECLARES THAT EXCEPT WHERE OTHERWISE CLEARLY INDICATED, THESE PRODUCTS ARE OF SPANISH PREFERENTIAL ORIGIN.
             </p>
           </div>
         )}
 
-        {/* Footer table: Payment, Bank, Terms, H.S. Codes + Stamp area */}
-        <div className="px-5 pb-1">
-          <div className="flex gap-3">
-            {/* Left: Info table */}
-            <table className="border-collapse text-[9px] flex-1">
-              <tbody>
-                {payment && (
-                  <tr>
-                    <td className={`${cellBorder} font-bold bg-neutral-100 whitespace-nowrap`} style={{ width: '30%' }}>TERMS OF PAYMENT</td>
-                    <td className={dataCell}>{payment.method}</td>
-                  </tr>
-                )}
+        {/* Footer: Payment + Bank + Terms + Stamp - all in one compact row */}
+        <div className="pb-1">
+          <table className="w-full border-collapse text-[8px]">
+            <tbody>
+              {payment && (
                 <tr>
-                  <td className={`${cellBorder} font-bold bg-neutral-100`}>BANK DETAILS</td>
-                  <td className={dataCell}>
-                    <div className="text-[8px] leading-tight" style={{ whiteSpace: 'pre-line' }}>
-                      {payment?.bankName || COMPANY.bank.name}
-                      {'\n'}{payment?.bankAddress || COMPANY.bank.address}
-                      {'\n'}IBAN: {payment?.iban || COMPANY.bank.iban}
-                      {'\n'}SWIFTCODE: {payment?.swift || COMPANY.bank.swift}
+                  <td className={`${cb} font-bold bg-neutral-100`} style={{ width: '22%' }}>PAYMENT</td>
+                  <td className={dc} colSpan={2}>{payment.method}</td>
+                  <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={4} style={{ width: '22%', verticalAlign: 'middle' }}>
+                    <div className="text-[7px] text-neutral-600">
+                      <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
+                      <p>CIF: B12945796</p>
                     </div>
                   </td>
                 </tr>
-                <tr>
-                  <td className={`${cellBorder} font-bold bg-neutral-100`}>TERMS OF SALE</td>
-                  <td className={dataCell}>{termsOfSale}</td>
-                </tr>
-                <tr>
-                  <td className={`${cellBorder} font-bold bg-neutral-100`}>OBSERVATIONS</td>
-                  <td className={dataCell}>{observations || 'MERCANCIA DE ORIGEN ESPAÑOL'}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Right: Stamp + H.S. Codes */}
-            <div className="flex flex-col justify-between" style={{ width: '170px', minWidth: '170px' }}>
-              {/* Stamp area */}
-              <div className="border border-neutral-400 rounded p-1.5 text-center text-[7px] text-neutral-500 flex-1 flex flex-col items-center justify-center">
-                <p className="font-bold text-neutral-700">SPHERA TILE S.L.</p>
-                <p>Avd. Mediterráneo 84 - 3</p>
-                <p>12200 - Onda (Castellón)</p>
-                <p>CIF: B12945796</p>
-              </div>
-              {/* H.S. Codes */}
-              {hsCodesStr && (
-                <div className="border border-neutral-400 mt-0.5 p-1 text-[8px]">
-                  <span className="font-bold">H.S. CODES</span>
-                  <span className="ml-1" style={{ whiteSpace: 'pre-line' }}>{hsCodesStr}</span>
-                </div>
               )}
-            </div>
-          </div>
+              <tr>
+                <td className={`${cb} font-bold bg-neutral-100`}>BANK</td>
+                <td className={dc} colSpan={payment ? 2 : 2}>
+                  {COMPANY.bank.name} - IBAN: {COMPANY.bank.iban} - SWIFT: {COMPANY.bank.swift}
+                </td>
+                {!payment && (
+                  <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={3} style={{ width: '22%', verticalAlign: 'middle' }}>
+                    <div className="text-[7px] text-neutral-600">
+                      <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
+                      <p>CIF: B12945796</p>
+                    </div>
+                  </td>
+                )}
+              </tr>
+              <tr>
+                <td className={`${cb} font-bold bg-neutral-100`}>TERMS</td>
+                <td className={dc} colSpan={2}>{termsOfSale}</td>
+              </tr>
+              <tr>
+                <td className={`${cb} font-bold bg-neutral-100`}>OBS.</td>
+                <td className={dc} colSpan={2}>
+                  {observations || 'MERCANCIA DE ORIGEN ESPAÑOL'}
+                  {hsCodesStr && <span className="ml-2 font-bold">H.S.: {hsCodesStr}</span>}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {/* Signatures (albaranes only) */}
         {showSignatures && (
-          <div className="px-5 pb-2">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <p className="text-[9px] text-neutral-600 mb-6">Entregado por / Delivered by:</p>
-                <div className="border-t border-neutral-400 pt-0.5">
-                  <p className="text-[8px] text-neutral-500">Firma y sello / Signature & stamp</p>
+          <div className="pb-1">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <p className="text-[8px] text-neutral-600 mb-4">Entregado por / Delivered by:</p>
+                <div className="border-t border-neutral-400 pt-px">
+                  <p className="text-[7px] text-neutral-500">Firma y sello</p>
                 </div>
               </div>
-              <div>
-                <p className="text-[9px] text-neutral-600 mb-6">Recibido por / Received by:</p>
-                <div className="border-t border-neutral-400 pt-0.5">
-                  <p className="text-[8px] text-neutral-500">Firma, nombre y DNI / Signature, name & ID</p>
+              <div className="flex-1">
+                <p className="text-[8px] text-neutral-600 mb-4">Recibido por / Received by:</p>
+                <div className="border-t border-neutral-400 pt-px">
+                  <p className="text-[7px] text-neutral-500">Firma, nombre y DNI</p>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Material reservation note */}
-        <div className="px-5 pb-0.5 text-center">
-          <p className="text-[9px] font-bold italic">Solo se reservará el material durante 20 días.</p>
+        {/* Footer line */}
+        <div className="text-center pt-1 border-t border-neutral-200">
+          <p className="text-[7px] italic font-medium text-neutral-600">Solo se reservará el material durante 20 días.</p>
+          <p className="text-[6px] text-neutral-400 mt-px">{COMPANY.registry}</p>
         </div>
 
-        {/* Legal footer */}
-        <div className="px-5 pb-2 text-center">
-          <p className="text-[7px] text-neutral-500">{COMPANY.registry}</p>
-        </div>
       </div>
     </div>
   )

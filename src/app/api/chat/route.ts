@@ -237,7 +237,14 @@ Si el usuario pregunta sobre temas completamente ajenos a cerámica/construcció
       systemInstruction: systemPrompt,
     })
 
-    const geminiHistory = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
+    // Filter history: remove all messages before the first user message
+    // (the frontend includes a welcome assistant message that would make
+    // Gemini fail since history must start with 'user', not 'model')
+    const previousMessages = messages.slice(0, -1)
+    const firstUserIndex = previousMessages.findIndex((m: { role: string }) => m.role === 'user')
+    const relevantMessages = firstUserIndex >= 0 ? previousMessages.slice(firstUserIndex) : []
+
+    const geminiHistory = relevantMessages.map((m: { role: string; content: string }) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }))

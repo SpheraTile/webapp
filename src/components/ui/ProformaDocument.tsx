@@ -189,13 +189,12 @@ export function ProformaDocument({
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className={hc} style={{ width: '9%' }}>FORMAT</th>
+                <th className={hc} style={{ width: '10%' }}>FORMAT</th>
                 <th className={hc}>DESCRIPTION</th>
-                <th className={hc} style={{ width: '5%' }}>CLASS</th>
-                <th className={hc} style={{ width: '30px' }}>QR</th>
-                <th className={`${hc} text-right`} style={{ width: '8%' }}>M2</th>
-                <th className={`${hc} text-right`} style={{ width: '6%' }}>BOX</th>
-                <th className={`${hc} text-right`} style={{ width: '7%' }}>PALLET</th>
+                <th className={hc} style={{ width: '6%' }}>CLASS</th>
+                <th className={`${hc} text-right`} style={{ width: '9%' }}>M2</th>
+                <th className={`${hc} text-right`} style={{ width: '7%' }}>BOX</th>
+                <th className={`${hc} text-right`} style={{ width: '8%' }}>PALLET</th>
                 {showPrices && (
                   <>
                     <th className={`${hc} text-right`} style={{ width: '8%' }}>PRICE €</th>
@@ -211,16 +210,6 @@ export function ProformaDocument({
                   <td className={dc}>{item.formato}</td>
                   <td className={`${dc} text-[8px]`}>{item.descripcion}</td>
                   <td className={`${dc} text-center`}>{item.calidad}</td>
-                  <td className={`${dc} text-center`} style={{ padding: '1px' }}>
-                    {item.qrSlug && (
-                      <QRCodeSVG
-                        value={`${baseUrl}/productos/${item.qrSlug}`}
-                        size={36}
-                        level="L"
-                        includeMargin={false}
-                      />
-                    )}
-                  </td>
                   <td className={`${dc} text-right`}>{fmt(item.m2)}</td>
                   <td className={`${dc} text-right`}>{fmt(item.cajas, 0)}</td>
                   <td className={`${dc} text-right`}>{fmt(item.pallets, 1)}</td>
@@ -236,6 +225,26 @@ export function ProformaDocument({
             </tbody>
           </table>
         </div>
+
+        {/* QR Codes Grid */}
+        {items.some((item) => item.qrSlug) && (
+          <div className="pb-2 pt-1">
+            <p className="text-[9px] font-bold text-neutral-700 uppercase mb-1.5">Scan Products</p>
+            <div className="flex flex-wrap gap-3">
+              {items.filter((item) => item.qrSlug).map((item, i) => (
+                <div key={i} className="flex flex-col items-center" style={{ width: '80px' }}>
+                  <QRCodeSVG
+                    value={`${baseUrl}/productos/${item.qrSlug}`}
+                    size={64}
+                    level="L"
+                  />
+                  <p className="text-[7px] text-neutral-700 text-center leading-tight mt-0.5 font-medium">{item.descripcion}</p>
+                  <p className="text-[7px] text-neutral-500 text-center leading-tight">{item.formato}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bottom section - pushed to bottom of page */}
         <div className="mt-auto">

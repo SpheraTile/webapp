@@ -124,7 +124,7 @@ export function ProformaDocument({
     : 'Total €'
 
   // Cell style helpers
-  const cb = 'border border-neutral-400 px-2 py-1'
+  const cb = 'border border-neutral-400 px-2.5 py-1.5'
   const hc = `${cb} bg-neutral-100 text-[9px] font-bold text-neutral-800 uppercase`
   const dc = `${cb} text-[9px] text-neutral-900`
 
@@ -215,7 +215,7 @@ export function ProformaDocument({
                     {item.qrSlug && (
                       <QRCodeSVG
                         value={`${baseUrl}/productos/${item.qrSlug}`}
-                        size={24}
+                        size={36}
                         level="L"
                         includeMargin={false}
                       />

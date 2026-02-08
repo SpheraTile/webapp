@@ -130,7 +130,7 @@ export function ProformaDocument({
 
   return (
     <div className="bg-white overflow-x-auto">
-      <div style={{ width: '210mm', minHeight: '297mm', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ width: '190mm', minHeight: '277mm', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4', display: 'flex', flexDirection: 'column' }}>
         <div className="px-5 py-4 flex-1 flex flex-col">
 
         {/* Header: Logo left + Company info center + Doc type right */}
@@ -251,113 +251,118 @@ export function ProformaDocument({
           </table>
         </div>
 
-        {/* Weight + Financial totals row */}
-        <div className="flex items-start justify-between pb-2">
-          <div className="text-[9px]">
-            <span className="font-bold">NET: {Math.round(weight.net)} KG</span>
-            <span className="ml-3 font-bold">GROSS: {Math.round(weight.gross)} KG</span>
+        {/* Bottom section - pushed to bottom of page */}
+        <div className="mt-auto">
+
+          {/* Weight + Financial totals row */}
+          <div className="flex items-start justify-between pb-2">
+            <div className="text-[9px]">
+              <span className="font-bold">NET: {Math.round(weight.net)} KG</span>
+              <span className="ml-3 font-bold">GROSS: {Math.round(weight.gross)} KG</span>
+            </div>
+
+            {showPrices && (
+              <table className="border-collapse text-[9px]">
+                <tbody>
+                  <tr>
+                    <td className={`${cb} bg-neutral-100 font-bold`}>Subtotal €</td>
+                    <td className={`${dc} text-right`}>{fmt(totals.subtotal)}</td>
+                    {totals.ivaPorcentaje != null && totals.ivaPorcentaje > 0 && (
+                      <>
+                        <td className={`${cb} bg-neutral-100 font-bold`}>IVA {totals.ivaPorcentaje}%</td>
+                        <td className={`${dc} text-right`}>{fmt(totals.ivaEuros || 0)}</td>
+                      </>
+                    )}
+                    <td className={`${cb} bg-neutral-100 font-bold text-[10px]`}>{totalLabel}</td>
+                    <td className={`${dc} text-right font-bold text-[11px]`}>{fmt(totals.total)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
           </div>
 
-          {showPrices && (
-            <table className="border-collapse text-[9px]">
+          {/* Exporter declaration */}
+          {Object.keys(hsCodes).length > 0 && (
+            <div className="pb-1">
+              <p className="text-[7px] font-bold text-neutral-700 leading-tight">
+                THE EXPORTER OF THE PRODUCTS COVERED BY THIS DOCUMENT (CUSTOMS AUTH. NO. ESEAOR 19000455 - ESREX3575),
+                DECLARES THAT EXCEPT WHERE OTHERWISE CLEARLY INDICATED, THESE PRODUCTS ARE OF SPANISH PREFERENTIAL ORIGIN.
+              </p>
+            </div>
+          )}
+
+          {/* Payment + Bank + Terms + Stamp */}
+          <div className="pb-2">
+            <table className="w-full border-collapse text-[9px]">
               <tbody>
+                {payment && (
+                  <tr>
+                    <td className={`${cb} font-bold bg-neutral-100`} style={{ width: '22%' }}>PAYMENT</td>
+                    <td className={dc} colSpan={2}>{payment.method}</td>
+                    <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={4} style={{ width: '22%', verticalAlign: 'middle' }}>
+                      <div className="text-[8px] text-neutral-600">
+                        <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
+                        <p>CIF: B12945796</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 <tr>
-                  <td className={`${cb} bg-neutral-100 font-bold`}>Subtotal €</td>
-                  <td className={`${dc} text-right`}>{fmt(totals.subtotal)}</td>
-                  {totals.ivaPorcentaje != null && totals.ivaPorcentaje > 0 && (
-                    <>
-                      <td className={`${cb} bg-neutral-100 font-bold`}>IVA {totals.ivaPorcentaje}%</td>
-                      <td className={`${dc} text-right`}>{fmt(totals.ivaEuros || 0)}</td>
-                    </>
+                  <td className={`${cb} font-bold bg-neutral-100`}>BANK</td>
+                  <td className={dc} colSpan={payment ? 2 : 2}>
+                    {COMPANY.bank.name} - IBAN: {COMPANY.bank.iban} - SWIFT: {COMPANY.bank.swift}
+                  </td>
+                  {!payment && (
+                    <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={3} style={{ width: '22%', verticalAlign: 'middle' }}>
+                      <div className="text-[8px] text-neutral-600">
+                        <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
+                        <p>CIF: B12945796</p>
+                      </div>
+                    </td>
                   )}
-                  <td className={`${cb} bg-neutral-100 font-bold text-[10px]`}>{totalLabel}</td>
-                  <td className={`${dc} text-right font-bold text-[11px]`}>{fmt(totals.total)}</td>
+                </tr>
+                <tr>
+                  <td className={`${cb} font-bold bg-neutral-100`}>TERMS</td>
+                  <td className={dc} colSpan={2}>{termsOfSale}</td>
+                </tr>
+                <tr>
+                  <td className={`${cb} font-bold bg-neutral-100`}>OBS.</td>
+                  <td className={dc} colSpan={2}>
+                    {observations || 'MERCANCIA DE ORIGEN ESPAÑOL'}
+                    {hsCodesStr && <span className="ml-2 font-bold">H.S.: {hsCodesStr}</span>}
+                  </td>
                 </tr>
               </tbody>
             </table>
-          )}
-        </div>
-
-        {/* Exporter declaration */}
-        {Object.keys(hsCodes).length > 0 && (
-          <div className="pb-1">
-            <p className="text-[7px] font-bold text-neutral-700 leading-tight">
-              THE EXPORTER OF THE PRODUCTS COVERED BY THIS DOCUMENT (CUSTOMS AUTH. NO. ESEAOR 19000455 - ESREX3575),
-              DECLARES THAT EXCEPT WHERE OTHERWISE CLEARLY INDICATED, THESE PRODUCTS ARE OF SPANISH PREFERENTIAL ORIGIN.
-            </p>
           </div>
-        )}
 
-        {/* Footer: Payment + Bank + Terms + Stamp - all in one compact row */}
-        <div className="pb-2">
-          <table className="w-full border-collapse text-[9px]">
-            <tbody>
-              {payment && (
-                <tr>
-                  <td className={`${cb} font-bold bg-neutral-100`} style={{ width: '22%' }}>PAYMENT</td>
-                  <td className={dc} colSpan={2}>{payment.method}</td>
-                  <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={4} style={{ width: '22%', verticalAlign: 'middle' }}>
-                    <div className="text-[8px] text-neutral-600">
-                      <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
-                      <p>CIF: B12945796</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              <tr>
-                <td className={`${cb} font-bold bg-neutral-100`}>BANK</td>
-                <td className={dc} colSpan={payment ? 2 : 2}>
-                  {COMPANY.bank.name} - IBAN: {COMPANY.bank.iban} - SWIFT: {COMPANY.bank.swift}
-                </td>
-                {!payment && (
-                  <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={3} style={{ width: '22%', verticalAlign: 'middle' }}>
-                    <div className="text-[8px] text-neutral-600">
-                      <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
-                      <p>CIF: B12945796</p>
-                    </div>
-                  </td>
-                )}
-              </tr>
-              <tr>
-                <td className={`${cb} font-bold bg-neutral-100`}>TERMS</td>
-                <td className={dc} colSpan={2}>{termsOfSale}</td>
-              </tr>
-              <tr>
-                <td className={`${cb} font-bold bg-neutral-100`}>OBS.</td>
-                <td className={dc} colSpan={2}>
-                  {observations || 'MERCANCIA DE ORIGEN ESPAÑOL'}
-                  {hsCodesStr && <span className="ml-2 font-bold">H.S.: {hsCodesStr}</span>}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Signatures (albaranes only) */}
-        {showSignatures && (
-          <div className="pb-2">
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <p className="text-[9px] text-neutral-600 mb-6">Entregado por / Delivered by:</p>
-                <div className="border-t border-neutral-400 pt-px">
-                  <p className="text-[8px] text-neutral-500">Firma y sello</p>
+          {/* Signatures (albaranes only) */}
+          {showSignatures && (
+            <div className="pb-2">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <p className="text-[9px] text-neutral-600 mb-6">Entregado por / Delivered by:</p>
+                  <div className="border-t border-neutral-400 pt-px">
+                    <p className="text-[8px] text-neutral-500">Firma y sello</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1">
-                <p className="text-[9px] text-neutral-600 mb-6">Recibido por / Received by:</p>
-                <div className="border-t border-neutral-400 pt-px">
-                  <p className="text-[8px] text-neutral-500">Firma, nombre y DNI</p>
+                <div className="flex-1">
+                  <p className="text-[9px] text-neutral-600 mb-6">Recibido por / Received by:</p>
+                  <div className="border-t border-neutral-400 pt-px">
+                    <p className="text-[8px] text-neutral-500">Firma, nombre y DNI</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Footer line - pushed to bottom of A4 page */}
-        <div className="text-center border-t border-neutral-300 pt-1 mt-auto">
-          <p className="text-[7px] text-neutral-500" style={{ margin: 0 }}>
-            Solo se reservará el material durante 20 días. — {COMPANY.registry}
-          </p>
+          {/* Footer line */}
+          <div className="text-center border-t border-neutral-300 pt-1">
+            <p className="text-[7px] text-neutral-500" style={{ margin: 0 }}>
+              Solo se reservará el material durante 20 días. — {COMPANY.registry}
+            </p>
+          </div>
+
         </div>
 
         </div>

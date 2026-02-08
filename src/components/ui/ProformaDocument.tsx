@@ -124,14 +124,14 @@ export function ProformaDocument({
     : 'Total €'
 
   // Cell style helpers
-  const cb = 'border border-neutral-400 px-3 py-1.5'
+  const cb = 'border border-neutral-400 px-2 py-1'
   const hc = `${cb} bg-neutral-100 text-[9px] font-bold text-neutral-800 uppercase`
   const dc = `${cb} text-[9px] text-neutral-900`
 
   return (
-    <div className="bg-white overflow-x-auto">
-      <div style={{ width: '190mm', minHeight: '277mm', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4', display: 'flex', flexDirection: 'column' }}>
-        <div className="px-5 py-4 flex-1 flex flex-col">
+    <div className="overflow-x-auto bg-white">
+      <div style={{ width: '800px', minHeight: '1130px', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4', display: 'flex', flexDirection: 'column', margin: '0 auto' }}>
+        <div className="pl-6 pr-4 py-3 flex-1 flex flex-col">
 
         {/* Header: Logo left + Company info center + Doc type right */}
         <div className="flex items-start justify-between pb-3">
@@ -233,26 +233,33 @@ export function ProformaDocument({
                   )}
                 </tr>
               ))}
-              {/* Totals row inside table */}
-              <tr className="bg-neutral-50">
-                <td className={`${cb} font-bold text-[9px]`} colSpan={4}>TOTALES</td>
-                <td className={`${cb} text-right font-bold text-[9px]`}>{fmt(totals.totalM2)}</td>
-                <td className={`${cb} text-right font-bold text-[9px]`}>{fmt(totals.totalCajas, 0)}</td>
-                <td className={`${cb} text-right font-bold text-[9px]`}>{fmt(totals.totalPallets, 1)}</td>
-                {showPrices && (
-                  <>
-                    <td className={cb}></td>
-                    <td className={cb}></td>
-                    <td className={`${cb} text-right font-bold text-[9px]`}>{fmt(totals.subtotal)}</td>
-                  </>
-                )}
-              </tr>
             </tbody>
           </table>
         </div>
 
         {/* Bottom section - pushed to bottom of page */}
         <div className="mt-auto">
+
+          {/* Totals row */}
+          <div className="pb-2">
+            <table className="w-full border-collapse">
+              <tbody>
+                <tr className="bg-neutral-50">
+                  <td className={`${cb} font-bold text-[9px]`} colSpan={4}>TOTALES</td>
+                  <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '8%' }}>{fmt(totals.totalM2)}</td>
+                  <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '6%' }}>{fmt(totals.totalCajas, 0)}</td>
+                  <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '7%' }}>{fmt(totals.totalPallets, 1)}</td>
+                  {showPrices && (
+                    <>
+                      <td className={cb} style={{ width: '8%' }}></td>
+                      <td className={cb} style={{ width: '6%' }}></td>
+                      <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '9%' }}>{fmt(totals.subtotal)}</td>
+                    </>
+                  )}
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
           {/* Weight + Financial totals row */}
           <div className="flex items-start justify-between pb-2">

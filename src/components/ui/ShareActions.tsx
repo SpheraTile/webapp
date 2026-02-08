@@ -8,7 +8,6 @@ interface ShareActionsProps {
   documentType: 'pedido' | 'albaran' | 'factura'
   clientEmail?: string
   clientPhone?: string
-  onPrint?: () => void
   printRef?: React.RefObject<HTMLElement | null>
 }
 
@@ -17,7 +16,6 @@ export function ShareActions({
   documentType,
   clientEmail,
   clientPhone,
-  onPrint,
   printRef,
 }: ShareActionsProps) {
   const [showEmailModal, setShowEmailModal] = useState(false)
@@ -152,14 +150,6 @@ export function ShareActions({
     }
   }
 
-  const handlePrint = () => {
-    if (onPrint) {
-      onPrint()
-    } else {
-      window.print()
-    }
-  }
-
   return (
     <>
       <div className="flex items-center gap-2 flex-wrap">
@@ -203,17 +193,6 @@ export function ShareActions({
           <span className="hidden sm:inline">WhatsApp</span>
         </button>
 
-        {/* Imprimir */}
-        <button
-          onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors"
-          title="Imprimir"
-        >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
-          <span className="hidden sm:inline">Imprimir</span>
-        </button>
       </div>
 
       {/* Modal de Email */}

@@ -16,6 +16,18 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
     (el as HTMLElement).style.display = 'none'
   })
 
+  // Force consistent capture width (800px) regardless of viewport
+  const originalStyles = {
+    width: element.style.width,
+    minWidth: element.style.minWidth,
+    maxWidth: element.style.maxWidth,
+    overflow: element.style.overflow,
+  }
+  element.style.width = '800px'
+  element.style.minWidth = '800px'
+  element.style.maxWidth = '800px'
+  element.style.overflow = 'visible'
+
   try {
     const canvas = await html2canvas(element, {
       scale: 2,
@@ -54,6 +66,12 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
 
     return pdf.output('blob')
   } finally {
+    // Restore capture width overrides
+    element.style.width = originalStyles.width
+    element.style.minWidth = originalStyles.minWidth
+    element.style.maxWidth = originalStyles.maxWidth
+    element.style.overflow = originalStyles.overflow
+
     // Restore hidden elements
     hiddenElements.forEach((el) => {
       (el as HTMLElement).style.display = ''

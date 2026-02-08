@@ -124,13 +124,14 @@ export function ProformaDocument({
     : 'Total €'
 
   // Cell style helpers
-  const cb = 'border border-neutral-400 px-2 py-1'
+  const cb = 'border border-neutral-400 px-3 py-1.5'
   const hc = `${cb} bg-neutral-100 text-[9px] font-bold text-neutral-800 uppercase`
   const dc = `${cb} text-[9px] text-neutral-900`
 
   return (
-    <div className="bg-white w-full" style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4' }}>
-      <div className="px-3 py-4 lg:px-5" style={{ maxWidth: '210mm' }}>
+    <div className="bg-white overflow-x-auto">
+      <div style={{ width: '210mm', minHeight: '297mm', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4', display: 'flex', flexDirection: 'column' }}>
+        <div className="px-5 py-4 flex-1 flex flex-col">
 
         {/* Header: Logo left + Company info center + Doc type right */}
         <div className="flex items-start justify-between pb-3">
@@ -352,13 +353,14 @@ export function ProformaDocument({
           </div>
         )}
 
-        {/* Footer line */}
-        <div className="text-center border-t border-neutral-300 pt-1 mt-2">
+        {/* Footer line - pushed to bottom of A4 page */}
+        <div className="text-center border-t border-neutral-300 pt-1 mt-auto">
           <p className="text-[7px] text-neutral-500" style={{ margin: 0 }}>
             Solo se reservará el material durante 20 días. — {COMPANY.registry}
           </p>
         </div>
 
+        </div>
       </div>
     </div>
   )

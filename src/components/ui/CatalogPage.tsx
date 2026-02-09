@@ -52,7 +52,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
   return (
     <div style={{ width: '368px', height: '505px', border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
       {/* Product image */}
-      <div style={{ width: '368px', height: '210px', overflow: 'hidden' }}>
+      <div style={{ width: '368px', height: '170px', overflow: 'hidden' }}>
         <img
           src={product.imagen}
           alt={product.nombre}

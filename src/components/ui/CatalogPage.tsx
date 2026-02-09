@@ -62,9 +62,9 @@ function ProductCard({ product }: { product: CatalogProduct }) {
       </div>
 
       {/* Product info - compact, no flex grow */}
-      <div style={{ padding: '10px 8px 30px 8px', display: 'flex', flexDirection: 'column' as const }}>
+      <div style={{ padding: '12px 10px 14px 10px', display: 'flex', flexDirection: 'column' as const }}>
         {/* Name + Reference */}
-        <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 1px 0', lineHeight: '1.5', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
+        <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 2px 0', lineHeight: '1.6', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
         <p style={{ fontSize: '7.5px', color: '#737373', margin: '0 0 4px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
 
         {/* Characteristics table */}

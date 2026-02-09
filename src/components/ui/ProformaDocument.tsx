@@ -230,7 +230,7 @@ export function ProformaDocument({
         {items.some((item) => item.qrSlug) && (
           <div className="pb-2 pt-1">
             <p className="text-[9px] font-bold text-neutral-700 uppercase mb-1.5">Scan Products</p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-6">
               {items.filter((item) => item.qrSlug).map((item, i) => (
                 <div key={i} className="flex flex-col items-center" style={{ width: '80px' }}>
                   <QRCodeSVG

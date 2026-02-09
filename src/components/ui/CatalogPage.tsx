@@ -46,7 +46,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
     ? window.location.origin
     : process.env.NEXT_PUBLIC_BASE_URL || 'https://spheratile.com'
 
-  const cell = { border: '1px solid #d4d4d4', padding: '1.5px 4px', fontSize: '7.5px' }
+  const cell = { border: '1px solid #d4d4d4', padding: '3px 6px', fontSize: '7.5px' }
   const headerCell = { ...cell, backgroundColor: '#f5f5f5', fontWeight: 'bold' as const, width: '25%' }
 
   return (

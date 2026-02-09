@@ -51,8 +51,8 @@ function ProductCard({ product }: { product: CatalogProduct }) {
 
   return (
     <div style={{ width: '368px', height: '505px', border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
-      {/* Product image */}
-      <div style={{ width: '368px', height: '170px', overflow: 'hidden' }}>
+      {/* Product image - fills remaining space */}
+      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <img
           src={product.imagen}
           alt={product.nombre}
@@ -61,8 +61,8 @@ function ProductCard({ product }: { product: CatalogProduct }) {
         />
       </div>
 
-      {/* Product info */}
-      <div style={{ padding: '6px 8px', flex: 1, display: 'flex', flexDirection: 'column' as const }}>
+      {/* Product info - compact, no flex grow */}
+      <div style={{ padding: '6px 8px', display: 'flex', flexDirection: 'column' as const }}>
         {/* Name + Reference */}
         <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 1px 0', lineHeight: '1.3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
         <p style={{ fontSize: '7.5px', color: '#737373', margin: '0 0 4px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
@@ -97,7 +97,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
         </p>
 
         {/* Price + Stock + QR */}
-        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div style={{ marginTop: '3px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
             <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#dc2626', margin: 0, lineHeight: '1.2' }}>
               €{fmt(product.precio_m2)} <span style={{ fontSize: '8px', fontWeight: 'normal', color: '#737373' }}>/m²</span>

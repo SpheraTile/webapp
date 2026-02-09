@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { CatalogPage, type CatalogProduct } from '@/components/ui/CatalogPage'
 import { CatalogCover } from '@/components/ui/CatalogCover'
-import { exportToPDF } from '@/lib/pdf'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 interface ApiProducto {
   id: string
@@ -31,16 +32,16 @@ const PRODUCTS_PER_PAGE = 4
 export default function CatalogoPage() {
   const [allProductos, setAllProductos] = useState<ApiProducto[]>([])
   const [series, setSeries] = useState<string[]>([])
-  const [selectedSerie, setSelectedSerie] = useState('all')
+  const [selectedSeries, setSelectedSeries] = useState<Set<string>>(new Set())
   const [soloConStock, setSoloConStock] = useState(true)
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [generatingPDF, setGeneratingPDF] = useState(false)
+  const [pdfProgress, setPdfProgress] = useState('')
   const [previewPage, setPreviewPage] = useState(0)
 
-  const pdfRef = useRef<HTMLDivElement>(null)
+  const pdfContainerRef = useRef<HTMLDivElement>(null)
 
-  // Fetch all products
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -62,7 +63,7 @@ export default function CatalogoPage() {
 
   // Filter products
   const filteredProducts = allProductos.filter((p) => {
-    if (selectedSerie !== 'all' && p.serie !== selectedSerie) return false
+    if (selectedSeries.size > 0 && !selectedSeries.has(p.serie)) return false
     if (soloConStock && p.stock_m2 <= 0) return false
     return true
   })
@@ -80,6 +81,24 @@ export default function CatalogoPage() {
   }
   const totalPages = pages.length
 
+  const toggleSerie = useCallback((serie: string) => {
+    setSelectedSeries((prev) => {
+      const next = new Set(prev)
+      if (next.has(serie)) {
+        next.delete(serie)
+      } else {
+        next.add(serie)
+      }
+      return next
+    })
+    setPreviewPage(0)
+  }, [])
+
+  const selectAllSeries = useCallback(() => {
+    setSelectedSeries(new Set())
+    setPreviewPage(0)
+  }, [])
+
   const handlePriceChange = useCallback((productId: string, newPrice: number) => {
     setPriceOverrides((prev) => ({ ...prev, [productId]: newPrice }))
   }, [])
@@ -90,30 +109,56 @@ export default function CatalogoPage() {
 
   const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
+  const serieLabel = selectedSeries.size === 0
+    ? undefined
+    : selectedSeries.size === 1
+      ? [...selectedSeries][0]
+      : `${selectedSeries.size} series`
+
+  // Generate PDF page by page to avoid cutting
   const handleDownloadPDF = async () => {
-    if (!pdfRef.current || catalogProducts.length === 0) return
+    if (!pdfContainerRef.current || catalogProducts.length === 0) return
 
     setGeneratingPDF(true)
-    try {
-      const blob = await exportToPDF({
-        filename: `Catalogo_SPHERA_TILE${selectedSerie !== 'all' ? `_${selectedSerie}` : ''}_${new Date().toISOString().slice(0, 10)}`,
-        element: pdfRef.current,
-        orientation: 'portrait',
-      })
+    setPdfProgress('Preparando...')
 
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `Catalogo_SPHERA_TILE${selectedSerie !== 'all' ? `_${selectedSerie}` : ''}_${new Date().toISOString().slice(0, 10)}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+    try {
+      const container = pdfContainerRef.current
+      // Get all page divs (direct children of the container)
+      const pageElements = container.children
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+
+      for (let i = 0; i < pageElements.length; i++) {
+        const el = pageElements[i] as HTMLElement
+        setPdfProgress(`Página ${i + 1} de ${pageElements.length}...`)
+
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: 800,
+          height: 1130,
+        })
+
+        const imgData = canvas.toDataURL('image/png')
+
+        if (i > 0) pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight)
+      }
+
+      const filename = `Catalogo_SPHERA_TILE${serieLabel ? `_${serieLabel}` : ''}_${new Date().toISOString().slice(0, 10)}`
+      pdf.save(`${filename}.pdf`)
     } catch (error) {
       console.error('Error generating PDF:', error)
       alert('Error al generar el PDF')
     } finally {
       setGeneratingPDF(false)
+      setPdfProgress('')
     }
   }
 
@@ -141,28 +186,43 @@ export default function CatalogoPage() {
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          {generatingPDF ? 'Generando...' : 'Descargar PDF'}
+          {generatingPDF ? pdfProgress : 'Descargar PDF'}
         </button>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Serie filter */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-neutral-700">Serie:</label>
-            <select
-              value={selectedSerie}
-              onChange={(e) => { setSelectedSerie(e.target.value); setPreviewPage(0) }}
-              className="px-3 py-1.5 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+        {/* Series chips */}
+        <div className="mb-3">
+          <label className="text-sm font-medium text-neutral-700 mb-2 block">Series:</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={selectAllSeries}
+              className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                selectedSeries.size === 0
+                  ? 'bg-red-600 text-white border-red-600'
+                  : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+              }`}
             >
-              <option value="all">Todas las series</option>
-              {series.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+              Todas
+            </button>
+            {series.map((s) => (
+              <button
+                key={s}
+                onClick={() => toggleSerie(s)}
+                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                  selectedSeries.has(s)
+                    ? 'bg-red-600 text-white border-red-600'
+                    : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
+        </div>
 
+        <div className="flex flex-wrap items-center gap-4">
           {/* Stock filter */}
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -224,14 +284,13 @@ export default function CatalogoPage() {
             {previewPage === 0 ? (
               <div className="mx-auto" style={{ width: '800px' }}>
                 <CatalogCover
-                  serie={selectedSerie !== 'all' ? selectedSerie : undefined}
+                  serie={serieLabel}
                   productCount={catalogProducts.length}
                   date={today}
                 />
               </div>
             ) : (
               <div className="mx-auto" style={{ width: '800px' }}>
-                {/* Editable preview - show product grid with price inputs */}
                 <div style={{ width: '800px', minHeight: '400px', padding: '20px', fontFamily: 'Arial, Helvetica, sans-serif' }}>
                   <div className="grid grid-cols-2 gap-4">
                     {pages[previewPage - 1]?.map((product) => (
@@ -274,25 +333,23 @@ export default function CatalogoPage() {
         </div>
       )}
 
-      {/* Hidden PDF render container */}
-      <div style={{ position: 'absolute', left: '-9999px', top: 0 }} ref={pdfRef}>
-        <div style={{ width: '800px' }}>
-          {/* Cover */}
-          <CatalogCover
-            serie={selectedSerie !== 'all' ? selectedSerie : undefined}
-            productCount={catalogProducts.length}
-            date={today}
+      {/* Hidden PDF render container - each child is one page */}
+      <div style={{ position: 'absolute', left: '-9999px', top: 0 }} ref={pdfContainerRef}>
+        {/* Cover */}
+        <CatalogCover
+          serie={serieLabel}
+          productCount={catalogProducts.length}
+          date={today}
+        />
+        {/* Product pages */}
+        {pages.map((pageProducts, i) => (
+          <CatalogPage
+            key={i}
+            products={pageProducts}
+            pageNumber={i + 1}
+            totalPages={totalPages}
           />
-          {/* Product pages */}
-          {pages.map((pageProducts, i) => (
-            <CatalogPage
-              key={i}
-              products={pageProducts}
-              pageNumber={i + 1}
-              totalPages={totalPages}
-            />
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   )

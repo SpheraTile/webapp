@@ -64,127 +64,6 @@ export default function QRCardsPage() {
     window.print()
   }
 
-  const handleDownload = async () => {
-    if (selectedIds.size === 0) {
-      showToast('Selecciona al menos un producto', 'error')
-      return
-    }
-
-    showToast('Generando PDF...', 'info')
-
-    try {
-      const { jsPDF } = await import('jspdf')
-      const html2canvas = (await import('html2canvas')).default
-
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4',
-      })
-
-      const cardWidth = 60
-      const cardHeight = 45
-      const margin = 5
-      const cardsPerRow = Math.floor((210 - margin * 2) / (cardWidth + margin))
-      const rowsPerPage = Math.floor((297 - margin * 2) / (cardHeight + margin))
-
-      // Crear un contenedor temporal para renderizar las tarjetas
-      const tempContainer = document.createElement('div')
-      tempContainer.style.position = 'absolute'
-      tempContainer.style.left = '-9999px'
-      tempContainer.style.top = '0'
-      tempContainer.style.width = `${cardsPerRow * (cardWidth + margin)}mm`
-      tempContainer.style.background = 'white'
-      document.body.appendChild(tempContainer)
-
-      // Procesar en lotes de páginas
-      const productosArray = selectedProductos
-      const totalPages = Math.ceil(productosArray.length / (cardsPerRow * rowsPerPage))
-
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) {
-          pdf.addPage()
-        }
-
-        tempContainer.innerHTML = ''
-
-        const startIndex = page * cardsPerRow * rowsPerPage
-        const endIndex = Math.min(startIndex + cardsPerRow * rowsPerPage, productosArray.length)
-        const pageProductos = productosArray.slice(startIndex, endIndex)
-
-        // Renderizar tarjetas en esta página
-        for (const producto of pageProductos) {
-          const card = document.createElement('div')
-          card.className = 'qr-card'
-          card.style.width = `${cardWidth}mm`
-          card.style.height = `${cardHeight}mm`
-          card.style.border = '2px solid #171717'
-          card.style.padding = '2mm'
-          card.style.display = 'inline-block'
-          card.style.fontFamily = 'Arial, sans-serif'
-          card.innerHTML = `
-            <div style="text-align: center; margin-bottom: 1mm;">
-              <div style="font-size: 6px; font-weight: bold; letter-spacing: 0.5px;">SPHERA TILE</div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; height: 22mm;">
-              <div style="width: 20mm; height: 20mm; background: #f5f5f5; overflow: hidden; position: relative;">
-                <img src="${producto.imagen}" alt="" style="width: 100%; height: 100%; object-fit: cover;" />
-              </div>
-              <div style="width: 22mm; height: 22mm; display: flex; align-items: center; justify-content: center;">
-                <canvas id="qr-${producto.id}" width="80" height="80"></canvas>
-              </div>
-            </div>
-            <div style="text-align: center; margin-top: 1mm;">
-              <div style="font-size: 5px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 1mm;" title="${producto.nombre}">${producto.nombre}</div>
-              <div style="display: flex; justify-content: space-between; font-size: 4px; color: #525252; padding: 0 1mm; margin-top: 0.5mm;">
-                <span style="font-weight: 500;">${producto.formato}</span>
-                <span style="font-family: monospace;">${producto.referencia}</span>
-              </div>
-            </div>
-          `
-          tempContainer.appendChild(card)
-
-          // Generar QR code
-          const { QRCodeCanvas } = await import('qrcode.react')
-          const canvas = card.querySelector(`#qr-${producto.id}`) as HTMLCanvasElement
-          if (canvas) {
-            const qrValue = `https://spheratile.com/producto/${producto.slug}`
-            const { default: QRCode } = await import('qrcode')
-            await QRCode.toCanvas(canvas, qrValue, {
-              width: 80,
-              margin: 0,
-              errorCorrectionLevel: 'M',
-            })
-          }
-        }
-
-        // Convertir a imagen y añadir al PDF
-        const canvas = await html2canvas(tempContainer, {
-          scale: 3,
-          useCORS: true,
-          logging: false,
-        })
-
-        const imgData = canvas.toDataURL('image/png')
-        const pdfWidth = pdf.internal.pageSize.getWidth()
-        const pdfHeight = pdf.internal.pageSize.getHeight()
-
-        pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth - margin * 2, pdfHeight - margin * 2)
-      }
-
-      document.body.removeChild(tempContainer)
-
-      // Generar un timestamp único para el nombre del archivo
-      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-      const fileName = `qr-cards-spheratile-${timestamp}.pdf`
-
-      pdf.save(fileName)
-      showToast(`PDF generado: ${fileName}`, 'success')
-    } catch (error) {
-      console.error('Error generating PDF:', error)
-      showToast('Error al generar PDF', 'error')
-    }
-  }
 
   return (
     <>
@@ -193,7 +72,7 @@ export default function QRCardsPage() {
         {/* Header */}
         <div className="mb-6 lg:mb-8">
           <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900">Tarjetas QR</h1>
-          <p className="text-neutral-500 mt-1">Genera e imprime códigos QR para productos (60mm x 45mm)</p>
+          <p className="text-neutral-500 mt-1">Selecciona productos e imprime sus tarjetas QR (60mm x 45mm)</p>
         </div>
 
         {/* Actions */}
@@ -242,16 +121,6 @@ export default function QRCardsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                 </svg>
                 Imprimir
-              </button>
-              <button
-                onClick={handleDownload}
-                disabled={selectedIds.size === 0}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Descargar PDF
               </button>
             </div>
           </div>

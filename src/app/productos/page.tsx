@@ -118,6 +118,7 @@ const mapFromDBValue = (key: string, value: string): string => {
 }
 
 interface Facets {
+  formato: Record<string, number>
   calidad: Record<string, number>
   materia_prima: Record<string, number>
   aspecto: Record<string, number>

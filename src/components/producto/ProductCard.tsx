@@ -141,7 +141,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
       className={`product-card block ${className}`}
     >
       {/* Imagen del producto */}
-      <div className={`relative bg-neutral-100 overflow-hidden ${esAlargado ? 'aspect-[4/1]' : 'aspect-product'}`}>
+      <div className={`relative bg-neutral-100 overflow-hidden ${esAlargado ? 'aspect-[16/7]' : 'aspect-product'}`}>
         <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
         <ProductImage
           src={producto.imagen}

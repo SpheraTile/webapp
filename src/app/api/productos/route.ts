@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
 
     // Filtros
     const busqueda = searchParams.get('busqueda')
+    const formato = searchParams.getAll('formato')
     const calidad = searchParams.getAll('calidad')
     const materia_prima = searchParams.getAll('materia_prima')
     const aspecto = searchParams.getAll('aspecto')
@@ -41,6 +42,10 @@ export async function GET(request: NextRequest) {
 
     if (serie) {
       where.serie = serie
+    }
+
+    if (formato.length > 0) {
+      where.formato = { in: formato }
     }
 
     if (calidad.length > 0) {
@@ -121,6 +126,7 @@ export async function GET(request: NextRequest) {
       // Helper to build where with all filters except one
       const buildWhereExcept = (exclude: string): Prisma.ProductoWhereInput => {
         const w: Prisma.ProductoWhereInput = { ...baseWhere }
+        if (exclude !== 'formato' && formato.length > 0) w.formato = { in: formato }
         if (exclude !== 'calidad' && calidad.length > 0) w.calidad = { in: calidad as any[] }
         if (exclude !== 'materia_prima' && materia_prima.length > 0) w.materia_prima = { in: materia_prima as any[] }
         if (exclude !== 'aspecto' && aspecto.length > 0) w.aspecto = { in: aspecto as any[] }
@@ -133,6 +139,7 @@ export async function GET(request: NextRequest) {
 
       // Get counts for each facet category
       const [
+        formatoCounts,
         calidadCounts,
         materiaPrimaCounts,
         aspectoCounts,
@@ -141,6 +148,11 @@ export async function GET(request: NextRequest) {
         usoCounts,
         estadoProductoCounts,
       ] = await Promise.all([
+        prisma.producto.groupBy({
+          by: ['formato'],
+          where: buildWhereExcept('formato'),
+          _count: { formato: true },
+        }),
         prisma.producto.groupBy({
           by: ['calidad'],
           where: buildWhereExcept('calidad'),
@@ -179,6 +191,7 @@ export async function GET(request: NextRequest) {
       ])
 
       return {
+        formato: Object.fromEntries(formatoCounts.map(c => [c.formato, c._count.formato])),
         calidad: Object.fromEntries(calidadCounts.map(c => [c.calidad, c._count.calidad])),
         materia_prima: Object.fromEntries(materiaPrimaCounts.map(c => [c.materia_prima, c._count.materia_prima])),
         aspecto: Object.fromEntries(aspectoCounts.map(c => [c.aspecto, c._count.aspecto])),

@@ -244,6 +244,7 @@
   },
   "filters": {
     "title": "Filters",
+    "size": "Size",
     "status": "Status",
     "pieceType": "Piece Type",
     "material": "Raw Material",

@@ -244,6 +244,7 @@
   },
   "filters": {
     "title": "Filtros",
+    "size": "Tamaño",
     "status": "Estado",
     "pieceType": "Tipo de Pieza",
     "material": "Materia Prima",

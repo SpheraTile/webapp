@@ -34,6 +34,8 @@ export default function CatalogoPage() {
   const [allProductos, setAllProductos] = useState<ApiProducto[]>([])
   const [series, setSeries] = useState<string[]>([])
   const [selectedSeries, setSelectedSeries] = useState<Set<string>>(new Set())
+  const [formatos, setFormatos] = useState<string[]>([])
+  const [selectedFormatos, setSelectedFormatos] = useState<Set<string>>(new Set())
   const [soloConStock, setSoloConStock] = useState(true)
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -57,6 +59,9 @@ export default function CatalogoPage() {
 
         const uniqueSeries = [...new Set(productos.map((p: ApiProducto) => p.serie))] as string[]
         setSeries(uniqueSeries.sort())
+
+        const uniqueFormatos = [...new Set(productos.map((p: ApiProducto) => p.formato))] as string[]
+        setFormatos(uniqueFormatos.sort())
       } catch (error) {
         console.error('Error loading products:', error)
       } finally {
@@ -69,6 +74,7 @@ export default function CatalogoPage() {
   // Filter products
   const filteredProducts = allProductos.filter((p) => {
     if (selectedSeries.size > 0 && !selectedSeries.has(p.serie)) return false
+    if (selectedFormatos.size > 0 && !selectedFormatos.has(p.formato)) return false
     if (soloConStock && p.stock_m2 <= 0) return false
     return true
   })
@@ -99,8 +105,26 @@ export default function CatalogoPage() {
     setPreviewPage(0)
   }, [])
 
+  const toggleFormato = useCallback((formato: string) => {
+    setSelectedFormatos((prev) => {
+      const next = new Set(prev)
+      if (next.has(formato)) {
+        next.delete(formato)
+      } else {
+        next.add(formato)
+      }
+      return next
+    })
+    setPreviewPage(0)
+  }, [])
+
   const selectAllSeries = useCallback(() => {
     setSelectedSeries(new Set())
+    setPreviewPage(0)
+  }, [])
+
+  const selectAllFormatos = useCallback(() => {
+    setSelectedFormatos(new Set())
     setPreviewPage(0)
   }, [])
 
@@ -265,6 +289,36 @@ export default function CatalogoPage() {
                 }`}
               >
                 {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Formatos chips */}
+        <div className="mb-3">
+          <label className="text-sm font-medium text-neutral-700 mb-2 block">Tamaños:</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={selectAllFormatos}
+              className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                selectedFormatos.size === 0
+                  ? 'bg-red-600 text-white border-red-600'
+                  : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+              }`}
+            >
+              Todos
+            </button>
+            {formatos.map((f) => (
+              <button
+                key={f}
+                onClick={() => toggleFormato(f)}
+                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                  selectedFormatos.has(f)
+                    ? 'bg-red-600 text-white border-red-600'
+                    : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                }`}
+              >
+                {f}
               </button>
             ))}
           </div>

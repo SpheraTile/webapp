@@ -15,6 +15,7 @@ import {
 } from '@/types'
 
 interface FiltrosActivos {
+  formato: string[]
   calidad: string[]
   materia_prima: string[]
   aspecto: string[]
@@ -25,6 +26,7 @@ interface FiltrosActivos {
 }
 
 interface Facets {
+  formato: Record<string, number>
   calidad: Record<string, number>
   materia_prima: Record<string, number>
   aspecto: Record<string, number>
@@ -114,6 +116,7 @@ export function FiltersDrawer({
 
   const limpiarFiltros = () => {
     onFiltrosChange({
+      formato: [],
       calidad: [],
       materia_prima: [],
       aspecto: [],
@@ -125,6 +128,7 @@ export function FiltersDrawer({
   }
 
   const totalFiltrosActivos =
+    filtros.formato.length +
     filtros.calidad.length +
     filtros.materia_prima.length +
     filtros.aspecto.length +
@@ -165,6 +169,21 @@ export function FiltersDrawer({
 
         {/* Contenido de filtros */}
         <div className="overflow-y-auto h-[calc(100%-140px)] lg:h-auto p-4 lg:p-0">
+          {/* Formato (Tamaño) */}
+          {facets?.formato && Object.keys(facets.formato).length > 0 && (
+            <FilterSection titulo={t('size')} defaultOpen>
+              {Object.keys(facets.formato).sort().map((fmt) => (
+                <FilterCheckbox
+                  key={fmt}
+                  label={fmt}
+                  checked={filtros.formato.includes(fmt)}
+                  onChange={() => toggleFiltro('formato', fmt)}
+                  count={getCount('formato', fmt)}
+                />
+              ))}
+            </FilterSection>
+          )}
+
           {/* Calidad */}
           <FilterSection titulo={t('quality')} defaultOpen>
             {OPCIONES_CALIDAD.map((cal) => (

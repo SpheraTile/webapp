@@ -12,6 +12,7 @@ import { IconFilter, IconGrid, IconList } from '@/components/ui/Icons'
 import { Producto } from '@/types'
 
 interface FiltrosActivos {
+  formato: string[]
   calidad: string[]
   materia_prima: string[]
   aspecto: string[]
@@ -22,6 +23,7 @@ interface FiltrosActivos {
 }
 
 const filtrosIniciales: FiltrosActivos = {
+  formato: [],
   calidad: [],
   materia_prima: [],
   aspecto: [],
@@ -144,6 +146,11 @@ function ProductosContent() {
     const nuevasFiltros: FiltrosActivos = { ...filtrosIniciales }
 
     // Leer cada tipo de filtro de la URL
+    const formato = searchParams.get('formato')
+    if (formato) {
+      nuevasFiltros.formato = [formato]
+    }
+
     const estadoProducto = searchParams.get('estado_producto')
     if (estadoProducto) {
       nuevasFiltros.estado_producto = [estadoProducto]
@@ -191,6 +198,7 @@ function ProductosContent() {
       if (busqueda) params.set('busqueda', busqueda)
 
       // Mapear valores a formato DB
+      filtrosActivos.formato.forEach(v => params.append('formato', v))
       filtrosActivos.calidad.forEach(v => params.append('calidad', v))
       filtrosActivos.materia_prima.forEach(v => params.append('materia_prima', mapToDBValue('materia_prima', v)))
       filtrosActivos.aspecto.forEach(v => params.append('aspecto', mapToDBValue('aspecto', v)))
@@ -234,6 +242,7 @@ function ProductosContent() {
 
   // Contar filtros activos
   const totalFiltrosActivos =
+    filtrosActivos.formato.length +
     filtrosActivos.calidad.length +
     filtrosActivos.materia_prima.length +
     filtrosActivos.aspecto.length +

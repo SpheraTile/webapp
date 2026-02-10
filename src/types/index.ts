@@ -53,6 +53,7 @@ export interface Producto {
 
 export interface FiltrosProducto {
   busqueda?: string
+  formato?: string[]
   calidad?: Calidad[]
   materia_prima?: MateriaPrima[]
   aspecto?: Aspecto[]

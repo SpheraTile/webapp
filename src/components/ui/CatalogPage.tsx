@@ -41,7 +41,7 @@ function fmt(n: number, decimals = 2): string {
   return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
-function ProductCard({ product }: { product: CatalogProduct }) {
+function ProductCard({ product, isElongated }: { product: CatalogProduct, isElongated?: boolean }) {
   const baseUrl = typeof window !== 'undefined'
     ? window.location.origin
     : process.env.NEXT_PUBLIC_BASE_URL || 'https://spheratile.com'
@@ -49,8 +49,12 @@ function ProductCard({ product }: { product: CatalogProduct }) {
   const cell = { border: '1px solid #d4d4d4', padding: '3px 6px', fontSize: '7.5px' }
   const headerCell = { ...cell, backgroundColor: '#f5f5f5', fontWeight: 'bold' as const, width: '25%' }
 
+  // Productos alargados: doble ancho, altura ajustada a ~75%
+  const cardWidth = isElongated ? '750px' : '368px'
+  const cardHeight = isElongated ? '380px' : '505px'
+
   return (
-    <div style={{ width: '368px', height: '505px', border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
+    <div style={{ width: cardWidth, height: cardHeight, border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
       {/* Product image - fills remaining space */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <img
@@ -62,9 +66,9 @@ function ProductCard({ product }: { product: CatalogProduct }) {
       </div>
 
       {/* Product info - compact, no flex grow */}
-      <div style={{ padding: '12px 10px 14px 10px', display: 'flex', flexDirection: 'column' as const }}>
+      <div style={{ padding: isElongated ? '10px 14px 12px 14px' : '12px 10px 14px 10px', display: 'flex', flexDirection: 'column' as const }}>
         {/* Name + Reference */}
-        <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 2px 0', lineHeight: '1.6', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
+        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 2px 0', lineHeight: '1.6', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
         <p style={{ fontSize: '7.5px', color: '#737373', margin: '0 0 4px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
 
         {/* Characteristics table */}
@@ -118,8 +122,27 @@ function ProductCard({ product }: { product: CatalogProduct }) {
 }
 
 export function CatalogPage({ products, pageNumber, totalPages }: CatalogPageProps) {
-  const topRow = products.slice(0, 2)
-  const bottomRow = products.slice(2, 4)
+  // Detectar productos alargados (22.5x119.5 o similar)
+  const isElongated = (product: CatalogProduct) =>
+    product.formato.includes('22.5') && product.formato.includes('119')
+
+  // Layout inteligente:
+  // - Si hay un producto alargado en primera posición, ocupa toda la fila superior
+  // - Los productos normales van en las filas inferiores
+  let topRow: CatalogProduct[] = []
+  let bottomRow: CatalogProduct[] = []
+
+  if (products.length > 0 && isElongated(products[0])) {
+    // Producto alargado ocupa toda la fila superior
+    topRow = [products[0]]
+    bottomRow = products.slice(1, 4) // Máximo 3 productos normales abajo
+  } else {
+    // Layout normal: 2 arriba, 2 abajo
+    topRow = products.slice(0, 2)
+    bottomRow = products.slice(2, 4)
+  }
+
+  const hasElongatedInTop = topRow.length > 0 && isElongated(topRow[0])
 
   return (
     <div style={{ width: '800px', height: '1130px', fontFamily: 'Arial, Helvetica, sans-serif', display: 'flex', flexDirection: 'column', backgroundColor: '#fff', boxSizing: 'border-box' as const }}>
@@ -134,16 +157,18 @@ export function CatalogPage({ products, pageNumber, totalPages }: CatalogPagePro
 
       {/* Products grid - centered */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '10px 20px' }}>
-        <div style={{ display: 'flex', gap: '14px' }}>
+        {/* Fila superior */}
+        <div style={{ display: 'flex', gap: hasElongatedInTop ? '0' : '14px', justifyContent: 'center' }}>
           {topRow.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} isElongated={isElongated(product)} />
           ))}
-          {topRow.length === 1 && <div style={{ width: '368px', height: '505px' }} />}
+          {topRow.length === 1 && !hasElongatedInTop && <div style={{ width: '368px', height: '505px' }} />}
         </div>
+        {/* Fila inferior */}
         {bottomRow.length > 0 && (
-          <div style={{ display: 'flex', gap: '14px' }}>
+          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
             {bottomRow.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} isElongated={isElongated(product)} />
             ))}
             {bottomRow.length === 1 && <div style={{ width: '368px', height: '505px' }} />}
           </div>

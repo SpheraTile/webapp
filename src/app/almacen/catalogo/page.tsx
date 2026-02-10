@@ -28,40 +28,27 @@ interface ApiProducto {
   peso_caja_kg: number
 }
 
-// Función para calcular el "peso" de un producto en la paginación
-function getProductWeight(product: ApiProducto): number {
-  // Productos alargados (22.5x119.5) ocupan el doble de espacio
-  if (product.formato.includes('22.5') && product.formato.includes('119')) {
-    return 2
-  }
-  return 1
+// Detectar si un producto es alargado
+function isElongatedProduct(product: ApiProducto): boolean {
+  return product.formato.includes('22.5') && product.formato.includes('119')
 }
 
-// Función inteligente para paginar productos
+// Función para paginar productos agrupando por tipo (no mezclar alargados con cuadrados)
 function paginateProducts(products: ApiProducto[]): ApiProducto[][] {
+  // Separar productos en dos grupos
+  const elongatedProducts = products.filter(isElongatedProduct)
+  const normalProducts = products.filter(p => !isElongatedProduct(p))
+
   const pages: ApiProducto[][] = []
-  const maxWeightPerPage = 4 // 4 productos normales o 2 alargados o combinación
 
-  let currentPage: ApiProducto[] = []
-  let currentWeight = 0
-
-  for (const product of products) {
-    const weight = getProductWeight(product)
-
-    // Si adding este producto excede el peso máximo, empezar nueva página
-    if (currentWeight + weight > maxWeightPerPage && currentPage.length > 0) {
-      pages.push(currentPage)
-      currentPage = []
-      currentWeight = 0
-    }
-
-    currentPage.push(product)
-    currentWeight += weight
+  // Paginar productos alargados (2 por página)
+  for (let i = 0; i < elongatedProducts.length; i += 2) {
+    pages.push(elongatedProducts.slice(i, i + 2))
   }
 
-  // Añadir la última página si tiene productos
-  if (currentPage.length > 0) {
-    pages.push(currentPage)
+  // Paginar productos normales (4 por página)
+  for (let i = 0; i < normalProducts.length; i += 4) {
+    pages.push(normalProducts.slice(i, i + 4))
   }
 
   return pages
@@ -514,87 +501,90 @@ export default function CatalogoPage() {
                   {/* Layout de edición de precios - muestra todos los productos */}
                   {(() => {
                     const pageProducts = pages[previewPage - 1] || []
-                    const isElongated = (p: ApiProducto) => p.formato.includes('22.5') && p.formato.includes('119')
-                    const hasElongatedFirst = pageProducts.length > 0 && isElongated(pageProducts[0])
+                    const isElongatedPage = pageProducts.length > 0 && isElongatedProduct(pageProducts[0])
 
+                    // Layout para productos alargados (vertical)
+                    if (isElongatedPage) {
+                      return (
+                        <div className="flex flex-col gap-4 justify-center">
+                          {pageProducts.map((product) => (
+                            <div key={product.id} className="border border-neutral-200 rounded-lg overflow-hidden mx-auto" style={{ width: '750px' }}>
+                              <div className="h-32 overflow-hidden">
+                                <img
+                                  src={product.imagen}
+                                  alt={product.nombre}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="p-3">
+                                <p className="font-semibold text-sm text-neutral-900 truncate">{product.nombre}</p>
+                                <p className="text-xs text-neutral-500">Ref: {product.referencia} · {product.serie}</p>
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-2 text-xs text-neutral-600">
+                                  <span>{product.formato}</span>
+                                  <span>{product.calidad}</span>
+                                  <span>{product.materia_prima}</span>
+                                  <span>{product.acabado}</span>
+                                </div>
+                                <div className="flex items-center gap-2 mt-3">
+                                  <label className="text-xs text-neutral-500">€/m²:</label>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    value={priceOverrides[product.id] ?? product.precio_m2}
+                                    onChange={(e) => handlePriceChange(product.id, parseFloat(e.target.value) || 0)}
+                                    className="w-24 px-2 py-1 text-sm font-semibold text-red-600 border border-neutral-200 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                  />
+                                  <span className="text-xs text-neutral-400 ml-auto">Stock: {product.stock_m2.toFixed(2)} m²</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    }
+
+                    // Layout para productos normales (2x2 grid)
                     return (
                       <div>
                         {/* Fila superior */}
                         <div className="flex gap-4 mb-4 justify-center">
-                          {hasElongatedFirst ? (
-                            // Producto alargado ocupa todo el ancho
-                            pageProducts.slice(0, 1).map((product) => (
-                              <div key={product.id} className="border border-neutral-200 rounded-lg overflow-hidden" style={{ width: '750px' }}>
-                                <div className="h-40 overflow-hidden">
-                                  <img
-                                    src={product.imagen}
-                                    alt={product.nombre}
-                                    className="w-full h-full object-cover"
-                                  />
+                          {pageProducts.slice(0, 2).map((product) => (
+                            <div key={product.id} className="border border-neutral-200 rounded-lg overflow-hidden" style={{ width: '368px' }}>
+                              <div className="h-40 overflow-hidden">
+                                <img
+                                  src={product.imagen}
+                                  alt={product.nombre}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="p-3">
+                                <p className="font-semibold text-sm text-neutral-900 truncate">{product.nombre}</p>
+                                <p className="text-xs text-neutral-500">Ref: {product.referencia} · {product.serie}</p>
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-2 text-xs text-neutral-600">
+                                  <span>{product.formato}</span>
+                                  <span>{product.calidad}</span>
+                                  <span>{product.materia_prima}</span>
+                                  <span>{product.acabado}</span>
                                 </div>
-                                <div className="p-3">
-                                  <p className="font-semibold text-sm text-neutral-900 truncate">{product.nombre}</p>
-                                  <p className="text-xs text-neutral-500">Ref: {product.referencia} · {product.serie}</p>
-                                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-2 text-xs text-neutral-600">
-                                    <span>{product.formato}</span>
-                                    <span>{product.calidad}</span>
-                                    <span>{product.materia_prima}</span>
-                                    <span>{product.acabado}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-3">
-                                    <label className="text-xs text-neutral-500">€/m²:</label>
-                                    <input
-                                      type="number"
-                                      step="0.01"
-                                      value={priceOverrides[product.id] ?? product.precio_m2}
-                                      onChange={(e) => handlePriceChange(product.id, parseFloat(e.target.value) || 0)}
-                                      className="w-24 px-2 py-1 text-sm font-semibold text-red-600 border border-neutral-200 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    />
-                                    <span className="text-xs text-neutral-400 ml-auto">Stock: {product.stock_m2.toFixed(2)} m²</span>
-                                  </div>
+                                <div className="flex items-center gap-2 mt-3">
+                                  <label className="text-xs text-neutral-500">€/m²:</label>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    value={priceOverrides[product.id] ?? product.precio_m2}
+                                    onChange={(e) => handlePriceChange(product.id, parseFloat(e.target.value) || 0)}
+                                    className="w-24 px-2 py-1 text-sm font-semibold text-red-600 border border-neutral-200 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                  />
+                                  <span className="text-xs text-neutral-400 ml-auto">Stock: {product.stock_m2.toFixed(2)} m²</span>
                                 </div>
                               </div>
-                            ))
-                          ) : (
-                            // Productos normales
-                            pageProducts.slice(0, 2).map((product) => (
-                              <div key={product.id} className="border border-neutral-200 rounded-lg overflow-hidden" style={{ width: '368px' }}>
-                                <div className="h-40 overflow-hidden">
-                                  <img
-                                    src={product.imagen}
-                                    alt={product.nombre}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="p-3">
-                                  <p className="font-semibold text-sm text-neutral-900 truncate">{product.nombre}</p>
-                                  <p className="text-xs text-neutral-500">Ref: {product.referencia} · {product.serie}</p>
-                                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-2 text-xs text-neutral-600">
-                                    <span>{product.formato}</span>
-                                    <span>{product.calidad}</span>
-                                    <span>{product.materia_prima}</span>
-                                    <span>{product.acabado}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-3">
-                                    <label className="text-xs text-neutral-500">€/m²:</label>
-                                    <input
-                                      type="number"
-                                      step="0.01"
-                                      value={priceOverrides[product.id] ?? product.precio_m2}
-                                      onChange={(e) => handlePriceChange(product.id, parseFloat(e.target.value) || 0)}
-                                      className="w-24 px-2 py-1 text-sm font-semibold text-red-600 border border-neutral-200 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    />
-                                    <span className="text-xs text-neutral-400 ml-auto">Stock: {product.stock_m2.toFixed(2)} m²</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))
-                          )}
+                            </div>
+                          ))}
                         </div>
                         {/* Fila inferior */}
-                        {pageProducts.slice(hasElongatedFirst ? 1 : 2).length > 0 && (
+                        {pageProducts.slice(2).length > 0 && (
                           <div className="flex gap-4 justify-center">
-                            {pageProducts.slice(hasElongatedFirst ? 1 : 2).map((product) => (
+                            {pageProducts.slice(2, 4).map((product) => (
                               <div key={product.id} className="border border-neutral-200 rounded-lg overflow-hidden" style={{ width: '368px' }}>
                                 <div className="h-40 overflow-hidden">
                                   <img

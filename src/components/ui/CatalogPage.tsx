@@ -126,23 +126,35 @@ export function CatalogPage({ products, pageNumber, totalPages }: CatalogPagePro
   const isElongated = (product: CatalogProduct) =>
     product.formato.includes('22.5') && product.formato.includes('119')
 
-  // Layout inteligente:
-  // - Si hay un producto alargado en primera posición, ocupa toda la fila superior
-  // - Los productos normales van en las filas inferiores
-  let topRow: CatalogProduct[] = []
-  let bottomRow: CatalogProduct[] = []
+  // Determinar el tipo de página según el primer producto
+  const isElongatedPage = products.length > 0 && isElongated(products[0])
 
-  if (products.length > 0 && isElongated(products[0])) {
-    // Producto alargado ocupa toda la fila superior
-    topRow = [products[0]]
-    bottomRow = products.slice(1, 4) // Máximo 3 productos normales abajo
-  } else {
-    // Layout normal: 2 arriba, 2 abajo
-    topRow = products.slice(0, 2)
-    bottomRow = products.slice(2, 4)
-  }
+  // Layout para página de productos alargados (2 productos, uno encima del otro)
+  const elongatedLayout = (
+    <>
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} isElongated={true} />
+      ))}
+    </>
+  )
 
-  const hasElongatedInTop = topRow.length > 0 && isElongated(topRow[0])
+  // Layout para página de productos normales (4 productos, 2x2 grid)
+  const normalLayout = (
+    <>
+      {/* Fila superior */}
+      <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
+        {products.slice(0, 2).map((product) => (
+          <ProductCard key={product.id} product={product} isElongated={false} />
+        ))}
+      </div>
+      {/* Fila inferior */}
+      <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
+        {products.slice(2, 4).map((product) => (
+          <ProductCard key={product.id} product={product} isElongated={false} />
+        ))}
+      </div>
+    </>
+  )
 
   return (
     <div style={{ width: '800px', height: '1130px', fontFamily: 'Arial, Helvetica, sans-serif', display: 'flex', flexDirection: 'column', backgroundColor: '#fff', boxSizing: 'border-box' as const }}>
@@ -156,23 +168,8 @@ export function CatalogPage({ products, pageNumber, totalPages }: CatalogPagePro
       </div>
 
       {/* Products grid - centered */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '10px 20px' }}>
-        {/* Fila superior */}
-        <div style={{ display: 'flex', gap: hasElongatedInTop ? '0' : '14px', justifyContent: 'center' }}>
-          {topRow.map((product) => (
-            <ProductCard key={product.id} product={product} isElongated={isElongated(product)} />
-          ))}
-          {topRow.length === 1 && !hasElongatedInTop && <div style={{ width: '368px', height: '505px' }} />}
-        </div>
-        {/* Fila inferior */}
-        {bottomRow.length > 0 && (
-          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
-            {bottomRow.map((product) => (
-              <ProductCard key={product.id} product={product} isElongated={isElongated(product)} />
-            ))}
-            {bottomRow.length === 1 && <div style={{ width: '368px', height: '505px' }} />}
-          </div>
-        )}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: isElongatedPage ? '15px' : '10px', padding: '10px 20px' }}>
+        {isElongatedPage ? elongatedLayout : normalLayout}
       </div>
 
       {/* Footer */}

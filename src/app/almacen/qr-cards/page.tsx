@@ -3,15 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { QRCard, qrCardPrintStyles } from '@/components/producto/QRCard'
 import { useToast } from '@/components/ui/Toast'
-
-interface Producto {
-  id: string
-  slug: string
-  nombre: string
-  referencia: string
-  formato: string
-  imagen: string
-}
+import { Producto } from '@/types'
 
 export default function QRCardsPage() {
   const [productos, setProductos] = useState<Producto[]>([])

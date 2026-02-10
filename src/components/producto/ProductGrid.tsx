@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { Producto } from '@/types'
 import { ProductCard } from './ProductCard'
+import { optimizeGridLayout } from '@/lib/gridOptimizer'
 
 interface ProductGridProps {
   productos: Producto[]
@@ -8,6 +10,11 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ productos, className = '', columnas }: ProductGridProps) {
+  // Optimizar orden de productos para minimizar huecos en el grid
+  const displayProducts = useMemo(() => {
+    if (columnas === 1) return productos // Vista lista, no optimizar
+    return optimizeGridLayout(productos)
+  }, [productos, columnas])
   if (productos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -49,12 +56,11 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
         grid grid-cols-2 gap-4
         md:grid-cols-3
         lg:grid-cols-4
-        grid-auto-flow: dense
         auto-rows-min
         ${className}
       `}
     >
-      {productos.map((producto) => {
+      {displayProducts.map((producto) => {
         // Detectar productos alargados (22.5x119.5 o similar)
         const esAlargado = producto.formato.includes('22.5') && producto.formato.includes('119')
 
@@ -62,9 +68,10 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
           <div
             key={producto.id}
             className={`
-              ${esAlargado ? 'col-span-2 row-span-1' : 'col-span-1 row-span-1'}
+              ${esAlargado ? 'col-span-2 row-span-1 justify-self-center' : 'col-span-1 row-span-1'}
               break-inside-avoid
               page-break-inside-avoid
+              w-full
             `}
           >
             <ProductCard producto={producto} esAlargado={esAlargado} />

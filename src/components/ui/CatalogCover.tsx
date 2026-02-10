@@ -14,9 +14,25 @@ interface CatalogCoverProps {
   serie?: string
   productCount: number
   date: string
+  customImage?: string // URL de imagen personalizada (800x1130px)
 }
 
-export function CatalogCover({ serie, productCount, date }: CatalogCoverProps) {
+export function CatalogCover({ serie, productCount, date, customImage }: CatalogCoverProps) {
+  // Si hay imagen personalizada, mostrarla como fondo completo
+  if (customImage) {
+    return (
+      <div style={{ width: '800px', height: '1130px', position: 'relative', overflow: 'hidden' }}>
+        <img
+          src={customImage}
+          alt="Portada"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          crossOrigin="anonymous"
+        />
+      </div>
+    )
+  }
+
+  // Diseño por defecto
   return (
     <div style={{ width: '800px', height: '1130px', fontFamily: 'Arial, Helvetica, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff', boxSizing: 'border-box' }}>
       {/* Logo */}

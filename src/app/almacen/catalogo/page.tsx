@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { CatalogPage, type CatalogProduct } from '@/components/ui/CatalogPage'
 import { CatalogCover } from '@/components/ui/CatalogCover'
+import { CatalogBackCover } from '@/components/ui/CatalogBackCover'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
@@ -39,6 +40,10 @@ export default function CatalogoPage() {
   const [generatingPDF, setGeneratingPDF] = useState(false)
   const [pdfProgress, setPdfProgress] = useState('')
   const [previewPage, setPreviewPage] = useState(0)
+  const [coverImage, setCoverImage] = useState<string>('')
+  const [backCoverImage, setBackCoverImage] = useState<string>('')
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [uploadingBackCover, setUploadingBackCover] = useState(false)
 
   const pdfContainerRef = useRef<HTMLDivElement>(null)
 
@@ -106,6 +111,49 @@ export default function CatalogoPage() {
   const resetPrices = useCallback(() => {
     setPriceOverrides({})
   }, [])
+
+  const handleImageUpload = async (file: File, type: 'cover' | 'backcover') => {
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen es demasiado grande. Máximo 5MB.')
+      return
+    }
+
+    // Validar tipo
+    if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+      alert('Formato no válido. Usa JPG o PNG.')
+      return
+    }
+
+    const setUploading = type === 'cover' ? setUploadingCover : setUploadingBackCover
+    setUploading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!res.ok) throw new Error('Error al subir imagen')
+
+      const data = await res.json()
+      const imageUrl = data.url
+
+      if (type === 'cover') {
+        setCoverImage(imageUrl)
+      } else {
+        setBackCoverImage(imageUrl)
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Error al subir la imagen')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const today = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
@@ -246,7 +294,79 @@ export default function CatalogoPage() {
 
           {/* Counter */}
           <div className="ml-auto text-sm text-neutral-500">
-            {catalogProducts.length} productos · {totalPages + 1} páginas
+            {catalogProducts.length} productos · {totalPages + (backCoverImage ? 2 : 1)} páginas
+          </div>
+        </div>
+
+        {/* Custom cover images */}
+        <div className="mt-4 pt-4 border-t border-neutral-200">
+          <label className="text-sm font-medium text-neutral-700 mb-3 block">Portadas personalizadas (800x1130px, JPG/PNG, máx 5MB):</label>
+          <div className="flex flex-wrap gap-4">
+            {/* Cover image */}
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-xs text-neutral-500 mb-1">Portada (primera página)</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleImageUpload(file, 'cover')
+                  }}
+                  disabled={uploadingCover}
+                  className="flex-1 text-xs text-neutral-600 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-red-50 file:text-red-600 hover:file:bg-red-100"
+                />
+                {coverImage && (
+                  <button
+                    onClick={() => setCoverImage('')}
+                    className="text-xs text-red-600 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
+                )}
+                {uploadingCover && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                )}
+              </div>
+              {coverImage && (
+                <div className="mt-2">
+                  <img src={coverImage} alt="Portada" className="h-16 w-auto rounded border border-neutral-200" />
+                </div>
+              )}
+            </div>
+
+            {/* Back cover image */}
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-xs text-neutral-500 mb-1">Contraportada (última página)</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) handleImageUpload(file, 'backcover')
+                  }}
+                  disabled={uploadingBackCover}
+                  className="flex-1 text-xs text-neutral-600 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-red-50 file:text-red-600 hover:file:bg-red-100"
+                />
+                {backCoverImage && (
+                  <button
+                    onClick={() => setBackCoverImage('')}
+                    className="text-xs text-red-600 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
+                )}
+                {uploadingBackCover && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                )}
+              </div>
+              {backCoverImage && (
+                <div className="mt-2">
+                  <img src={backCoverImage} alt="Contraportada" className="h-16 w-auto rounded border border-neutral-200" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -268,11 +388,15 @@ export default function CatalogoPage() {
               Anterior
             </button>
             <span className="text-sm text-neutral-600">
-              {previewPage === 0 ? 'Portada' : `Página ${previewPage} de ${totalPages}`}
+              {previewPage === 0
+                ? 'Portada'
+                : backCoverImage && previewPage === totalPages + 1
+                  ? 'Contraportada'
+                  : `Página ${previewPage} de ${totalPages}`}
             </span>
             <button
-              onClick={() => setPreviewPage(Math.min(totalPages, previewPage + 1))}
-              disabled={previewPage >= totalPages}
+              onClick={() => setPreviewPage(Math.min(totalPages + (backCoverImage ? 1 : 0), previewPage + 1))}
+              disabled={previewPage >= totalPages + (backCoverImage ? 1 : 0)}
               className="px-3 py-1.5 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-30"
             >
               Siguiente
@@ -287,7 +411,12 @@ export default function CatalogoPage() {
                   serie={serieLabel}
                   productCount={catalogProducts.length}
                   date={today}
+                  customImage={coverImage}
                 />
+              </div>
+            ) : backCoverImage && previewPage === totalPages + 1 ? (
+              <div className="mx-auto" style={{ width: '800px' }}>
+                <CatalogBackCover customImage={backCoverImage} />
               </div>
             ) : (
               <div className="mx-auto" style={{ width: '800px' }}>
@@ -340,6 +469,7 @@ export default function CatalogoPage() {
           serie={serieLabel}
           productCount={catalogProducts.length}
           date={today}
+          customImage={coverImage}
         />
         {/* Product pages */}
         {pages.map((pageProducts, i) => (
@@ -350,6 +480,10 @@ export default function CatalogoPage() {
             totalPages={totalPages}
           />
         ))}
+        {/* Back cover */}
+        {backCoverImage && (
+          <CatalogBackCover customImage={backCoverImage} />
+        )}
       </div>
     </div>
   )

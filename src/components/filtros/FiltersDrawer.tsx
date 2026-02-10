@@ -75,6 +75,7 @@ const LABELS_ASPECTO: Record<string, string> = {
   'Colores': 'colors',
   'Madera': 'wood',
   'Mármol': 'marble',
+  'Onyx': 'onyx',
   'Piedra': 'stone',
   'Terracota': 'terracotta',
 }

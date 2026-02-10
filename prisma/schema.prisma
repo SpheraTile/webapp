@@ -121,6 +121,7 @@ enum Aspecto {
   COLORES
   MADERA
   MARMOL
+  ONYX
   PIEDRA
   TERRACOTA
 }

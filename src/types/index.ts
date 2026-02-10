@@ -10,6 +10,7 @@ export type Aspecto =
   | 'Colores'
   | 'Madera'
   | 'Mármol'
+  | 'Onyx'
   | 'Piedra'
   | 'Terracota'
 
@@ -209,7 +210,7 @@ export interface EstadisticasAlmacen {
 // Opciones para los filtros (para componentes UI)
 export const OPCIONES_CALIDAD: Calidad[] = ['COM', 'PRIMERA']
 export const OPCIONES_MATERIA_PRIMA: MateriaPrima[] = ['Porcelánico', 'Gres', 'Azulejo']
-export const OPCIONES_ASPECTO: Aspecto[] = ['Blanco', 'Cemento', 'Colores', 'Madera', 'Mármol', 'Piedra', 'Terracota']
+export const OPCIONES_ASPECTO: Aspecto[] = ['Blanco', 'Cemento', 'Colores', 'Madera', 'Mármol', 'Onyx', 'Piedra', 'Terracota']
 export const OPCIONES_ACABADO: Acabado[] = ['Mate', 'Pulido', 'Satinado', 'Texturizado', 'Antideslizante']
 export const OPCIONES_TIPO_PIEZA: TipoPieza[] = ['base', 'decorado', 'multistep']
 export const OPCIONES_USO: Uso[] = ['pavimento', 'revestimiento', 'pavimento_revestimiento']

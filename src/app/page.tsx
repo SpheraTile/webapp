@@ -229,7 +229,7 @@ export default async function HomePage() {
         {/* Footer Desktop */}
         <footer className="bg-neutral-900 text-white py-16">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-4 gap-12">
+            <div className="grid grid-cols-3 gap-12">
               {/* Logo y descripción */}
               <div className="col-span-2">
                 <div className="mb-6">
@@ -240,38 +240,12 @@ export default async function HomePage() {
                 </p>
               </div>
 
-              {/* Enlaces */}
-              <div>
-                <h4 className="font-semibold text-lg mb-4">{tFooter('catalog')}</h4>
-                <ul className="space-y-3 text-neutral-400">
-                  <li>
-                    <Link href="/productos?calidad=Porcelánico" className="hover:text-white transition-colors">
-                      {t('categoryPorcelain')}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/productos?calidad=Gres" className="hover:text-white transition-colors">
-                      {t('categoryStoneware')}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/productos?calidad=Azulejo" className="hover:text-white transition-colors">
-                      {t('categoryTile')}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/productos" className="hover:text-white transition-colors">
-                      {tFooter('viewAll')}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
               {/* Contacto */}
               <div>
                 <h4 className="font-semibold text-lg mb-4">{tFooter('contact')}</h4>
                 <ul className="space-y-3 text-neutral-400">
                   <li>info@spheratile.es</li>
+                  <li>sales@spheratile.es</li>
                   <li>+34 633 909 095</li>
                   <li>{tFooter('schedule')}</li>
                 </ul>

@@ -37,11 +37,11 @@ export function QRCard({ producto, baseUrl = 'https://spheratile.com' }: QRCardP
       </div>
 
       {/* QR Code - Large, takes most space */}
-      <div className="flex-1 flex items-center justify-center my-[1mm]">
-        <div className="w-[38mm] h-[38mm] flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center my-[0.5mm]">
+        <div className="w-[30mm] h-[30mm] flex items-center justify-center">
           <QRCodeSVG
             value={productUrl}
-            size={150}
+            size={120}
             level="M"
             includeMargin={false}
           />

@@ -62,7 +62,7 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
           <div
             key={producto.id}
             className={`
-              ${esAlargado ? 'col-span-2 lg:col-span-2 row-span-1' : 'col-span-1'}
+              ${esAlargado ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1'}
               break-inside-avoid
               page-break-inside-avoid
               flex

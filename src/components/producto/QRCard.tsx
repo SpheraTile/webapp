@@ -1,7 +1,6 @@
 'use client'
 
 import { QRCodeSVG } from 'qrcode.react'
-import Image from 'next/image'
 import { Producto } from '@/types'
 
 interface QRCardProps {
@@ -17,31 +16,19 @@ export function QRCard({ producto, baseUrl = 'https://spheratile.com' }: QRCardP
 
   return (
     <div
-      className="qr-card bg-white flex flex-col border-2 border-neutral-900"
+      className="qr-card bg-white flex flex-col items-center border-2 border-neutral-900"
       style={{
         width: `${CARD_WIDTH_MM}mm`,
         height: `${CARD_HEIGHT_MM}mm`,
         fontFamily: 'Arial, sans-serif',
       }}
     >
-      {/* Top section - Product Image + QR Code */}
-      <div className="flex-1 flex p-[2mm] gap-[2mm]">
-        {/* Product Image - Left */}
-        <div className="w-[26mm] h-[26mm] relative bg-neutral-100 overflow-hidden flex-shrink-0">
-          <Image
-            src={producto.imagen}
-            alt={producto.nombre}
-            fill
-            className="object-cover"
-            sizes="26mm"
-          />
-        </div>
-
-        {/* QR Code - Right */}
-        <div className="w-[26mm] h-[26mm] flex-shrink-0 flex items-center justify-center bg-white">
+      {/* Top section - QR Code centered */}
+      <div className="flex-1 flex items-center justify-center p-[2mm]">
+        <div className="w-[36mm] h-[36mm] flex items-center justify-center bg-white">
           <QRCodeSVG
             value={productUrl}
-            size={100}
+            size={140}
             level="M"
             includeMargin={false}
           />
@@ -63,7 +50,7 @@ export function QRCard({ producto, baseUrl = 'https://spheratile.com' }: QRCardP
       </div>
 
       {/* Bottom section - Company Info */}
-      <div className="px-[2mm] pb-[1mm] mt-auto">
+      <div className="px-[2mm] pb-[1mm] w-full">
         <div className="text-center border-t border-neutral-300 pt-[1mm]">
           <div className="text-[5px] font-bold text-neutral-900 leading-tight">
             SPHERA TILE

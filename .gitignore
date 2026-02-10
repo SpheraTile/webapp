@@ -32,6 +32,10 @@ yarn.lock
 .env*.local
 .env
 
+# Database exports
+db-export.json
+db-backup.sql
+
 # Vercel
 .vercel
 

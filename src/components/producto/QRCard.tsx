@@ -5,13 +5,13 @@ import { Producto } from '@/types'
 
 interface QRCardProps {
   producto: Producto
-  baseUrl?: string // Default: https://spheratile.com
+  baseUrl?: string
 }
 
 const CARD_WIDTH_MM = 60
 const CARD_HEIGHT_MM = 45
 
-export function QRCard({ producto, baseUrl = 'https://spheratile.com' }: QRCardProps) {
+export function QRCard({ producto, baseUrl = 'https://app.spheratile.es' }: QRCardProps) {
   const productUrl = `${baseUrl}/producto/${producto.slug}`
 
   return (

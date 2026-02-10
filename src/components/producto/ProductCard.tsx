@@ -11,6 +11,7 @@ interface ProductCardProps {
   producto: Producto
   className?: string
   variant?: 'grid' | 'list'
+  esAlargado?: boolean
 }
 
 // Translation keys for product attributes
@@ -63,7 +64,7 @@ function EstadoBadge({ estado, t }: { estado: string; t: (key: string) => string
   )
 }
 
-export function ProductCard({ producto, className = '', variant = 'grid' }: ProductCardProps) {
+export function ProductCard({ producto, className = '', variant = 'grid', esAlargado = false }: ProductCardProps) {
   const t = useTranslations('filters')
 
   // Get translated labels
@@ -140,14 +141,14 @@ export function ProductCard({ producto, className = '', variant = 'grid' }: Prod
       className={`product-card block ${className}`}
     >
       {/* Imagen del producto */}
-      <div className="relative aspect-product bg-neutral-100 overflow-hidden">
+      <div className={`relative bg-neutral-100 overflow-hidden ${esAlargado ? 'aspect-[5/2]' : 'aspect-product'}`}>
         <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
         <ProductImage
           src={producto.imagen}
           alt={producto.nombre}
           fill
           className="object-cover"
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+          sizes={esAlargado ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"}
         />
       </div>
 

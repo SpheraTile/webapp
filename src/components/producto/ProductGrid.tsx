@@ -52,9 +52,23 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
         ${className}
       `}
     >
-      {productos.map((producto) => (
-        <ProductCard key={producto.id} producto={producto} />
-      ))}
+      {productos.map((producto) => {
+        // Detectar productos alargados (22.5x119.5 o similar)
+        const esAlargado = producto.formato.includes('22.5') && producto.formato.includes('119')
+
+        return (
+          <div
+            key={producto.id}
+            className={`
+              ${esAlargado ? 'col-span-2 lg:col-span-2' : ''}
+              break-inside-avoid
+              page-break-inside-avoid
+            `}
+          >
+            <ProductCard producto={producto} esAlargado={esAlargado} />
+          </div>
+        )
+      })}
     </div>
   )
 }

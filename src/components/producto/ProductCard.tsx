@@ -138,7 +138,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
   return (
     <Link
       href={`/productos/${producto.slug}`}
-      className={`product-card block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${className}`}
+      className={`product-card block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${esAlargado ? 'w-full' : ''} ${className}`}
     >
       {/* Imagen del producto */}
       <div className={`relative bg-neutral-100 overflow-hidden ${esAlargado ? 'aspect-[8/3]' : 'aspect-product'}`}>

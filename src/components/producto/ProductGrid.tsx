@@ -65,7 +65,6 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
               ${esAlargado ? 'col-span-2 row-span-1' : 'col-span-1 row-span-1'}
               break-inside-avoid
               page-break-inside-avoid
-              flex
             `}
           >
             <ProductCard producto={producto} esAlargado={esAlargado} />

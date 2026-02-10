@@ -138,80 +138,43 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
   return (
     <Link
       href={`/productos/${producto.slug}`}
-      className={`product-card block ${className}`}
+      className={`product-card block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${className}`}
     >
-      {esAlargado ? (
-        // Layout horizontal para productos alargados
-        <div className="flex h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          {/* Imagen - ocupa ~60% del ancho */}
-          <div className="relative w-[60%] bg-neutral-100 overflow-hidden">
-            <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
-            <ProductImage
-              src={producto.imagen}
-              alt={producto.nombre}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          </div>
+      {/* Imagen del producto */}
+      <div className={`relative bg-neutral-100 overflow-hidden ${esAlargado ? 'aspect-[8/3]' : 'aspect-product'}`}>
+        <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
+        <ProductImage
+          src={producto.imagen}
+          alt={producto.nombre}
+          fill
+          className="object-cover"
+          sizes={esAlargado ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" : "(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"}
+        />
+      </div>
 
-          {/* Información del producto - ocupa ~40% del ancho */}
-          <div className="w-[40%] p-3 flex flex-col justify-center space-y-1.5">
-            {/* Nombre */}
-            <h3 className="font-semibold text-neutral-900 text-xs uppercase tracking-wide line-clamp-2">
-              {producto.nombre}
-            </h3>
+      {/* Información del producto */}
+      <div className={`p-3 ${esAlargado ? 'space-y-1' : 'space-y-2'}`}>
+        {/* Nombre */}
+        <h3 className={`font-semibold text-neutral-900 uppercase tracking-wide line-clamp-2 ${esAlargado ? 'text-xs' : 'text-sm'}`}>
+          {producto.nombre}
+        </h3>
 
-            {/* Formato */}
-            <p className="text-xs text-neutral-500">{producto.formato}</p>
-
-            {/* Badge de stock */}
-            <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
-
-            {/* Precio */}
-            <PriceTag precio_m2={producto.precio_m2} size="sm" />
-          </div>
+        {/* Formato y tipo */}
+        <div className={`flex items-center gap-2 text-neutral-500 ${esAlargado ? 'text-xs' : 'text-sm'}`}>
+          <span>{producto.formato}</span>
+          {tipoPiezaLabel && tipoPiezaKey !== 'base' && (
+            <span className="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded">
+              {tipoPiezaLabel}
+            </span>
+          )}
         </div>
-      ) : (
-        // Layout vertical normal para productos cuadrados
-        <>
-          {/* Imagen del producto */}
-          <div className="relative bg-neutral-100 overflow-hidden aspect-product">
-            <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
-            <ProductImage
-              src={producto.imagen}
-              alt={producto.nombre}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            />
-          </div>
 
-          {/* Información del producto */}
-          <div className="p-3 space-y-2">
-            {/* Nombre */}
-            <h3 className="font-semibold text-neutral-900 text-sm uppercase tracking-wide line-clamp-2">
-              {producto.nombre}
-            </h3>
+        {/* Badge de stock */}
+        <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
 
-            {/* Formato y tipo */}
-            <div className="flex items-center gap-2 text-sm text-neutral-500">
-              <span>{producto.formato}</span>
-              {tipoPiezaLabel && tipoPiezaKey !== 'base' && (
-                <span className="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded">
-                  {tipoPiezaLabel}
-                </span>
-              )}
-            </div>
-
-            {/* Badge de stock */}
-            <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
-
-            {/* Precio */}
-            <PriceTag precio_m2={producto.precio_m2} size="md" />
-          </div>
-        </>
-      )}
+        {/* Precio */}
+        <PriceTag precio_m2={producto.precio_m2} size={esAlargado ? 'sm' : 'md'} />
+      </div>
     </Link>
   )
 }

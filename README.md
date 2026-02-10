@@ -51,27 +51,20 @@ bun run prisma:studio # GUI de base de datos
 
 ## Variables de Entorno
 
-```env
-# Database
-DATABASE_URL="postgresql://..."
+Copia `.env.example` a `.env.local` y rellena con tus valores:
 
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="..."
-
-# OpenAI (Chatbot)
-OPENAI_API_KEY="sk-..."
-
-# Gemini (Embeddings)
-GEMINI_API_KEY="..."
-
-# Bunny CDN
-BUNNY_API_KEY="..."
-BUNNY_STORAGE_ZONE="..."
-
-# Resend (Email)
-RESEND_API_KEY="re_..."
+```bash
+cp .env.example .env.local
 ```
+
+Variables necesarias:
+- `DATABASE_URL` - PostgreSQL connection string (Neon)
+- `NEXTAUTH_URL` - URL de la aplicación
+- `NEXTAUTH_SECRET` - Secreto para JWT (mínimo 32 caracteres)
+- `OPENAI_API_KEY` - Para el chatbot
+- `GEMINI_API_KEY` - Para embeddings de productos
+- `BUNNY_API_KEY` - Para subida de archivos
+- `RESEND_API_KEY` - Para envío de emails
 
 ## Estructura del Proyecto
 

@@ -11,8 +11,13 @@ interface QRCardProps {
 const CARD_WIDTH_MM = 60
 const CARD_HEIGHT_MM = 45
 
-export function QRCard({ producto, baseUrl = 'https://app.spheratile.es' }: QRCardProps) {
-  const productUrl = `${baseUrl}/producto/${producto.slug}`
+export function QRCard({ producto, baseUrl }: QRCardProps) {
+  // Usar window.location.origin dinámicamente como en ProductQRCode
+  const origin = typeof window !== 'undefined'
+    ? window.location.origin
+    : baseUrl || process.env.NEXT_PUBLIC_BASE_URL || 'https://app.spheratile.es'
+
+  const productUrl = `${origin}/productos/${producto.slug}`
 
   return (
     <div

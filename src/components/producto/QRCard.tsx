@@ -17,55 +17,63 @@ export function QRCard({ producto, baseUrl = 'https://spheratile.com' }: QRCardP
 
   return (
     <div
-      className="qr-card bg-white flex flex-col items-center justify-between p-2 border-2 border-neutral-900"
+      className="qr-card bg-white flex flex-col border-2 border-neutral-900"
       style={{
         width: `${CARD_WIDTH_MM}mm`,
         height: `${CARD_HEIGHT_MM}mm`,
         fontFamily: 'Arial, sans-serif',
       }}
     >
-      {/* Header - Logo */}
-      <div className="w-full flex justify-center mb-1">
-        <div className="text-[6px] font-bold text-neutral-900 tracking-wider">
-          SPHERA TILE
-        </div>
-      </div>
-
-      {/* Content - QR Code + Product Image */}
-      <div className="flex-1 flex items-center justify-between w-full gap-1">
-        {/* Product Image */}
-        <div className="w-[20mm] h-[20mm] relative bg-neutral-100 rounded-sm overflow-hidden flex-shrink-0">
+      {/* Top section - Product Image + QR Code */}
+      <div className="flex-1 flex p-[2mm] gap-[2mm]">
+        {/* Product Image - Left */}
+        <div className="w-[26mm] h-[26mm] relative bg-neutral-100 overflow-hidden flex-shrink-0">
           <Image
             src={producto.imagen}
             alt={producto.nombre}
             fill
             className="object-cover"
-            sizes="20mm"
+            sizes="26mm"
           />
         </div>
 
-        {/* QR Code */}
-        <div className="w-[22mm] h-[22mm] flex-shrink-0 flex items-center justify-center bg-white rounded-sm">
+        {/* QR Code - Right */}
+        <div className="w-[26mm] h-[26mm] flex-shrink-0 flex items-center justify-center bg-white">
           <QRCodeSVG
             value={productUrl}
-            size={80}
+            size={100}
             level="M"
             includeMargin={false}
           />
         </div>
       </div>
 
-      {/* Footer - Product Info */}
-      <div className="w-full text-center mt-1 space-y-0.5">
-        {/* Product Name - truncate with ellipsis */}
-        <div className="text-[5px] font-semibold text-neutral-900 leading-tight truncate px-1" title={producto.nombre}>
+      {/* Middle section - Product Info */}
+      <div className="px-[2mm] text-center space-y-[0.5mm]">
+        {/* Product Name */}
+        <div className="text-[6px] font-bold text-neutral-900 leading-tight uppercase" title={producto.nombre}>
           {producto.nombre}
         </div>
 
         {/* Format + Reference */}
-        <div className="flex items-center justify-between text-[4px] text-neutral-600 px-1">
+        <div className="flex items-center justify-center gap-[2mm] text-[5px] text-neutral-700">
           <span className="font-medium">{producto.formato}</span>
-          <span className="font-mono">{producto.referencia}</span>
+          <span className="font-mono text-neutral-500">{producto.referencia}</span>
+        </div>
+      </div>
+
+      {/* Bottom section - Company Info */}
+      <div className="px-[2mm] pb-[1mm] mt-auto">
+        <div className="text-center border-t border-neutral-300 pt-[1mm]">
+          <div className="text-[5px] font-bold text-neutral-900 leading-tight">
+            SPHERA TILE
+          </div>
+          <div className="text-[4px] text-neutral-600 leading-tight mt-[0.5mm]">
+            info@spheratile.es
+          </div>
+          <div className="text-[4px] text-neutral-600 leading-tight">
+            www.spheratile.com
+          </div>
         </div>
       </div>
     </div>

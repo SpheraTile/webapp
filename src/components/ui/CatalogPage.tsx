@@ -64,18 +64,18 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
       </div>
 
       {/* Product info - compact, no flex grow */}
-      <div style={{ padding: isElongated ? '10px 14px 12px 14px' : '12px 10px 14px 10px', display: 'flex', flexDirection: 'column' as const }}>
+      <div style={{ padding: isElongated ? '16px 20px 16px 20px' : '16px 14px 18px 14px', display: 'flex', flexDirection: 'column' as const }}>
         {/* Name + Reference */}
-        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 2px 0', lineHeight: '1.6', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
-        <p style={{ fontSize: '7.5px', color: '#737373', margin: '0 0 4px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
+        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.6', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
+        <p style={{ fontSize: '7.5px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
 
         {/* Stock - same size as name */}
-        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 2px 0', lineHeight: '1.2' }}>
+        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.2' }}>
           Stock: {fmt(product.stock_m2)} m²
         </p>
 
         {/* Characteristics table */}
-        <table style={{ width: '100%', borderCollapse: 'collapse' as const, marginBottom: '3px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' as const, marginBottom: '6px' }}>
           <tbody>
             <tr>
               <td style={headerCell}>Formato</td>
@@ -99,12 +99,12 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
         </table>
 
         {/* Technical data */}
-        <p style={{ fontSize: '7px', color: '#737373', margin: '0 0 3px 0', lineHeight: '1.2' }}>
+        <p style={{ fontSize: '7px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>
           {fmt(product.m2_caja)} m²/caja · {product.piezas_caja} pzs/caja · {product.cajas_palet} cajas/palet · {fmt(product.peso_caja_kg, 1)} kg/caja
         </p>
 
         {/* Price (hide if 0) + QR */}
-        <div style={{ marginTop: '3px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           {product.precio_m2 > 0 && (
             <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#dc2626', margin: 0, lineHeight: '1.2' }}>
               €{fmt(product.precio_m2)} <span style={{ fontSize: '8px', fontWeight: 'normal', color: '#737373' }}>/m²</span>

@@ -70,7 +70,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
         <p style={{ fontSize: '7.5px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
 
         {/* Stock - same size as name */}
-        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.2' }}>
+        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 8px 0', lineHeight: '1.2' }}>
           Stock: {fmt(product.stock_m2)} m²
         </p>
 

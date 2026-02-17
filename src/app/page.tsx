@@ -145,6 +145,7 @@ export default async function HomePage() {
                 <ul className="space-y-3 text-neutral-400">
                   <li>info@spheratile.es</li>
                   <li>sales@spheratile.es</li>
+                  <li>+34 633 220 225</li>
                   <li>+34 633 909 095</li>
                   <li>{tFooter('schedule')}</li>
                 </ul>

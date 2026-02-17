@@ -152,17 +152,29 @@ export async function POST(request: NextRequest) {
     // Enviar email de bienvenida si se solicita
     if (data.sendWelcomeEmail) {
       try {
+        console.log('📧 Enviando email de bienvenida a:', usuario.email)
+        console.log('📧 sendWelcomeEmail:', data.sendWelcomeEmail)
+        console.log('📧 idioma:', data.idioma)
+
         const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
         const emailContent = getWelcomeEmail(usuario.nombre, `${baseUrl}/login`, data.idioma || 'es')
-        await sendEmail({
+
+        console.log('📧 Email subject:', emailContent.subject)
+        console.log('📧 Email from:', process.env.EMAIL_FROM)
+
+        const result = await sendEmail({
           to: usuario.email,
           subject: emailContent.subject,
           html: emailContent.html,
         })
+
+        console.log('✅ Email enviado successfully:', result)
       } catch (emailError) {
-        console.error('Error sending welcome email:', emailError)
+        console.error('❌ Error sending welcome email:', emailError)
         // No fallar la creación si el email falla
       }
+    } else {
+      console.log('⚠️ Email de bienvenida NO solicitado (sendWelcomeEmail:', data.sendWelcomeEmail + ')')
     }
 
     return NextResponse.json(usuario, { status: 201 })

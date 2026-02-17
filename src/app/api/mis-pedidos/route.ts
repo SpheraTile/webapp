@@ -131,8 +131,7 @@ export async function POST(request: NextRequest) {
 
     // Enviar email de confirmación
     try {
-      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-      const pedidoUrl = `${baseUrl}/cuenta/pedidos/${pedido.id}`
+      const pedidoUrl = `https://app.spheratile.es/cuenta/pedidos/${pedido.id}`
       const totalFormatted = total_euros.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
 
       const emailContent = getOrderConfirmationEmail(

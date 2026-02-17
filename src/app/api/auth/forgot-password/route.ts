@@ -43,8 +43,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Generar URL de reset
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const resetUrl = `${baseUrl}/reset-password?token=${token}`
+    const resetUrl = `https://app.spheratile.es/reset-password?token=${token}`
 
     // Enviar email
     const emailContent = getPasswordResetEmail(user.nombre, resetUrl)

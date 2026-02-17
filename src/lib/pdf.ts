@@ -35,6 +35,27 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
+      ignoreElements: (element) => {
+        // Ignorar elementos con estilos problemáticos
+        const style = window.getComputedStyle(element)
+        return style.color?.includes('oklch') || style.backgroundColor?.includes('oklch')
+      },
+      onclone: (clonedDoc) => {
+        // Eliminar todos los estilos que usen oklch del documento clonado
+        const allElements = clonedDoc.querySelectorAll('*')
+        allElements.forEach((el) => {
+          const style = (el as HTMLElement).style
+          if (style.color && style.color.includes('oklch')) {
+            style.color = '#000000'
+          }
+          if (style.backgroundColor && style.backgroundColor.includes('oklch')) {
+            style.backgroundColor = '#ffffff'
+          }
+          if (style.borderColor && style.borderColor.includes('oklch')) {
+            style.borderColor = '#d4d4d4'
+          }
+        })
+      },
     })
 
     const imgData = canvas.toDataURL('image/png')

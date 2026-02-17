@@ -103,7 +103,9 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
               <td style={headerCell}>Aspecto</td>
               <td style={cell}>{product.aspecto}</td>
               <td style={headerCell}>Uso</td>
-              <td style={cell}>{abbreviateUso(product.uso)}</td>
+              <td style={{ ...cell, fontSize: abbreviateUso(product.uso) === product.uso ? '12px' : '9px' }}>
+                {abbreviateUso(product.uso)}
+              </td>
             </tr>
           </tbody>
         </table>

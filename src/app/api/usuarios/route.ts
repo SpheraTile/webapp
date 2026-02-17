@@ -156,11 +156,12 @@ export async function POST(request: NextRequest) {
         console.log('📧 sendWelcomeEmail:', data.sendWelcomeEmail)
         console.log('📧 idioma:', data.idioma)
 
-        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+        const baseUrl = process.env.NEXTAUTH_URL || 'https://app.spheratile.es'
         const emailContent = getWelcomeEmail(usuario.nombre, `${baseUrl}/login`, data.idioma || 'es')
 
         console.log('📧 Email subject:', emailContent.subject)
         console.log('📧 Email from:', process.env.EMAIL_FROM)
+        console.log('📧 Login URL:', `${baseUrl}/login`)
 
         const result = await sendEmail({
           to: usuario.email,

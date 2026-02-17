@@ -122,7 +122,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
           )}
           <QRCodeSVG
             value={`${baseUrl}/productos/${product.slug}`}
-            size={44}
+            size={52}
             level="L"
           />
         </div>

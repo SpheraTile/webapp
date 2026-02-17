@@ -314,6 +314,54 @@ export default function UsuariosPage() {
     }
   }
 
+  const handleSendWelcomeEmail = async (usuario: Usuario) => {
+    const confirmed = window.confirm(
+      `¿Enviar email de bienvenida a "${usuario.nombre}" (${usuario.email})?\n\nSe le enviarán sus credenciales de acceso.`
+    )
+    if (!confirmed) return
+
+    try {
+      const response = await fetch(`/api/usuarios/${usuario.id}/send-welcome`, {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert('Email de bienvenida enviado correctamente')
+      } else {
+        alert(data.error || 'Error al enviar email')
+      }
+    } catch (error) {
+      console.error('Error sending welcome email:', error)
+      alert('Error al enviar email')
+    }
+  }
+
+  const handleSendPasswordReset = async (usuario: Usuario) => {
+    const confirmed = window.confirm(
+      `¿Enviar email de restablecimiento de contraseña a "${usuario.nombre}" (${usuario.email})?`
+    )
+    if (!confirmed) return
+
+    try {
+      const response = await fetch(`/api/usuarios/${usuario.id}/send-reset`, {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert('Email de restablecimiento enviado correctamente')
+      } else {
+        alert(data.error || 'Error al enviar email')
+      }
+    } catch (error) {
+      console.error('Error sending password reset:', error)
+      alert('Error al enviar email')
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
@@ -428,6 +476,24 @@ export default function UsuariosPage() {
                   Editar
                 </button>
                 <button
+                  onClick={() => handleSendWelcomeEmail(usuario)}
+                  className="flex-1 py-2 px-3 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                  title="Reenviar credenciales"
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="mx-auto">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => handleSendPasswordReset(usuario)}
+                  className="flex-1 py-2 px-3 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+                  title="Resetear contraseña"
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="mx-auto">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                </button>
+                <button
                   onClick={() => handleToggleActive(usuario)}
                   className={`flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-colors ${
                     usuario.activo
@@ -535,6 +601,24 @@ export default function UsuariosPage() {
                       >
                         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleSendWelcomeEmail(usuario)}
+                        className="p-2 text-neutral-400 hover:text-blue-600 transition-colors"
+                        title="Reenviar credenciales"
+                      >
+                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleSendPasswordReset(usuario)}
+                        className="p-2 text-neutral-400 hover:text-orange-600 transition-colors"
+                        title="Resetear contraseña"
+                      >
+                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                         </svg>
                       </button>
                       <button

@@ -50,34 +50,60 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
     )
   }
 
-  return (
-    <div
-      className={`
-        grid grid-cols-2 gap-4
-        md:grid-cols-3
-        lg:grid-cols-4
-        auto-rows-min
-        ${className}
-      `}
-    >
-      {displayProducts.map((producto) => {
-        // Detectar productos alargados (22.5x119.5 o similar)
-        const esAlargado = producto.formato.includes('22.5') && producto.formato.includes('119')
+  // Separar productos por tipo para organizar en filas separadas
+  const elongatedProducts = displayProducts.filter(p =>
+    p.formato.includes('22.5') && p.formato.includes('119')
+  )
+  const normalProducts = displayProducts.filter(p =>
+    !(p.formato.includes('22.5') && p.formato.includes('119'))
+  )
 
-        return (
-          <div
-            key={producto.id}
-            className={`
-              ${esAlargado ? 'col-span-2 row-span-1 justify-self-center' : 'col-span-1 row-span-1'}
-              break-inside-avoid
-              page-break-inside-avoid
-              w-full
-            `}
-          >
-            <ProductCard producto={producto} esAlargado={esAlargado} />
-          </div>
-        )
-      })}
+  return (
+    <div className={`flex flex-col gap-4 ${className}`}>
+      {/* Filas de productos alargados (2 por fila) */}
+      {elongatedProducts.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {chunkArray(elongatedProducts, 2).map((row, rowIndex) => (
+            <div key={`elongated-${rowIndex}`} className="grid grid-cols-2 gap-4 justify-items-center">
+              {row.map((producto) => (
+                <div
+                  key={producto.id}
+                  className="col-span-1 break-inside-avoid page-break-inside-avoid w-full max-w-lg"
+                >
+                  <ProductCard producto={producto} esAlargado={true} />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Filas de productos normales (4 por fila en desktop) */}
+      {normalProducts.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {chunkArray(normalProducts, 4).map((row, rowIndex) => (
+            <div key={`normal-${rowIndex}`} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
+              {row.map((producto) => (
+                <div
+                  key={producto.id}
+                  className="col-span-1 break-inside-avoid page-break-inside-avoid w-full max-w-xs"
+                >
+                  <ProductCard producto={producto} esAlargado={false} />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
+
+  // Función auxiliar para dividir array en chunks
+  function chunkArray<T>(array: T[], size: number): T[][] {
+    const chunks: T[][] = []
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size))
+    }
+    return chunks
+  }
 }

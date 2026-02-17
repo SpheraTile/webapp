@@ -39,6 +39,16 @@ function fmt(n: number, decimals = 2): string {
   return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 }
 
+function abbreviateUso(uso: string): string {
+  if (uso === 'PAVIMENTO_Y_REVESTIMIENTO') {
+    return 'PAV. Y REV.'
+  }
+  if (uso === 'PAVIMENTO_REVESTIMIENTO') {
+    return 'PAV. Y REV.'
+  }
+  return uso
+}
+
 function ProductCard({ product, isElongated }: { product: CatalogProduct, isElongated?: boolean }) {
   const baseUrl = typeof window !== 'undefined'
     ? window.location.origin
@@ -93,7 +103,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
               <td style={headerCell}>Aspecto</td>
               <td style={cell}>{product.aspecto}</td>
               <td style={headerCell}>Uso</td>
-              <td style={cell}>{product.uso}</td>
+              <td style={cell}>{abbreviateUso(product.uso)}</td>
             </tr>
           </tbody>
         </table>

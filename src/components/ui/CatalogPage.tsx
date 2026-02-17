@@ -99,7 +99,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
         </table>
 
         {/* Technical data */}
-        <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>
+        <p style={{ fontSize: '12px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.3' }}>
           {fmt(product.m2_caja)} m²/caja · {product.piezas_caja} pzs/caja · {product.cajas_palet} cajas/palet · {fmt(product.peso_caja_kg, 1)} kg/caja
         </p>
 

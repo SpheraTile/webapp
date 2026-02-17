@@ -91,13 +91,22 @@ export function getPasswordResetEmail(nombre: string, resetUrl: string) {
   }
 }
 
-export function getWelcomeEmail(nombre: string, loginUrl: string, idioma: string = 'es') {
-  const texts: Record<string, { subject: string; greeting: string; body: string; button: string; rights: string }> = {
+export function getWelcomeEmail(
+  nombre: string,
+  loginUrl: string,
+  idioma: string = 'es',
+  credentials?: { email: string; password: string }
+) {
+  const texts: Record<string, { subject: string; greeting: string; body: string; button: string; rights: string; credentialsTitle: string; credentialsEmail: string; credentialsPassword: string; credentialsNote: string }> = {
     es: {
       subject: 'Bienvenido a SPHERA TILE',
       greeting: `¡Bienvenido ${nombre}!`,
       body: 'Tu cuenta ha sido creada correctamente. Ya puedes acceder a nuestro catálogo y realizar pedidos.',
       button: 'Acceder a mi cuenta',
+      credentialsTitle: 'Tus credenciales de acceso:',
+      credentialsEmail: 'Email:',
+      credentialsPassword: 'Contraseña:',
+      credentialsNote: 'Te recomendamos cambiar tu contraseña después del primer acceso por seguridad.',
       rights: 'Todos los derechos reservados.',
     },
     en: {
@@ -105,6 +114,10 @@ export function getWelcomeEmail(nombre: string, loginUrl: string, idioma: string
       greeting: `Welcome ${nombre}!`,
       body: 'Your account has been successfully created. You can now access our catalog and place orders.',
       button: 'Access my account',
+      credentialsTitle: 'Your login credentials:',
+      credentialsEmail: 'Email:',
+      credentialsPassword: 'Password:',
+      credentialsNote: 'We recommend changing your password after first login for security.',
       rights: 'All rights reserved.',
     },
     ar: {
@@ -112,12 +125,31 @@ export function getWelcomeEmail(nombre: string, loginUrl: string, idioma: string
       greeting: `!${nombre} مرحبًا`,
       body: 'تم إنشاء حسابك بنجاح. يمكنك الآن الوصول إلى الكتالوج الخاص بنا وتقديم الطلبات.',
       button: 'الوصول إلى حسابي',
+      credentialsTitle: 'بيانات الاعتماد الخاصة بك:',
+      credentialsEmail: 'البريد الإلكتروني:',
+      credentialsPassword: 'كلمة المرور:',
+      credentialsNote: 'نوصي بتغيير كلمة المرور بعد أول تسجيل دخول لأمان حسابك.',
       rights: 'جميع الحقوق محفوظة.',
     },
   }
 
   const t = texts[idioma] || texts.es
   const dir = idioma === 'ar' ? 'rtl' : 'ltr'
+
+  const credentialsSection = credentials ? `
+    <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 24px; margin: 24px 0;">
+      <h3 style="color: #166534; font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">${t.credentialsTitle}</h3>
+      <div style="background: white; border-radius: 6px; padding: 16px; margin-bottom: 12px;">
+        <p style="color: #374151; font-size: 13px; margin: 0 0 8px 0; font-weight: 600;">${t.credentialsEmail}</p>
+        <p style="color: #1b5e20; font-size: 15px; font-family: monospace; margin: 0;">${credentials.email}</p>
+      </div>
+      <div style="background: white; border-radius: 6px; padding: 16px;">
+        <p style="color: #374151; font-size: 13px; margin: 0 0 8px 0; font-weight: 600;">${t.credentialsPassword}</p>
+        <p style="color: #dc2626; font-size: 15px; font-family: monospace; margin: 0;">${credentials.password}</p>
+      </div>
+      <p style="color: #6b7280; font-size: 11px; margin: 16px 0 0 0;">${t.credentialsNote}</p>
+    </div>
+  ` : ''
 
   return {
     subject: t.subject,
@@ -140,6 +172,8 @@ export function getWelcomeEmail(nombre: string, loginUrl: string, idioma: string
             <p style="color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
               ${t.body}
             </p>
+
+            ${credentialsSection}
 
             <div style="text-align: center; margin: 32px 0;">
               <a href="${loginUrl}"

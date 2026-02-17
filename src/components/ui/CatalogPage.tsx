@@ -44,7 +44,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
     ? window.location.origin
     : process.env.NEXT_PUBLIC_BASE_URL || 'https://spheratile.com'
 
-  const cell = { border: '1px solid #d4d4d4', padding: '4px 6px', fontSize: '9px', wordWrap: 'break-word' as const }
+  const cell = { border: '1px solid #d4d4d4', padding: '6px 8px', fontSize: '12px', wordWrap: 'break-word' as const }
   const headerCell = { ...cell, backgroundColor: '#f5f5f5', fontWeight: 'bold' as const, width: '25%' }
 
   // Productos alargados: doble ancho, altura ajustada a ~75%

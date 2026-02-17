@@ -44,7 +44,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
     ? window.location.origin
     : process.env.NEXT_PUBLIC_BASE_URL || 'https://spheratile.com'
 
-  const cell = { border: '1px solid #d4d4d4', padding: '4px 8px', fontSize: '15px' }
+  const cell = { border: '1px solid #d4d4d4', padding: '4px 6px', fontSize: '9px', wordWrap: 'break-word' as const }
   const headerCell = { ...cell, backgroundColor: '#f5f5f5', fontWeight: 'bold' as const, width: '25%' }
 
   // Productos alargados: doble ancho, altura ajustada a ~75%
@@ -66,11 +66,11 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
       {/* Product info - compact, no flex grow */}
       <div style={{ padding: isElongated ? '16px 20px 16px 20px' : '16px 14px 18px 14px', display: 'flex', flexDirection: 'column' as const }}>
         {/* Name + Reference */}
-        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.6', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
-        <p style={{ fontSize: '15px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
+        <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.4', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
+        <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
 
         {/* Stock - same size as name */}
-        <p style={{ fontSize: isElongated ? '11px' : '10px', fontWeight: 'bold', color: '#171717', margin: '0 0 8px 0', lineHeight: '1.2' }}>
+        <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 8px 0', lineHeight: '1.2' }}>
           Stock: {fmt(product.stock_m2)} m²
         </p>
 
@@ -99,7 +99,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
         </table>
 
         {/* Technical data */}
-        <p style={{ fontSize: '14px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>
+        <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>
           {fmt(product.m2_caja)} m²/caja · {product.piezas_caja} pzs/caja · {product.cajas_palet} cajas/palet · {fmt(product.peso_caja_kg, 1)} kg/caja
         </p>
 

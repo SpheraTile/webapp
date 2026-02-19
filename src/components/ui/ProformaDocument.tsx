@@ -130,7 +130,7 @@ export function ProformaDocument({
 
   return (
     <div className="overflow-x-auto bg-white">
-      <div style={{ width: '800px', minHeight: '1130px', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4', display: 'flex', flexDirection: 'column', margin: '0 auto' }}>
+      <div data-pdf-page style={{ width: '800px', minHeight: '1130px', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4', display: 'flex', flexDirection: 'column', margin: '0 auto' }}>
         <div className="pl-6 pr-4 py-3 flex-1 flex flex-col">
 
           {/* Header: Logo left + Company info center + Doc type right */}
@@ -370,6 +370,7 @@ export function ProformaDocument({
       {items.filter((item) => item.qrSlug).map((item, i) => (
         <div
           key={`qr-page-${i}`}
+          data-pdf-page
           style={{
             width: '800px',
             height: '1130px',
@@ -379,7 +380,6 @@ export function ProformaDocument({
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto',
-            pageBreakBefore: 'always',
           }}
         >
           {/* Product name */}

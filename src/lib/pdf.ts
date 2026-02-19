@@ -10,13 +10,13 @@ interface ExportPDFOptions {
 }
 
 export async function exportToPDF({ filename, element, orientation = 'portrait' }: ExportPDFOptions): Promise<Blob> {
-  // Temporarily show all elements (remove print:hidden)
+  // Temporarily hide print:hidden elements
   const hiddenElements = element.querySelectorAll('.print\\:hidden')
   hiddenElements.forEach((el) => {
     (el as HTMLElement).style.display = 'none'
   })
 
-  // Force consistent capture width (800px) regardless of viewport
+  // Save original styles
   const originalStyles = {
     width: element.style.width,
     minWidth: element.style.minWidth,
@@ -29,36 +29,6 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
   element.style.overflow = 'visible'
 
   try {
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      ignoreElements: (element) => {
-        // Ignorar elementos con estilos problemáticos
-        const style = window.getComputedStyle(element)
-        return style.color?.includes('oklch') || style.backgroundColor?.includes('oklch')
-      },
-      onclone: (clonedDoc) => {
-        // Eliminar todos los estilos que usen oklch del documento clonado
-        const allElements = clonedDoc.querySelectorAll('*')
-        allElements.forEach((el) => {
-          const style = (el as HTMLElement).style
-          if (style.color && style.color.includes('oklch')) {
-            style.color = '#000000'
-          }
-          if (style.backgroundColor && style.backgroundColor.includes('oklch')) {
-            style.backgroundColor = '#ffffff'
-          }
-          if (style.borderColor && style.borderColor.includes('oklch')) {
-            style.borderColor = '#d4d4d4'
-          }
-        })
-      },
-    })
-
-    const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF({
       orientation,
       unit: 'mm',
@@ -67,33 +37,81 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
 
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
-    const imgWidth = pageWidth - 20 // 10mm margins
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
 
-    let heightLeft = imgHeight
-    let position = 10 // Top margin
+    // Check for data-pdf-page sections for multi-page support
+    const pages = element.querySelectorAll('[data-pdf-page]')
 
-    // Add first page
-    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
-    heightLeft -= (pageHeight - 20)
+    const canvasOptions = {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      ignoreElements: (el: Element) => {
+        const style = window.getComputedStyle(el)
+        return style.color?.includes('oklch') || style.backgroundColor?.includes('oklch')
+      },
+      onclone: (clonedDoc: Document) => {
+        const allElements = clonedDoc.querySelectorAll('*')
+        allElements.forEach((el) => {
+          const style = (el as HTMLElement).style
+          if (style.color && style.color.includes('oklch')) style.color = '#000000'
+          if (style.backgroundColor && style.backgroundColor.includes('oklch')) style.backgroundColor = '#ffffff'
+          if (style.borderColor && style.borderColor.includes('oklch')) style.borderColor = '#d4d4d4'
+        })
+      },
+    }
 
-    // Add more pages if needed
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight + 10
-      pdf.addPage()
+    if (pages.length > 0) {
+      // Multi-page mode: capture each [data-pdf-page] section as its own PDF page
+      for (let i = 0; i < pages.length; i++) {
+        const pageEl = pages[i] as HTMLElement
+
+        if (i > 0) {
+          pdf.addPage()
+        }
+
+        const canvas = await html2canvas(pageEl, canvasOptions)
+        const imgData = canvas.toDataURL('image/png')
+        const imgWidth = pageWidth - 20
+        const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+        // Center vertically on the page if the content is shorter than the page
+        const yOffset = imgHeight < (pageHeight - 20)
+          ? 10
+          : 10
+
+        pdf.addImage(imgData, 'PNG', 10, yOffset, imgWidth, imgHeight)
+      }
+    } else {
+      // Fallback: single continuous capture (original behavior)
+      const canvas = await html2canvas(element, canvasOptions)
+      const imgData = canvas.toDataURL('image/png')
+      const imgWidth = pageWidth - 20
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      let heightLeft = imgHeight
+      let position = 10
+
       pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
       heightLeft -= (pageHeight - 20)
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 10
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
+        heightLeft -= (pageHeight - 20)
+      }
     }
 
     return pdf.output('blob')
   } finally {
-    // Restore capture width overrides
+    // Restore styles
     element.style.width = originalStyles.width
     element.style.minWidth = originalStyles.minWidth
     element.style.maxWidth = originalStyles.maxWidth
     element.style.overflow = originalStyles.overflow
 
-    // Restore hidden elements
     hiddenElements.forEach((el) => {
       (el as HTMLElement).style.display = ''
     })

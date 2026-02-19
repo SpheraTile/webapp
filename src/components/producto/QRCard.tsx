@@ -29,39 +29,38 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
       }}
     >
       {/* Top - Product Name */}
-      <div className="text-center">
-        <div className="text-[7px] font-bold text-neutral-900 leading-tight uppercase" title={producto.nombre}>
+      <div className="text-center mb-[0.5mm]">
+        <div className="text-[6px] font-bold text-neutral-900 leading-tight uppercase" title={producto.nombre}>
           {producto.nombre}
         </div>
       </div>
 
       {/* Format + Reference */}
-      <div className="flex items-center justify-center gap-[2mm] text-[5px] text-neutral-700">
+      <div className="flex items-center justify-center gap-[1.5mm] text-[5px] text-neutral-700 mb-[0.5mm]">
         <span className="font-medium">{producto.formato}</span>
+        <span>·</span>
         <span className="font-mono text-neutral-500">{producto.referencia}</span>
       </div>
 
       {/* QR Code - Large, takes most space */}
-      <div className="flex-1 flex items-center justify-center my-[0.5mm]">
-        <div className="w-[30mm] h-[30mm] flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center">
+        <div className="w-[32mm] h-[32mm] flex items-center justify-center">
           <QRCodeSVG
             value={productUrl}
-            size={120}
+            size={128}
             level="M"
             includeMargin={false}
           />
         </div>
       </div>
 
-      {/* Instructions */}
-      <div className="text-center text-[4px] text-neutral-600 leading-tight">
-        Escanea este código QR para acceder al producto
-      </div>
-
       {/* Bottom - Company Name */}
-      <div className="text-center border-t border-neutral-300 pt-[1mm] mt-[1mm]">
-        <div className="text-[4px] font-bold text-neutral-900 leading-tight">
+      <div className="text-center border-t border-neutral-300 pt-[1mm] mt-[0.5mm]">
+        <div className="text-[5px] font-bold text-neutral-900 leading-tight">
           SPHERA TILE
+        </div>
+        <div className="text-[4px] text-neutral-600 leading-tight">
+          {producto.formato}
         </div>
       </div>
     </div>

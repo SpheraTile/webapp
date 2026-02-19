@@ -21,47 +21,42 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
 
   return (
     <div
-      className="qr-card bg-white flex flex-col border-2 border-black p-[2mm]"
+      className="qr-card bg-white flex flex-col items-center justify-center border-2 border-black p-[2mm]"
       style={{
         width: `${CARD_WIDTH_MM}mm`,
         height: `${CARD_HEIGHT_MM}mm`,
         fontFamily: 'Arial, sans-serif',
       }}
     >
-      {/* Top - Product Name */}
-      <div className="text-center mb-[0.5mm]">
-        <div className="text-[10px] font-bold text-black leading-tight uppercase" title={producto.nombre}>
+      {/* Product Name - 18px */}
+      <div className="text-center mb-[1mm]">
+        <div
+          className="font-bold text-black leading-tight uppercase"
+          style={{ fontSize: '18px' }}
+          title={producto.nombre}
+        >
           {producto.nombre}
         </div>
       </div>
 
-      {/* Format + Reference */}
-      <div className="flex items-center justify-center gap-[1.5mm] text-[10px] text-black mb-[0.5mm]">
-        <span className="font-medium">{producto.formato}</span>
-        <span>·</span>
-        <span className="font-mono text-black">{producto.referencia}</span>
-      </div>
-
-      {/* QR Code - Large, takes most space */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-[28mm] h-[28mm] flex items-center justify-center">
-          <QRCodeSVG
-            value={productUrl}
-            size={112}
-            level="M"
-            includeMargin={false}
-          />
+      {/* Reference - 15px */}
+      <div className="text-center mb-[1mm]">
+        <div
+          className="font-mono text-black"
+          style={{ fontSize: '15px' }}
+        >
+          {producto.referencia}
         </div>
       </div>
 
-      {/* Bottom - Company Name */}
-      <div className="text-center border-t border-black pt-[1mm] mt-[0.5mm]">
-        <div className="text-[10px] font-bold text-black leading-tight">
-          SPHERA TILE
-        </div>
-        <div className="text-[10px] text-black leading-tight">
-          {producto.formato}
-        </div>
+      {/* QR Code - Takes remaining space */}
+      <div className="flex-1 flex items-center justify-center w-full">
+        <QRCodeSVG
+          value={productUrl}
+          size={120}
+          level="M"
+          includeMargin={false}
+        />
       </div>
     </div>
   )

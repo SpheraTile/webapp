@@ -20,7 +20,10 @@
     "elements": "elements",
     "clearAll": "Clear all",
     "viewResults": "View results",
-    "clean": "Clear"
+    "clean": "Clear",
+    "previous": "Previous",
+    "next": "Next",
+    "of": "of"
   },
   "auth": {
     "login": "Log In",

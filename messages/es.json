@@ -20,7 +20,10 @@
     "elements": "elementos",
     "clearAll": "Limpiar todo",
     "viewResults": "Ver resultados",
-    "clean": "Limpiar"
+    "clean": "Limpiar",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "of": "de"
   },
   "auth": {
     "login": "Iniciar Sesión",

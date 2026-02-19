@@ -10,12 +10,11 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ productos, className = '', columnas }: ProductGridProps) {
-  // Filtrar productos con stock y optimizar orden
+  // Filtrar productos con stock y optimizar orden (siempre optimizar para mantener consistencia)
   const displayProducts = useMemo(() => {
     const productosConStock = productos.filter(p => p.stock_m2 > 0)
-    if (columnas === 1) return productosConStock // Vista lista, no optimizar
     return optimizeGridLayout(productosConStock)
-  }, [productos, columnas])
+  }, [productos])
 
   if (displayProducts.length === 0) {
     return (

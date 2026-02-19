@@ -86,6 +86,16 @@ export default function QRCardsPage() {
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
+        onclone: (clonedDoc: Document) => {
+          const allElements = clonedDoc.querySelectorAll('*')
+          allElements.forEach((el) => {
+            const style = (el as HTMLElement).style
+            const computed = clonedDoc.defaultView?.getComputedStyle(el)
+            if (computed?.color?.includes('oklch')) style.color = '#000000'
+            if (computed?.backgroundColor?.includes('oklch')) style.backgroundColor = '#ffffff'
+            if (computed?.borderColor?.includes('oklch')) style.borderColor = '#d4d4d4'
+          })
+        },
       })
 
       // Hide again

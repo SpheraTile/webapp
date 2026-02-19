@@ -366,60 +366,59 @@ export function ProformaDocument({
         </div>
       </div>
 
-      {/* Full-page QR codes — one per page, centered */}
+      {/* Full-page QR codes — one per page, adapts to any paper size */}
       {items.filter((item) => item.qrSlug).map((item, i) => (
         <div
           key={`qr-page-${i}`}
           data-pdf-page
+          className="qr-print-page"
           style={{
-            width: '800px',
-            height: '1130px',
+            width: '100%',
+            maxWidth: '800px',
             fontFamily: 'Arial, Helvetica, sans-serif',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto',
+            padding: '8px',
+            boxSizing: 'border-box',
+            pageBreakBefore: 'always',
           }}
         >
           {/* Product name */}
-          <h2
+          <p
             className="font-bold text-neutral-900 text-center uppercase leading-tight"
-            style={{ fontSize: '28px', maxWidth: '600px', marginBottom: '4px' }}
+            style={{ fontSize: 'clamp(14px, 5vw, 28px)', marginBottom: '2px', width: '100%' }}
           >
             {item.descripcion}
-          </h2>
+          </p>
 
           {/* Format */}
           <p
             className="text-neutral-500 text-center"
-            style={{ fontSize: '20px', marginBottom: '40px' }}
+            style={{ fontSize: 'clamp(10px, 3vw, 18px)', marginBottom: 'clamp(8px, 3vw, 24px)' }}
           >
             {item.formato}
           </p>
 
-          {/* QR Code — fills the page */}
-          <QRCodeSVG
-            value={`${baseUrl}/productos/${item.qrSlug}`}
-            size={520}
-            level="M"
-            includeMargin
-          />
+          {/* QR Code — fills available width */}
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <QRCodeSVG
+              value={`${baseUrl}/productos/${item.qrSlug}`}
+              size={1000}
+              level="M"
+              includeMargin={false}
+              style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
+            />
+          </div>
 
           {/* Scan instruction */}
           <p
             className="text-neutral-600 text-center"
-            style={{ fontSize: '14px', marginTop: '36px', marginBottom: '6px' }}
+            style={{ fontSize: 'clamp(8px, 2.5vw, 13px)', marginTop: 'clamp(6px, 2vw, 20px)' }}
           >
-            Escanea este código QR para ver los detalles del producto
-          </p>
-
-          {/* URL */}
-          <p
-            className="text-neutral-400 font-mono text-center"
-            style={{ fontSize: '11px', maxWidth: '500px', wordBreak: 'break-all' }}
-          >
-            {baseUrl}/productos/{item.qrSlug}
+            Escanea para ver el producto
           </p>
         </div>
       ))}

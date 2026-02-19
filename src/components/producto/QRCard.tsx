@@ -73,14 +73,15 @@ export const qrCardPrintStyles = `
     .qr-card {
       page-break-inside: avoid;
       break-inside: avoid;
-      float: left;
+      /* Tamaño relativo que se escala con la página */
+      width: 80mm !important;
+      height: 60mm !important;
       margin: 0;
       padding: 2mm;
       border: 1px solid black;
-      /* Ajustar automáticamente al tamaño de página */
-      width: auto !important;
-      height: auto !important;
       box-sizing: border-box;
+      display: inline-block;
+      vertical-align: top;
     }
 
     body * {
@@ -97,11 +98,9 @@ export const qrCardPrintStyles = `
       left: 0;
       top: 0;
       width: 100%;
-      display: grid;
-      /* Grid automático que se adapta al tamaño de página */
-      grid-template-columns: repeat(auto-fill, minmax(50mm, 1fr));
-      gap: 0;
-      align-items: start;
+      /* Las tarjetas fluyen naturalmente */
+      font-size: 0; /* Eliminar espacio en línea */
+      line-height: 0;
     }
 
     /* Hide everything else */

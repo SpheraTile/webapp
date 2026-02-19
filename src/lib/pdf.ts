@@ -66,6 +66,7 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
       // Multi-page mode: capture each [data-pdf-page] section as its own PDF page
       for (let i = 0; i < pages.length; i++) {
         const pageEl = pages[i] as HTMLElement
+        const isQRPage = pageEl.classList.contains('qr-print-page')
 
         if (i > 0) {
           pdf.addPage()
@@ -73,15 +74,20 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
 
         const canvas = await html2canvas(pageEl, canvasOptions)
         const imgData = canvas.toDataURL('image/png')
-        const imgWidth = pageWidth - 20
+
+        // QR pages: minimal margins, fill the page, center vertically
+        // Normal pages: standard 10mm margins
+        const margin = isQRPage ? 5 : 10
+        const imgWidth = pageWidth - (margin * 2)
         const imgHeight = (canvas.height * imgWidth) / canvas.width
 
-        // Center vertically on the page if the content is shorter than the page
-        const yOffset = imgHeight < (pageHeight - 20)
-          ? 10
-          : 10
+        // Center vertically on the page
+        const availableHeight = pageHeight - (margin * 2)
+        const yOffset = imgHeight < availableHeight
+          ? margin + (availableHeight - imgHeight) / 2
+          : margin
 
-        pdf.addImage(imgData, 'PNG', 10, yOffset, imgWidth, imgHeight)
+        pdf.addImage(imgData, 'PNG', margin, yOffset, imgWidth, imgHeight)
       }
     } else {
       // Fallback: single continuous capture (original behavior)

@@ -28,22 +28,22 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
         fontFamily: 'Arial, sans-serif',
       }}
     >
-      {/* Product Name - 12px, smaller for multi-line titles */}
-      <div className="text-center mb-[2mm]">
+      {/* Product Name - 15px, smaller for multi-line titles */}
+      <div className="text-center mb-[1mm]">
         <div
           className="font-bold text-black leading-tight uppercase"
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '15px' }}
           title={producto.nombre}
         >
           {producto.nombre}
         </div>
       </div>
 
-      {/* Reference - 12px */}
-      <div className="text-center mb-[2mm]">
+      {/* Reference - 15px */}
+      <div className="text-center mb-[1mm]">
         <div
           className="font-mono text-black"
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '15px' }}
         >
           {producto.referencia}
         </div>
@@ -53,7 +53,7 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
       <div className="flex-1 flex items-center justify-center w-full">
         <QRCodeSVG
           value={productUrl}
-          size={105}
+          size={95}
           level="M"
           includeMargin={false}
         />

@@ -45,12 +45,12 @@ function ProductGallery({ images, productName }: { images: string[]; productName
   return (
     <div className="space-y-4">
       {/* Imagen principal */}
-      <div className="relative aspect-square bg-neutral-100 rounded-2xl overflow-hidden">
+      <div className="relative aspect-square bg-neutral-100 overflow-hidden">
         <ProductImage
           src={images[selectedIndex]}
           alt={`${productName} - Imagen ${selectedIndex + 1}`}
           fill
-          className="object-cover"
+          className="object-cover rounded-none"
           priority
           sizes="(max-width: 1024px) 100vw, 50vw"
         />
@@ -63,7 +63,7 @@ function ProductGallery({ images, productName }: { images: string[]; productName
             <button
               key={index}
               onClick={() => setSelectedIndex(index)}
-              className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`relative w-20 h-20 overflow-hidden border-2 transition-all ${
                 selectedIndex === index
                   ? 'border-primary-600 ring-2 ring-primary-200'
                   : 'border-transparent hover:border-neutral-300'
@@ -73,7 +73,7 @@ function ProductGallery({ images, productName }: { images: string[]; productName
                 src={img}
                 alt={`${productName} - Miniatura ${index + 1}`}
                 fill
-                className="object-cover"
+                className="object-cover rounded-none"
                 sizes="80px"
               />
             </button>

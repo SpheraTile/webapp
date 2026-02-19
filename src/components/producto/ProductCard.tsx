@@ -12,6 +12,7 @@ interface ProductCardProps {
   className?: string
   variant?: 'grid' | 'list'
   esAlargado?: boolean
+  aspectRatio?: string // Nueva prop para aspect ratio personalizado
 }
 
 // Translation keys for product attributes
@@ -64,7 +65,7 @@ function EstadoBadge({ estado, t }: { estado: string; t: (key: string) => string
   )
 }
 
-export function ProductCard({ producto, className = '', variant = 'grid', esAlargado = false }: ProductCardProps) {
+export function ProductCard({ producto, className = '', variant = 'grid', esAlargado = false, aspectRatio }: ProductCardProps) {
   const t = useTranslations('filters')
 
   // Get translated labels
@@ -138,10 +139,18 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
   return (
     <Link
       href={`/productos/${producto.slug}`}
-      className={`product-card block bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${esAlargado ? 'w-full' : ''} ${className}`}
+      className={`product-card block bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow ${esAlargado ? 'w-full' : ''} ${aspectRatio && !aspectRatio.includes('1/1') ? '' : 'rounded-lg'} ${className}`}
     >
       {/* Imagen del producto */}
-      <div className={`relative bg-neutral-100 overflow-hidden ${esAlargado ? 'aspect-[8/3]' : 'aspect-product'}`}>
+      <div
+        className={`relative bg-neutral-100 overflow-hidden ${
+          aspectRatio
+            ? `aspect-[${aspectRatio}]`
+            : esAlargado
+            ? 'aspect-[8/3]'
+            : 'aspect-product'
+        }`}
+      >
         <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
         <ProductImage
           src={producto.imagen}

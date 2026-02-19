@@ -117,11 +117,11 @@ export function ProformaDocument({
 
   const typeLabel = type === 'FACTURA' ? 'FACTURA / INVOICE'
     : type === 'ALBARÁN DE ENTREGA' ? 'ALBARÁN / DELIVERY NOTE'
-    : 'PEDIDO / ORDER'
+      : 'PEDIDO / ORDER'
 
   const totalLabel = type === 'FACTURA' ? 'Total Factura €'
     : type === 'PEDIDO' ? 'Total Pedido €'
-    : 'Total €'
+      : 'Total €'
 
   // Cell style helpers
   const cb = 'border border-neutral-400 px-2.5 py-1.5'
@@ -133,256 +133,301 @@ export function ProformaDocument({
       <div style={{ width: '800px', minHeight: '1130px', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9px', lineHeight: '1.4', display: 'flex', flexDirection: 'column', margin: '0 auto' }}>
         <div className="pl-6 pr-4 py-3 flex-1 flex flex-col">
 
-        {/* Header: Logo left + Company info center + Doc type right */}
-        <div className="flex items-start justify-between pb-3">
-          <img src="/logo-sphera.png" alt="SPHERA TILE" className="h-8" />
-          <div className="text-center flex-1 px-3">
-            <p className="text-[8px] text-neutral-700 font-medium leading-tight">
-              {COMPANY.name} - {COMPANY.address} - NIF: {COMPANY.nif}
-            </p>
-            <p className="text-[8px] text-neutral-600 leading-tight">
-              {COMPANY.email} | TEL: {COMPANY.tel} | MOB: {COMPANY.mob}
-            </p>
-          </div>
-          <div className="text-right">
-            <h1 className="text-sm font-bold text-red-700 leading-tight whitespace-nowrap">{typeLabel}</h1>
-          </div>
-        </div>
-
-        {/* Client + Doc info row */}
-        <div className="pb-2">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className={hc} style={{ width: '25%' }}>CLIENTE / CLIENT</th>
-                <th className={hc} style={{ width: '20%' }}>
-                  {type === 'FACTURA' ? 'FACTURA' : type === 'ALBARÁN DE ENTREGA' ? 'ALBARÁN' : 'PEDIDO'}
-                </th>
-                <th className={hc} style={{ width: '12%' }}>FECHA / DATE</th>
-                <th className={hc} style={{ width: '8%' }}>PÁG.</th>
-                <th className={hc} style={{ width: '35%' }}>DATOS CLIENTE</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className={dc}>
-                  <div className="font-semibold">{client.nombre}</div>
-                  {client.codigo && <div className="text-[8px] text-neutral-500">Cód: {client.codigo}</div>}
-                </td>
-                <td className={`${dc} font-medium`}>{documentNumber}</td>
-                <td className={dc}>{formatDateShort(date)}</td>
-                <td className={dc}>{page}</td>
-                <td className={dc}>
-                  <div className="text-[8px] leading-tight">
-                    {client.pais && <span>({client.pais}) </span>}
-                    {client.nif && <span>NIF: {client.nif} </span>}
-                    {client.telefono && <span>Tel: {client.telefono}</span>}
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Products Table */}
-        <div className="pb-2">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className={hc} style={{ width: '10%' }}>FORMAT</th>
-                <th className={hc}>DESCRIPTION</th>
-                <th className={hc} style={{ width: '6%' }}>CLASS</th>
-                <th className={`${hc} text-right`} style={{ width: '9%' }}>M2</th>
-                <th className={`${hc} text-right`} style={{ width: '7%' }}>BOX</th>
-                <th className={`${hc} text-right`} style={{ width: '8%' }}>PALLET</th>
-                {showPrices && (
-                  <>
-                    <th className={`${hc} text-right`} style={{ width: '8%' }}>PRICE €</th>
-                    <th className={`${hc} text-right`} style={{ width: '6%' }}>% DTO.</th>
-                    <th className={`${hc} text-right`} style={{ width: '9%' }}>AMOUNT</th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, i) => (
-                <tr key={i}>
-                  <td className={dc}>{item.formato}</td>
-                  <td className={`${dc} text-[8px]`}>{item.descripcion}</td>
-                  <td className={`${dc} text-center`}>{item.calidad}</td>
-                  <td className={`${dc} text-right`}>{fmt(item.m2)}</td>
-                  <td className={`${dc} text-right`}>{fmt(item.cajas, 0)}</td>
-                  <td className={`${dc} text-right`}>{fmt(item.pallets, 1)}</td>
-                  {showPrices && (
-                    <>
-                      <td className={`${dc} text-right`}>{fmt(item.precioM2)}</td>
-                      <td className={`${dc} text-right`}>{item.descuento ? fmt(item.descuento) : ''}</td>
-                      <td className={`${dc} text-right font-medium`}>{fmt(item.importe)}</td>
-                    </>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* QR Codes Grid */}
-        {items.some((item) => item.qrSlug) && (
-          <div className="pb-2 pt-1">
-            <p className="text-[9px] font-bold text-neutral-700 uppercase mb-1.5">Scan Products</p>
-            <div className="flex flex-wrap gap-6">
-              {items.filter((item) => item.qrSlug).map((item, i) => (
-                <div key={i} className="flex flex-col items-center" style={{ width: '80px' }}>
-                  <QRCodeSVG
-                    value={`${baseUrl}/productos/${item.qrSlug}`}
-                    size={64}
-                    level="L"
-                  />
-                  <p className="text-[7px] text-neutral-700 text-center leading-tight mt-0.5 font-medium">{item.descripcion}</p>
-                  <p className="text-[7px] text-neutral-500 text-center leading-tight">{item.formato}</p>
-                </div>
-              ))}
+          {/* Header: Logo left + Company info center + Doc type right */}
+          <div className="flex items-start justify-between pb-3">
+            <img src="/logo-sphera.png" alt="SPHERA TILE" className="h-8" />
+            <div className="text-center flex-1 px-3">
+              <p className="text-[8px] text-neutral-700 font-medium leading-tight">
+                {COMPANY.name} - {COMPANY.address} - NIF: {COMPANY.nif}
+              </p>
+              <p className="text-[8px] text-neutral-600 leading-tight">
+                {COMPANY.email} | TEL: {COMPANY.tel} | MOB: {COMPANY.mob}
+              </p>
+            </div>
+            <div className="text-right">
+              <h1 className="text-sm font-bold text-red-700 leading-tight whitespace-nowrap">{typeLabel}</h1>
             </div>
           </div>
-        )}
 
-        {/* Bottom section - pushed to bottom of page */}
-        <div className="mt-auto">
-
-          {/* Totals row */}
+          {/* Client + Doc info row */}
           <div className="pb-2">
             <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className={hc} style={{ width: '25%' }}>CLIENTE / CLIENT</th>
+                  <th className={hc} style={{ width: '20%' }}>
+                    {type === 'FACTURA' ? 'FACTURA' : type === 'ALBARÁN DE ENTREGA' ? 'ALBARÁN' : 'PEDIDO'}
+                  </th>
+                  <th className={hc} style={{ width: '12%' }}>FECHA / DATE</th>
+                  <th className={hc} style={{ width: '8%' }}>PÁG.</th>
+                  <th className={hc} style={{ width: '35%' }}>DATOS CLIENTE</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr className="bg-neutral-50">
-                  <td className={`${cb} font-bold text-[9px]`} colSpan={4}>TOTALES</td>
-                  <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '8%' }}>{fmt(totals.totalM2)}</td>
-                  <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '6%' }}>{fmt(totals.totalCajas, 0)}</td>
-                  <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '7%' }}>{fmt(totals.totalPallets, 1)}</td>
-                  {showPrices && (
-                    <>
-                      <td className={cb} style={{ width: '8%' }}></td>
-                      <td className={cb} style={{ width: '6%' }}></td>
-                      <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '9%' }}>{fmt(totals.subtotal)}</td>
-                    </>
-                  )}
+                <tr>
+                  <td className={dc}>
+                    <div className="font-semibold">{client.nombre}</div>
+                    {client.codigo && <div className="text-[8px] text-neutral-500">Cód: {client.codigo}</div>}
+                  </td>
+                  <td className={`${dc} font-medium`}>{documentNumber}</td>
+                  <td className={dc}>{formatDateShort(date)}</td>
+                  <td className={dc}>{page}</td>
+                  <td className={dc}>
+                    <div className="text-[8px] leading-tight">
+                      {client.pais && <span>({client.pais}) </span>}
+                      {client.nif && <span>NIF: {client.nif} </span>}
+                      {client.telefono && <span>Tel: {client.telefono}</span>}
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          {/* Weight + Financial totals row */}
-          <div className="flex items-start justify-between pb-2">
-            <div className="text-[9px]">
-              <span className="font-bold">NET: {Math.round(weight.net)} KG</span>
-              <span className="ml-3 font-bold">GROSS: {Math.round(weight.gross)} KG</span>
-            </div>
-
-            {showPrices && (
-              <table className="border-collapse text-[9px]">
-                <tbody>
-                  <tr>
-                    <td className={`${cb} bg-neutral-100 font-bold`}>Subtotal €</td>
-                    <td className={`${dc} text-right`}>{fmt(totals.subtotal)}</td>
-                    {totals.ivaPorcentaje != null && totals.ivaPorcentaje > 0 && (
+          {/* Products Table */}
+          <div className="pb-2">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className={hc} style={{ width: '10%' }}>FORMAT</th>
+                  <th className={hc}>DESCRIPTION</th>
+                  <th className={hc} style={{ width: '6%' }}>CLASS</th>
+                  <th className={`${hc} text-right`} style={{ width: '9%' }}>M2</th>
+                  <th className={`${hc} text-right`} style={{ width: '7%' }}>BOX</th>
+                  <th className={`${hc} text-right`} style={{ width: '8%' }}>PALLET</th>
+                  {showPrices && (
+                    <>
+                      <th className={`${hc} text-right`} style={{ width: '8%' }}>PRICE €</th>
+                      <th className={`${hc} text-right`} style={{ width: '6%' }}>% DTO.</th>
+                      <th className={`${hc} text-right`} style={{ width: '9%' }}>AMOUNT</th>
+                    </>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item, i) => (
+                  <tr key={i}>
+                    <td className={dc}>{item.formato}</td>
+                    <td className={`${dc} text-[8px]`}>{item.descripcion}</td>
+                    <td className={`${dc} text-center`}>{item.calidad}</td>
+                    <td className={`${dc} text-right`}>{fmt(item.m2)}</td>
+                    <td className={`${dc} text-right`}>{fmt(item.cajas, 0)}</td>
+                    <td className={`${dc} text-right`}>{fmt(item.pallets, 1)}</td>
+                    {showPrices && (
                       <>
-                        <td className={`${cb} bg-neutral-100 font-bold`}>IVA {totals.ivaPorcentaje}%</td>
-                        <td className={`${dc} text-right`}>{fmt(totals.ivaEuros || 0)}</td>
+                        <td className={`${dc} text-right`}>{fmt(item.precioM2)}</td>
+                        <td className={`${dc} text-right`}>{item.descuento ? fmt(item.descuento) : ''}</td>
+                        <td className={`${dc} text-right font-medium`}>{fmt(item.importe)}</td>
                       </>
                     )}
-                    <td className={`${cb} bg-neutral-100 font-bold text-[10px]`}>{totalLabel}</td>
-                    <td className={`${dc} text-right font-bold text-[11px]`}>{fmt(totals.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* QR Codes — Full-page per product (after main document) */}
+
+          {/* Bottom section - pushed to bottom of page */}
+          <div className="mt-auto">
+
+            {/* Totals row */}
+            <div className="pb-2">
+              <table className="w-full border-collapse">
+                <tbody>
+                  <tr className="bg-neutral-50">
+                    <td className={`${cb} font-bold text-[9px]`} colSpan={4}>TOTALES</td>
+                    <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '8%' }}>{fmt(totals.totalM2)}</td>
+                    <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '6%' }}>{fmt(totals.totalCajas, 0)}</td>
+                    <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '7%' }}>{fmt(totals.totalPallets, 1)}</td>
+                    {showPrices && (
+                      <>
+                        <td className={cb} style={{ width: '8%' }}></td>
+                        <td className={cb} style={{ width: '6%' }}></td>
+                        <td className={`${cb} text-right font-bold text-[9px]`} style={{ width: '9%' }}>{fmt(totals.subtotal)}</td>
+                      </>
+                    )}
                   </tr>
                 </tbody>
               </table>
-            )}
-          </div>
-
-          {/* Exporter declaration */}
-          {Object.keys(hsCodes).length > 0 && (
-            <div className="pb-1">
-              <p className="text-[7px] font-bold text-neutral-700 leading-tight">
-                THE EXPORTER OF THE PRODUCTS COVERED BY THIS DOCUMENT (CUSTOMS AUTH. NO. ESEAOR 19000455 - ESREX3575),
-                DECLARES THAT EXCEPT WHERE OTHERWISE CLEARLY INDICATED, THESE PRODUCTS ARE OF SPANISH PREFERENTIAL ORIGIN.
-              </p>
             </div>
-          )}
 
-          {/* Payment + Bank + Terms + Stamp */}
-          <div className="pb-2">
-            <table className="w-full border-collapse text-[9px]">
-              <tbody>
-                {payment && (
+            {/* Weight + Financial totals row */}
+            <div className="flex items-start justify-between pb-2">
+              <div className="text-[9px]">
+                <span className="font-bold">NET: {Math.round(weight.net)} KG</span>
+                <span className="ml-3 font-bold">GROSS: {Math.round(weight.gross)} KG</span>
+              </div>
+
+              {showPrices && (
+                <table className="border-collapse text-[9px]">
+                  <tbody>
+                    <tr>
+                      <td className={`${cb} bg-neutral-100 font-bold`}>Subtotal €</td>
+                      <td className={`${dc} text-right`}>{fmt(totals.subtotal)}</td>
+                      {totals.ivaPorcentaje != null && totals.ivaPorcentaje > 0 && (
+                        <>
+                          <td className={`${cb} bg-neutral-100 font-bold`}>IVA {totals.ivaPorcentaje}%</td>
+                          <td className={`${dc} text-right`}>{fmt(totals.ivaEuros || 0)}</td>
+                        </>
+                      )}
+                      <td className={`${cb} bg-neutral-100 font-bold text-[10px]`}>{totalLabel}</td>
+                      <td className={`${dc} text-right font-bold text-[11px]`}>{fmt(totals.total)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Exporter declaration */}
+            {Object.keys(hsCodes).length > 0 && (
+              <div className="pb-1">
+                <p className="text-[7px] font-bold text-neutral-700 leading-tight">
+                  THE EXPORTER OF THE PRODUCTS COVERED BY THIS DOCUMENT (CUSTOMS AUTH. NO. ESEAOR 19000455 - ESREX3575),
+                  DECLARES THAT EXCEPT WHERE OTHERWISE CLEARLY INDICATED, THESE PRODUCTS ARE OF SPANISH PREFERENTIAL ORIGIN.
+                </p>
+              </div>
+            )}
+
+            {/* Payment + Bank + Terms + Stamp */}
+            <div className="pb-2">
+              <table className="w-full border-collapse text-[9px]">
+                <tbody>
+                  {payment && (
+                    <tr>
+                      <td className={`${cb} font-bold bg-neutral-100`} style={{ width: '22%' }}>PAYMENT</td>
+                      <td className={dc} colSpan={2}>{payment.method}</td>
+                      <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={4} style={{ width: '22%', verticalAlign: 'middle' }}>
+                        <div className="text-[8px] text-neutral-600">
+                          <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
+                          <p>CIF: B12945796</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                   <tr>
-                    <td className={`${cb} font-bold bg-neutral-100`} style={{ width: '22%' }}>PAYMENT</td>
-                    <td className={dc} colSpan={2}>{payment.method}</td>
-                    <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={4} style={{ width: '22%', verticalAlign: 'middle' }}>
-                      <div className="text-[8px] text-neutral-600">
-                        <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
-                        <p>CIF: B12945796</p>
-                      </div>
+                    <td className={`${cb} font-bold bg-neutral-100`}>BANK</td>
+                    <td className={dc} colSpan={payment ? 2 : 2}>
+                      {COMPANY.bank.name} - IBAN: {COMPANY.bank.iban} - SWIFT: {COMPANY.bank.swift}
+                    </td>
+                    {!payment && (
+                      <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={3} style={{ width: '22%', verticalAlign: 'middle' }}>
+                        <div className="text-[8px] text-neutral-600">
+                          <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
+                          <p>CIF: B12945796</p>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                  <tr>
+                    <td className={`${cb} font-bold bg-neutral-100`}>TERMS</td>
+                    <td className={dc} colSpan={2}>{termsOfSale}</td>
+                  </tr>
+                  <tr>
+                    <td className={`${cb} font-bold bg-neutral-100`}>OBS.</td>
+                    <td className={dc} colSpan={2}>
+                      {observations || 'MERCANCIA DE ORIGEN ESPAÑOL'}
+                      {hsCodesStr && <span className="ml-2 font-bold">H.S.: {hsCodesStr}</span>}
                     </td>
                   </tr>
-                )}
-                <tr>
-                  <td className={`${cb} font-bold bg-neutral-100`}>BANK</td>
-                  <td className={dc} colSpan={payment ? 2 : 2}>
-                    {COMPANY.bank.name} - IBAN: {COMPANY.bank.iban} - SWIFT: {COMPANY.bank.swift}
-                  </td>
-                  {!payment && (
-                    <td className={`${cb} bg-neutral-100 font-bold text-center`} rowSpan={3} style={{ width: '22%', verticalAlign: 'middle' }}>
-                      <div className="text-[8px] text-neutral-600">
-                        <p className="font-bold text-neutral-800">SPHERA TILE S.L.</p>
-                        <p>CIF: B12945796</p>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-                <tr>
-                  <td className={`${cb} font-bold bg-neutral-100`}>TERMS</td>
-                  <td className={dc} colSpan={2}>{termsOfSale}</td>
-                </tr>
-                <tr>
-                  <td className={`${cb} font-bold bg-neutral-100`}>OBS.</td>
-                  <td className={dc} colSpan={2}>
-                    {observations || 'MERCANCIA DE ORIGEN ESPAÑOL'}
-                    {hsCodesStr && <span className="ml-2 font-bold">H.S.: {hsCodesStr}</span>}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                </tbody>
+              </table>
+            </div>
 
-          {/* Signatures (albaranes only) */}
-          {showSignatures && (
-            <div className="pb-2">
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <p className="text-[9px] text-neutral-600 mb-6">Entregado por / Delivered by:</p>
-                  <div className="border-t border-neutral-400 pt-px">
-                    <p className="text-[8px] text-neutral-500">Firma y sello</p>
+            {/* Signatures (albaranes only) */}
+            {showSignatures && (
+              <div className="pb-2">
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <p className="text-[9px] text-neutral-600 mb-6">Entregado por / Delivered by:</p>
+                    <div className="border-t border-neutral-400 pt-px">
+                      <p className="text-[8px] text-neutral-500">Firma y sello</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-[9px] text-neutral-600 mb-6">Recibido por / Received by:</p>
-                  <div className="border-t border-neutral-400 pt-px">
-                    <p className="text-[8px] text-neutral-500">Firma, nombre y DNI</p>
+                  <div className="flex-1">
+                    <p className="text-[9px] text-neutral-600 mb-6">Recibido por / Received by:</p>
+                    <div className="border-t border-neutral-400 pt-px">
+                      <p className="text-[8px] text-neutral-500">Firma, nombre y DNI</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Footer line */}
-          <div className="text-center border-t border-neutral-300 pt-1">
-            <p className="text-[7px] text-neutral-500" style={{ margin: 0 }}>
-              Solo se reservará el material durante 20 días. — {COMPANY.registry}
-            </p>
+            {/* Footer line */}
+            <div className="text-center border-t border-neutral-300 pt-1">
+              <p className="text-[7px] text-neutral-500" style={{ margin: 0 }}>
+                Solo se reservará el material durante 20 días. — {COMPANY.registry}
+              </p>
+            </div>
+
           </div>
 
         </div>
-
-        </div>
       </div>
+
+      {/* Full-page QR codes — one page per product */}
+      {items.filter((item) => item.qrSlug).map((item, i) => (
+        <div
+          key={`qr-page-${i}`}
+          style={{
+            width: '800px',
+            height: '1130px',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            display: 'flex',
+            flexDirection: 'column',
+            margin: '0 auto',
+            pageBreakBefore: 'always',
+          }}
+        >
+          {/* Mini header */}
+          <div className="flex items-center justify-between px-6 pt-4 pb-2 border-b border-neutral-200">
+            <img src="/logo-sphera.png" alt="SPHERA TILE" className="h-6" />
+            <p className="text-[9px] text-neutral-500 uppercase tracking-wider">Product QR Code</p>
+          </div>
+
+          {/* Centered QR content */}
+          <div className="flex-1 flex flex-col items-center justify-center px-6">
+            {/* Product name */}
+            <h2
+              className="text-2xl font-bold text-neutral-900 text-center uppercase mb-1 leading-tight"
+              style={{ maxWidth: '500px' }}
+            >
+              {item.descripcion}
+            </h2>
+
+            {/* Format */}
+            <p className="text-lg text-neutral-500 mb-8">{item.formato}</p>
+
+            {/* QR Code — large */}
+            <div className="bg-white p-4 rounded-lg">
+              <QRCodeSVG
+                value={`${baseUrl}/productos/${item.qrSlug}`}
+                size={300}
+                level="M"
+                includeMargin
+              />
+            </div>
+
+            {/* Scan instruction */}
+            <p className="text-sm text-neutral-600 mt-6 mb-2">
+              Escanea este código QR para ver los detalles del producto
+            </p>
+
+            {/* URL */}
+            <p className="text-xs text-neutral-400 font-mono break-all text-center" style={{ maxWidth: '400px' }}>
+              {baseUrl}/productos/{item.qrSlug}
+            </p>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center px-6 pb-3 border-t border-neutral-200 pt-2">
+            <p className="text-[8px] text-neutral-400">
+              {COMPANY.name} — {COMPANY.email} — TEL: {COMPANY.tel}
+            </p>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

@@ -44,8 +44,8 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
   if (columnas === 1) {
     return (
       <div className={`space-y-4 ${className}`}>
-        {displayProducts.map((producto, index) => (
-          <ProductCard key={`${producto.id}-${index}`} producto={producto} variant="list" />
+        {displayProducts.map((producto) => (
+          <ProductCard key={producto.id} producto={producto} variant="list" />
         ))}
       </div>
     )
@@ -91,9 +91,9 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
                     : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
                 }`}
               >
-                {row.map((producto, idx) => (
+                {row.map((producto) => (
                   <div
-                    key={`${producto.id}-${idx}`}
+                    key={producto.id}
                     className={`col-span-1 break-inside-avoid page-break-inside-avoid w-full ${
                       isElongatedFormat(producto.formato) ? 'max-w-lg' : 'max-w-xs'
                     }`}

@@ -186,7 +186,7 @@ export function FiltersDrawer({
           )}
 
           {/* Calidad */}
-          <FilterSection titulo={t('quality')} defaultOpen>
+          <FilterSection titulo={t('quality')}>
             {OPCIONES_CALIDAD.map((cal) => (
               <FilterCheckbox
                 key={cal}

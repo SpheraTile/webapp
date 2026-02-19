@@ -39,11 +39,11 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
         </div>
       </div>
 
-      {/* Reference - 10px */}
+      {/* Reference - 11px */}
       <div className="text-center mb-[2mm]">
         <div
           className="font-mono text-black"
-          style={{ fontSize: '10px' }}
+          style={{ fontSize: '11px' }}
         >
           {producto.referencia}
         </div>

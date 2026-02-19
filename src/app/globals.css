@@ -56,7 +56,7 @@
 
   /* Card de producto */
   .product-card {
-    @apply bg-white rounded-lg overflow-hidden
+    @apply bg-white overflow-hidden
            transition-transform duration-200 active:scale-[0.98];
   }
 

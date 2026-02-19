@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Producto } from '@/types'
 import { ProductCard } from './ProductCard'
-import { optimizeGridLayout } from '@/lib/gridOptimizer'
+import { optimizeGridLayout, isElongatedFormat } from '@/lib/gridOptimizer'
 
 interface ProductGridProps {
   productos: Producto[]
@@ -63,12 +63,6 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
     return groups
   }, [displayProducts])
 
-  // Determinar si un formato es alargado (22.5x119 o 60x120)
-  const isElongatedFormat = (formato: string) => {
-    return (formato.includes('22.5') && formato.includes('119')) ||
-           (formato.includes('60') && formato.includes('120'))
-  }
-
   return (
     <div className={`flex flex-col gap-8 py-4 ${className}`}>
       {Object.entries(productsByFormat).map(([formato, productos]) => (
@@ -84,18 +78,16 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
             {chunkArray(productos, isElongatedFormat(formato) ? 2 : 4).map((row, rowIndex) => (
               <div
                 key={`${formato}-${rowIndex}`}
-                className={`grid gap-4 justify-items-center ${
-                  isElongatedFormat(formato)
-                    ? 'grid-cols-2'
-                    : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-                }`}
+                className={`grid gap-4 justify-items-center ${isElongatedFormat(formato)
+                  ? 'grid-cols-2'
+                  : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+                  }`}
               >
                 {row.map((producto) => (
                   <div
                     key={producto.id}
-                    className={`col-span-1 break-inside-avoid page-break-inside-avoid w-full ${
-                      isElongatedFormat(producto.formato) ? 'max-w-lg' : 'max-w-xs'
-                    }`}
+                    className={`col-span-1 break-inside-avoid page-break-inside-avoid w-full ${isElongatedFormat(producto.formato) ? 'max-w-lg' : 'max-w-xs'
+                      }`}
                   >
                     <ProductCard
                       producto={producto}

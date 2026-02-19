@@ -1,10 +1,36 @@
 import { Producto } from '@/types'
 
 /**
- * Detecta si un producto es alargado (formato 22.5x119.5)
+ * Parsea un formato como "23.3x120" o "23.3X120" y devuelve [ancho, alto].
+ * Devuelve null si no se puede parsear.
+ */
+export function parseFormatDimensions(formato: string): [number, number] | null {
+  const match = formato.match(/^(\d+(?:[.,]\d+)?)\s*[xX×]\s*(\d+(?:[.,]\d+)?)/)
+  if (!match) return null
+  const a = parseFloat(match[1].replace(',', '.'))
+  const b = parseFloat(match[2].replace(',', '.'))
+  if (isNaN(a) || isNaN(b) || a === 0 || b === 0) return null
+  return [a, b]
+}
+
+/**
+ * Detecta si un formato es alargado.
+ * Un formato es alargado si la relación entre el lado más largo
+ * y el más corto es >= 2 (uno es al menos el doble del otro).
+ */
+export function isElongatedFormat(formato: string): boolean {
+  const dims = parseFormatDimensions(formato)
+  if (!dims) return false
+  const [a, b] = dims
+  const ratio = Math.max(a, b) / Math.min(a, b)
+  return ratio >= 2
+}
+
+/**
+ * Detecta si un producto es alargado basándose en su formato.
  */
 export function isElongatedProduct(product: Producto): boolean {
-  return product.formato.includes('22.5') && product.formato.includes('119')
+  return isElongatedFormat(product.formato)
 }
 
 /**
@@ -18,10 +44,8 @@ export function isElongatedProduct(product: Producto): boolean {
  * @returns Array de productos con orden optimizado
  */
 export function optimizeGridLayout(products: Producto[]): Producto[] {
-  // Separar productos por tipo
   const elongated = products.filter(isElongatedProduct)
   const normal = products.filter(p => !isElongatedProduct(p))
-
-  // Combinar: alargados primero, luego normales
   return [...elongated, ...normal]
 }
+

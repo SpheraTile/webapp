@@ -12,7 +12,6 @@ interface ProductCardProps {
   className?: string
   variant?: 'grid' | 'list'
   esAlargado?: boolean
-  aspectRatio?: string // Nueva prop para aspect ratio personalizado
 }
 
 // Translation keys for product attributes
@@ -65,7 +64,7 @@ function EstadoBadge({ estado, t }: { estado: string; t: (key: string) => string
   )
 }
 
-export function ProductCard({ producto, className = '', variant = 'grid', esAlargado = false, aspectRatio }: ProductCardProps) {
+export function ProductCard({ producto, className = '', variant = 'grid', esAlargado = false }: ProductCardProps) {
   const t = useTranslations('filters')
 
   // Get translated labels
@@ -144,9 +143,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
       {/* Imagen del producto */}
       <div
         className={`relative bg-neutral-100 overflow-hidden ${
-          aspectRatio
-            ? `aspect-[${aspectRatio}]`
-            : esAlargado
+          esAlargado
             ? 'aspect-[8/3]'
             : 'aspect-product'
         }`}

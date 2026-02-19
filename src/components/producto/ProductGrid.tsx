@@ -65,31 +65,10 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
     return groups
   }, [displayProducts])
 
-  // Determinar si un formato es alargado (22.5x119 o similar)
+  // Determinar si un formato es alargado (22.5x119 o 60x120)
   const isElongatedFormat = (formato: string) => {
-    return formato.includes('22.5') && formato.includes('119')
-  }
-
-  // Calcular el aspect ratio correcto basado en el formato (ancho/alto)
-  const getAspectRatio = (formato: string): string | undefined => {
-    const match = formato.match(/(\d+\.?\d*)\s*x\s*(\d+\.?\d*)/i)
-    if (!match) return undefined
-
-    const ancho = parseFloat(match[1])
-    const alto = parseFloat(match[2])
-
-    if (ancho > 0 && alto > 0) {
-      // Simplificar la fracción ancho/alto
-      const gcd = (a: number, b: number): number => {
-        return b === 0 ? a : gcd(b, a % b)
-      }
-      const divisor = gcd(ancho, alto)
-      const simpleAncho = Math.round(ancho / divisor)
-      const simpleAlto = Math.round(alto / divisor)
-      return `${simpleAncho}/${simpleAlto}`
-    }
-
-    return undefined
+    return (formato.includes('22.5') && formato.includes('119')) ||
+           (formato.includes('60') && formato.includes('120'))
   }
 
   return (
@@ -113,26 +92,19 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
                     : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
                 }`}
               >
-                {row.map((producto) => {
-                  const aspectRatio = getAspectRatio(producto.formato)
-                  // Si la proporción es muy alargada (≥1.5), usar max-w-lg, si no, max-w-xs
-                  const isVeryElongated = aspectRatio && parseFloat(aspectRatio.split('/')[0]) / parseFloat(aspectRatio.split('/')[1]) >= 1.5
-
-                  return (
-                    <div
-                      key={producto.id}
-                      className={`col-span-1 break-inside-avoid page-break-inside-avoid w-full ${
-                        isVeryElongated ? 'max-w-lg' : 'max-w-xs'
-                      }`}
-                    >
-                      <ProductCard
-                        producto={producto}
-                        esAlargado={isElongatedFormat(formato)}
-                        aspectRatio={aspectRatio}
-                      />
-                    </div>
-                  )
-                })}
+                {row.map((producto) => (
+                  <div
+                    key={producto.id}
+                    className={`col-span-1 break-inside-avoid page-break-inside-avoid w-full ${
+                      isElongatedFormat(producto.formato) ? 'max-w-lg' : 'max-w-xs'
+                    }`}
+                  >
+                    <ProductCard
+                      producto={producto}
+                      esAlargado={isElongatedFormat(producto.formato)}
+                    />
+                  </div>
+                ))}
               </div>
             ))}
           </div>

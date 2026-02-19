@@ -21,39 +21,36 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
 
   return (
     <div
-      className="qr-card bg-white flex flex-col items-center justify-center border-2 border-black p-[3mm]"
+      className="qr-card bg-white flex flex-row items-stretch border-2 border-black p-[2mm]"
       style={{
         width: `${CARD_WIDTH_MM}mm`,
         height: `${CARD_HEIGHT_MM}mm`,
         fontFamily: 'Arial, sans-serif',
+        gap: '2mm',
       }}
     >
-      {/* Product Name - 15px, smaller for multi-line titles */}
-      <div className="text-center mb-[1mm]">
+      {/* Left side: Text */}
+      <div className="flex-1 flex flex-col justify-center" style={{ minWidth: 0 }}>
         <div
           className="font-bold text-black leading-tight uppercase"
-          style={{ fontSize: '15px' }}
+          style={{ fontSize: '13px', wordBreak: 'break-word' }}
           title={producto.nombre}
         >
           {producto.nombre}
         </div>
-      </div>
-
-      {/* Reference - 15px */}
-      <div className="text-center mb-[1mm]">
         <div
-          className="font-mono text-black"
-          style={{ fontSize: '15px' }}
+          className="font-mono text-black mt-[1mm]"
+          style={{ fontSize: '13px' }}
         >
           {producto.referencia}
         </div>
       </div>
 
-      {/* QR Code - Takes remaining space */}
-      <div className="flex-1 flex items-center justify-center w-full">
+      {/* Right side: QR Code */}
+      <div className="flex items-center justify-center" style={{ width: `${CARD_HEIGHT_MM - 6}mm` }}>
         <QRCodeSVG
           value={productUrl}
-          size={95}
+          size={110}
           level="M"
           includeMargin={false}
         />
@@ -88,33 +85,38 @@ export const qrCardPrintStyles = `
       height: 100%;
     }
 
-    /* Each QR card = one full page, centered, no border */
+    /* Each QR card = one full page, horizontal layout, centered, no border */
     .qr-card {
       width: 100% !important;
       height: 100vh !important;
       margin: 0 !important;
-      padding: 5mm !important;
+      padding: 10mm !important;
       border: none !important;
       box-sizing: border-box !important;
       display: flex !important;
-      flex-direction: column !important;
+      flex-direction: row !important;
       align-items: center !important;
       justify-content: center !important;
+      gap: 10mm !important;
       page-break-after: always;
       page-break-inside: avoid;
     }
 
-    /* Make QR SVG fill available width */
+    /* Text side takes available space */
+    .qr-card > div:first-child {
+      flex: 1 !important;
+      text-align: left !important;
+    }
+
+    /* QR side */
+    .qr-card > div:last-child {
+      width: 45vh !important;
+      flex-shrink: 0 !important;
+    }
+
     .qr-card svg {
       width: 100% !important;
       height: auto !important;
-      max-width: 100% !important;
-    }
-
-    /* Scale text to fit */
-    .qr-card div {
-      width: 100% !important;
-      text-align: center !important;
     }
 
     /* Hide everything else */

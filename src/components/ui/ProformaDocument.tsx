@@ -366,7 +366,7 @@ export function ProformaDocument({
         </div>
       </div>
 
-      {/* Full-page QR codes — one page per product */}
+      {/* Full-page QR codes — one per page, centered */}
       {items.filter((item) => item.qrSlug).map((item, i) => (
         <div
           key={`qr-page-${i}`}
@@ -376,56 +376,51 @@ export function ProformaDocument({
             fontFamily: 'Arial, Helvetica, sans-serif',
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             margin: '0 auto',
             pageBreakBefore: 'always',
           }}
         >
-          {/* Mini header */}
-          <div className="flex items-center justify-between px-6 pt-4 pb-2 border-b border-neutral-200">
-            <img src="/logo-sphera.png" alt="SPHERA TILE" className="h-6" />
-            <p className="text-[9px] text-neutral-500 uppercase tracking-wider">Product QR Code</p>
-          </div>
+          {/* Product name */}
+          <h2
+            className="font-bold text-neutral-900 text-center uppercase leading-tight"
+            style={{ fontSize: '28px', maxWidth: '600px', marginBottom: '4px' }}
+          >
+            {item.descripcion}
+          </h2>
 
-          {/* Centered QR content */}
-          <div className="flex-1 flex flex-col items-center justify-center px-6">
-            {/* Product name */}
-            <h2
-              className="text-2xl font-bold text-neutral-900 text-center uppercase mb-1 leading-tight"
-              style={{ maxWidth: '500px' }}
-            >
-              {item.descripcion}
-            </h2>
+          {/* Format */}
+          <p
+            className="text-neutral-500 text-center"
+            style={{ fontSize: '20px', marginBottom: '40px' }}
+          >
+            {item.formato}
+          </p>
 
-            {/* Format */}
-            <p className="text-lg text-neutral-500 mb-8">{item.formato}</p>
+          {/* QR Code — fills the page */}
+          <QRCodeSVG
+            value={`${baseUrl}/productos/${item.qrSlug}`}
+            size={520}
+            level="M"
+            includeMargin
+          />
 
-            {/* QR Code — large */}
-            <div className="bg-white p-4 rounded-lg">
-              <QRCodeSVG
-                value={`${baseUrl}/productos/${item.qrSlug}`}
-                size={300}
-                level="M"
-                includeMargin
-              />
-            </div>
+          {/* Scan instruction */}
+          <p
+            className="text-neutral-600 text-center"
+            style={{ fontSize: '14px', marginTop: '36px', marginBottom: '6px' }}
+          >
+            Escanea este código QR para ver los detalles del producto
+          </p>
 
-            {/* Scan instruction */}
-            <p className="text-sm text-neutral-600 mt-6 mb-2">
-              Escanea este código QR para ver los detalles del producto
-            </p>
-
-            {/* URL */}
-            <p className="text-xs text-neutral-400 font-mono break-all text-center" style={{ maxWidth: '400px' }}>
-              {baseUrl}/productos/{item.qrSlug}
-            </p>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center px-6 pb-3 border-t border-neutral-200 pt-2">
-            <p className="text-[8px] text-neutral-400">
-              {COMPANY.name} — {COMPANY.email} — TEL: {COMPANY.tel}
-            </p>
-          </div>
+          {/* URL */}
+          <p
+            className="text-neutral-400 font-mono text-center"
+            style={{ fontSize: '11px', maxWidth: '500px', wordBreak: 'break-all' }}
+          >
+            {baseUrl}/productos/{item.qrSlug}
+          </p>
         </div>
       ))}
     </div>

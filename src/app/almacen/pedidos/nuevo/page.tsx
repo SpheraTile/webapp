@@ -64,7 +64,7 @@ export default function NuevoPedidoPage() {
       try {
         const [clientesRes, productosRes] = await Promise.all([
           fetch('/api/clientes'),
-          fetch('/api/productos'),
+          fetch('/api/productos?limit=1000'),
         ])
 
         if (clientesRes.ok) {

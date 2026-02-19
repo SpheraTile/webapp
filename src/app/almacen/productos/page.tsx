@@ -44,7 +44,7 @@ export default function ProductosAlmacenPage() {
       const params = new URLSearchParams()
       if (busqueda) params.set('busqueda', busqueda)
 
-      const response = await fetch(`/api/productos?${params.toString()}`)
+      const response = await fetch(`/api/productos?limit=1000&${params.toString()}`)
       const data = await response.json()
       const productos = data.productos || []
 
@@ -508,11 +508,10 @@ export default function ProductosAlmacenPage() {
               <button
                 key={pag}
                 onClick={() => setPagina(pag)}
-                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pag === pagina
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${pag === pagina
                     ? 'bg-primary-600 text-white'
                     : 'text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-50'
-                }`}
+                  }`}
               >
                 {pag}
               </button>

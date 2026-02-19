@@ -191,7 +191,7 @@ export default function ProductosAlmacenPage() {
       </div>
 
       {/* Stats rápidos */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <p className="text-sm text-neutral-500">Total Productos</p>
           <p className="text-2xl font-bold text-neutral-900">{productos.length}</p>
@@ -205,10 +205,6 @@ export default function ProductosAlmacenPage() {
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <p className="text-sm text-neutral-500">Bajo Stock</p>
           <p className="text-2xl font-bold text-red-600">{productosConBajoStock}</p>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <p className="text-sm text-neutral-500">Series</p>
-          <p className="text-2xl font-bold text-neutral-900">{series}</p>
         </div>
       </div>
 

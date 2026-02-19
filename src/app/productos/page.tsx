@@ -8,7 +8,7 @@ import { DesktopNav } from '@/components/layout/DesktopNav'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { ProductGrid } from '@/components/producto/ProductGrid'
 import { FiltersDrawer } from '@/components/filtros/FiltersDrawer'
-import { IconFilter, IconGrid, IconList } from '@/components/ui/Icons'
+import { IconFilter } from '@/components/ui/Icons'
 import { Producto } from '@/types'
 
 interface FiltrosActivos {
@@ -135,7 +135,6 @@ function ProductosContent() {
   const [busqueda, setBusqueda] = useState('')
   const [filtrosActivos, setFiltrosActivos] = useState<FiltrosActivos>(filtrosIniciales)
   const [mostrarFiltros, setMostrarFiltros] = useState(false)
-  const [vistaGrid, setVistaGrid] = useState(true)
   const [mostrarBusqueda, setMostrarBusqueda] = useState(false)
   const [productos, setProductos] = useState<Producto[]>([])
   const [loading, setLoading] = useState(true)
@@ -302,23 +301,9 @@ function ProductosContent() {
             </button>
           </div>
 
-          {/* Contador y vista */}
+          {/* Contador */}
           <div className="flex items-center justify-between px-4 py-2 text-sm text-neutral-500">
             <span>{tCommon('showing')} {productos.length} {tCommon('elements')}</span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setVistaGrid(true)}
-                className={`p-1.5 rounded ${vistaGrid ? 'text-neutral-900' : 'text-neutral-400'}`}
-              >
-                <IconGrid size={20} />
-              </button>
-              <button
-                onClick={() => setVistaGrid(false)}
-                className={`p-1.5 rounded ${!vistaGrid ? 'text-neutral-900' : 'text-neutral-400'}`}
-              >
-                <IconList size={20} />
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -373,22 +358,6 @@ function ProductosContent() {
         {/* Grid de productos */}
         <div className="flex-1 p-4 lg:p-6">
           {/* Vista toggle para desktop */}
-          <div className="hidden lg:flex items-center justify-end gap-2 mb-4">
-            <span className="text-sm text-neutral-500 mr-2">{tCommon('view')}:</span>
-            <button
-              onClick={() => setVistaGrid(true)}
-              className={`p-2 rounded-lg transition-colors ${vistaGrid ? 'bg-primary-100 text-primary-700' : 'text-neutral-400 hover:bg-neutral-100'}`}
-            >
-              <IconGrid size={20} />
-            </button>
-            <button
-              onClick={() => setVistaGrid(false)}
-              className={`p-2 rounded-lg transition-colors ${!vistaGrid ? 'bg-primary-100 text-primary-700' : 'text-neutral-400 hover:bg-neutral-100'}`}
-            >
-              <IconList size={20} />
-            </button>
-          </div>
-
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
@@ -407,7 +376,7 @@ function ProductosContent() {
               </button>
             </div>
           ) : (
-            <ProductGrid productos={productos} columnas={vistaGrid ? undefined : 1} />
+            <ProductGrid productos={productos} />
           )}
         </div>
       </div>

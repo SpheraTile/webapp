@@ -63,11 +63,10 @@ function ProductGallery({ images, productName }: { images: string[]; productName
             <button
               key={index}
               onClick={() => setSelectedIndex(index)}
-              className={`relative w-20 h-20 overflow-hidden border-2 transition-all ${
-                selectedIndex === index
+              className={`relative w-20 h-20 overflow-hidden border-2 transition-all ${selectedIndex === index
                   ? 'border-primary-600 ring-2 ring-primary-200'
                   : 'border-transparent hover:border-neutral-300'
-              }`}
+                }`}
             >
               <ProductImage
                 src={img}
@@ -92,7 +91,7 @@ function MobileGallery({ images, productName }: { images: string[]; productName:
   return (
     <div className="p-4">
       {/* Imagen principal */}
-      <div className="relative aspect-square bg-neutral-100 rounded-2xl overflow-hidden">
+      <div className="relative aspect-square bg-neutral-100 overflow-hidden">
         <ProductImage
           src={images[selectedIndex]}
           alt={`${productName} - Imagen ${selectedIndex + 1}`}
@@ -110,11 +109,10 @@ function MobileGallery({ images, productName }: { images: string[]; productName:
             <button
               key={index}
               onClick={() => setSelectedIndex(index)}
-              className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                selectedIndex === index
+              className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${selectedIndex === index
                   ? 'border-primary-600'
                   : 'border-neutral-200'
-              }`}
+                }`}
             >
               <ProductImage
                 src={img}

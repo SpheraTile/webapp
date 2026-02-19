@@ -62,28 +62,15 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
   )
 }
 
-// Print styles - to be included in the page
+// Print styles - each QR card fills one full page, centered, no borders
 export const qrCardPrintStyles = `
   @media print {
     @page {
+      margin: 5mm;
       size: auto;
-      margin: 0;
     }
 
-    .qr-card {
-      page-break-inside: avoid;
-      break-inside: avoid;
-      /* Tamaño relativo que se escala con la página */
-      width: 80mm !important;
-      height: 60mm !important;
-      margin: 0;
-      padding: 2mm;
-      border: 1px solid black;
-      box-sizing: border-box;
-      display: inline-block;
-      vertical-align: top;
-    }
-
+    /* Hide everything except print area */
     body * {
       visibility: hidden;
     }
@@ -98,9 +85,36 @@ export const qrCardPrintStyles = `
       left: 0;
       top: 0;
       width: 100%;
-      /* Las tarjetas fluyen naturalmente */
-      font-size: 0; /* Eliminar espacio en línea */
-      line-height: 0;
+      height: 100%;
+    }
+
+    /* Each QR card = one full page, centered, no border */
+    .qr-card {
+      width: 100% !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      padding: 5mm !important;
+      border: none !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      page-break-after: always;
+      page-break-inside: avoid;
+    }
+
+    /* Make QR SVG fill available width */
+    .qr-card svg {
+      width: 100% !important;
+      height: auto !important;
+      max-width: 100% !important;
+    }
+
+    /* Scale text to fit */
+    .qr-card div {
+      width: 100% !important;
+      text-align: center !important;
     }
 
     /* Hide everything else */

@@ -64,6 +64,15 @@ export default function QRCardsPage() {
     window.print()
   }
 
+  const handlePrintSingle = (id: string) => {
+    const prevSelected = new Set(selectedIds)
+    setSelectedIds(new Set([id]))
+    setTimeout(() => {
+      window.print()
+      setSelectedIds(prevSelected)
+    }, 100)
+  }
+
 
   return (
     <>
@@ -164,14 +173,12 @@ export default function QRCardsPage() {
                   <div
                     key={producto.id}
                     onClick={() => toggleSelect(producto.id)}
-                    className={`p-4 cursor-pointer transition-colors ${
-                      selectedIds.has(producto.id) ? 'bg-primary-50' : 'hover:bg-neutral-50'
-                    }`}
+                    className={`p-4 cursor-pointer transition-colors ${selectedIds.has(producto.id) ? 'bg-primary-50' : 'hover:bg-neutral-50'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                        selectedIds.has(producto.id) ? 'bg-primary-600 border-primary-600' : 'border-neutral-300'
-                      }`}>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${selectedIds.has(producto.id) ? 'bg-primary-600 border-primary-600' : 'border-neutral-300'
+                        }`}>
                         {selectedIds.has(producto.id) && (
                           <svg width="14" height="14" fill="none" stroke="white" strokeWidth="3" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -189,6 +196,15 @@ export default function QRCardsPage() {
                         <div className="font-medium text-neutral-900 truncate">{producto.nombre}</div>
                         <div className="text-sm text-neutral-500">{producto.referencia} · {producto.formato}</div>
                       </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handlePrintSingle(producto.id) }}
+                        className="p-2 text-neutral-400 hover:text-primary-600 transition-colors flex-shrink-0"
+                        title="Imprimir QR"
+                      >
+                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -216,6 +232,8 @@ export default function QRCardsPage() {
                       <th className="text-left px-6 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider">
                         Formato
                       </th>
+                      <th className="px-6 py-3 text-xs font-medium text-neutral-500 uppercase tracking-wider w-16">
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-200">
@@ -223,9 +241,8 @@ export default function QRCardsPage() {
                       <tr
                         key={producto.id}
                         onClick={() => toggleSelect(producto.id)}
-                        className={`cursor-pointer transition-colors ${
-                          selectedIds.has(producto.id) ? 'bg-primary-50' : 'hover:bg-neutral-50'
-                        }`}
+                        className={`cursor-pointer transition-colors ${selectedIds.has(producto.id) ? 'bg-primary-50' : 'hover:bg-neutral-50'
+                          }`}
                       >
                         <td className="px-6 py-4">
                           <input
@@ -252,6 +269,17 @@ export default function QRCardsPage() {
                         </td>
                         <td className="px-6 py-4 text-neutral-500">
                           {producto.formato}
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handlePrintSingle(producto.id) }}
+                            className="p-2 text-neutral-400 hover:text-primary-600 transition-colors rounded-lg hover:bg-primary-50"
+                            title="Imprimir QR"
+                          >
+                            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                          </button>
                         </td>
                       </tr>
                     ))}

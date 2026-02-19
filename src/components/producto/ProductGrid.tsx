@@ -87,16 +87,20 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
               <div
                 key={`${formato}-${rowIndex}`}
                 className={`grid gap-4 justify-items-center ${
-                  isElongatedFormat(formato)
-                    ? 'grid-cols-2'
+                  formato.includes('60') && formato.includes('120')
+                    ? 'grid-cols-1 md:grid-cols-2'
                     : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
                 }`}
               >
                 {row.map((producto) => (
                   <div
                     key={producto.id}
-                    className={`col-span-1 break-inside-avoid page-break-inside-avoid w-full ${
-                      isElongatedFormat(producto.formato) ? 'max-w-lg' : 'max-w-xs'
+                    className={`break-inside-avoid page-break-inside-avoid w-full ${
+                      formato.includes('60') && formato.includes('120')
+                        ? 'col-span-1'
+                        : isElongatedFormat(producto.formato)
+                        ? 'max-w-lg'
+                        : 'max-w-xs'
                     }`}
                   >
                     <ProductCard

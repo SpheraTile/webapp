@@ -84,7 +84,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
     return (
       <Link
         href={`/productos/${producto.slug}`}
-        className={`block bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow ${className}`}
+        className={`block bg-white border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow ${className}`}
       >
         {/* Imagen del producto - ancho completo */}
         <div className="relative w-full aspect-[16/9] bg-neutral-100">
@@ -93,7 +93,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
             src={producto.imagen}
             alt={producto.nombre}
             fill
-            className="object-cover"
+            className="object-cover rounded-none"
             sizes="100vw"
           />
         </div>
@@ -153,7 +153,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
           src={producto.imagen}
           alt={producto.nombre}
           fill
-          className="object-cover"
+          className="object-cover rounded-none"
           sizes={esAlargado ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" : "(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"}
         />
       </div>

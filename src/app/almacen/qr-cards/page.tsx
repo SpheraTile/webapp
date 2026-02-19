@@ -58,22 +58,7 @@ export default function QRCardsPage() {
 
   const selectedProductos = productos.filter(p => selectedIds.has(p.id))
 
-  const handlePrint = () => {
-    if (selectedIds.size === 0) {
-      showToast('Selecciona al menos un producto', 'error')
-      return
-    }
-    window.print()
-  }
 
-  const handlePrintSingle = (id: string) => {
-    const prevSelected = new Set(selectedIds)
-    setSelectedIds(new Set([id]))
-    setTimeout(() => {
-      window.print()
-      setSelectedIds(prevSelected)
-    }, 100)
-  }
 
   const handleDownloadImage = async () => {
     if (selectedIds.size === 0) {
@@ -84,12 +69,17 @@ export default function QRCardsPage() {
 
     setGeneratingImage(true)
     try {
-      // Temporarily show the print area
       const el = printAreaRef.current
-      el.style.display = 'block'
-      el.style.position = 'absolute'
+      // Make visible offscreen for html2canvas
+      el.classList.remove('hidden')
+      el.style.position = 'fixed'
       el.style.left = '-9999px'
-      el.style.width = '800px'
+      el.style.top = '0'
+      el.style.width = 'auto'
+      el.style.background = '#ffffff'
+
+      // Wait for render
+      await new Promise(r => setTimeout(r, 200))
 
       const canvas = await html2canvas(el, {
         scale: 2,
@@ -98,11 +88,13 @@ export default function QRCardsPage() {
         logging: false,
       })
 
-      // Reset
-      el.style.display = ''
+      // Hide again
+      el.classList.add('hidden')
       el.style.position = ''
       el.style.left = ''
+      el.style.top = ''
       el.style.width = ''
+      el.style.background = ''
 
       canvas.toBlob((blob) => {
         if (!blob) return
@@ -173,19 +165,9 @@ export default function QRCardsPage() {
                 {selectedIds.size === filteredProductos.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
               </button>
               <button
-                onClick={handlePrint}
-                disabled={selectedIds.size === 0}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Imprimir
-              </button>
-              <button
                 onClick={handleDownloadImage}
                 disabled={selectedIds.size === 0 || generatingImage}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -331,17 +313,7 @@ export default function QRCardsPage() {
                         <td className="px-6 py-4 text-neutral-500">
                           {producto.formato}
                         </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handlePrintSingle(producto.id) }}
-                            className="p-2 text-neutral-400 hover:text-primary-600 transition-colors rounded-lg hover:bg-primary-50"
-                            title="Imprimir QR"
-                          >
-                            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                          </button>
-                        </td>
+
                       </tr>
                     ))}
                   </tbody>

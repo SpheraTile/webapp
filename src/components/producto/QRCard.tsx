@@ -21,36 +21,35 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
 
   return (
     <div
-      className="qr-card bg-white flex flex-row items-stretch border-2 border-black p-[2mm]"
+      className="qr-card bg-white flex flex-row items-center p-[3mm]"
       style={{
         width: `${CARD_WIDTH_MM}mm`,
         height: `${CARD_HEIGHT_MM}mm`,
         fontFamily: 'Arial, sans-serif',
-        gap: '2mm',
+        gap: '3mm',
       }}
     >
       {/* Left side: Text */}
       <div className="flex-1 flex flex-col justify-center" style={{ minWidth: 0 }}>
         <div
-          className="font-bold text-black leading-tight uppercase"
-          style={{ fontSize: '13px', wordBreak: 'break-word' }}
-          title={producto.nombre}
+          className="font-bold text-black leading-snug uppercase"
+          style={{ fontSize: '10px' }}
         >
           {producto.nombre}
         </div>
         <div
-          className="font-mono text-black mt-[1mm]"
-          style={{ fontSize: '13px' }}
+          className="font-mono text-black mt-[2mm]"
+          style={{ fontSize: '11px' }}
         >
           {producto.referencia}
         </div>
       </div>
 
       {/* Right side: QR Code */}
-      <div className="flex items-center justify-center" style={{ width: `${CARD_HEIGHT_MM - 6}mm` }}>
+      <div className="flex items-center justify-center flex-shrink-0">
         <QRCodeSVG
           value={productUrl}
-          size={110}
+          size={80}
           level="M"
           includeMargin={false}
         />

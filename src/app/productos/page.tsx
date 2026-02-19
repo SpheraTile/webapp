@@ -140,6 +140,8 @@ function ProductosContent() {
   const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
   const [facets, setFacets] = useState<Facets | undefined>(undefined)
+  const [page, setPage] = useState(1)
+  const limit = 50
 
   // Leer filtros de la URL al cargar
   useEffect(() => {
@@ -189,6 +191,11 @@ function ProductosContent() {
     setFiltrosActivos(nuevasFiltros)
   }, [searchParams])
 
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [filtrosActivos, busqueda])
+
   // Fetch productos from API
   const fetchProductos = useCallback(async () => {
     setLoading(true)
@@ -196,6 +203,10 @@ function ProductosContent() {
       const params = new URLSearchParams()
 
       if (busqueda) params.set('busqueda', busqueda)
+
+      // Pagination
+      params.set('page', page.toString())
+      params.set('limit', limit.toString())
 
       // Mapear valores a formato DB
       filtrosActivos.formato.forEach(v => params.append('formato', v))
@@ -231,7 +242,7 @@ function ProductosContent() {
     } finally {
       setLoading(false)
     }
-  }, [busqueda, filtrosActivos])
+  }, [busqueda, filtrosActivos, page, limit])
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -250,6 +261,13 @@ function ProductosContent() {
     filtrosActivos.tipo_pieza.length +
     filtrosActivos.uso.length +
     filtrosActivos.estado_producto.length
+
+  const totalPages = Math.ceil(total / limit)
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -303,7 +321,7 @@ function ProductosContent() {
 
           {/* Contador */}
           <div className="flex items-center justify-between px-4 py-2 text-sm text-neutral-500">
-            <span>{tCommon('showing')} {productos.length} {tCommon('elements')}</span>
+            <span>{tCommon('showing')} {Math.min((page - 1) * limit + 1, total)}-{Math.min(page * limit, total)} {tCommon('of')} {total} {tCommon('elements')}</span>
           </div>
         </div>
       </div>
@@ -330,7 +348,7 @@ function ProductosContent() {
       </div>
 
       {/* Contenido principal */}
-      <div className="flex lg:max-w-7xl lg:mx-auto lg:gap-8">
+      <div className="flex lg:max-w-7xl lg:mx-auto lg:gap-8 min-h-[500px]">
         {/* Sidebar de filtros (desktop) */}
         <aside className="hidden lg:block w-72 flex-shrink-0 border-r border-neutral-100 min-h-[calc(100vh-12rem)]">
           <div className="sticky top-28 p-6">
@@ -347,7 +365,7 @@ function ProductosContent() {
             </div>
             <FiltersDrawer
               isOpen={true}
-              onClose={() => {}}
+              onClose={() => { }}
               filtros={filtrosActivos}
               onFiltrosChange={setFiltrosActivos}
               facets={facets}
@@ -356,14 +374,14 @@ function ProductosContent() {
         </aside>
 
         {/* Grid de productos */}
-        <div className="flex-1 p-4 lg:p-6">
+        <div className="flex-1 p-4 lg:p-6 flex flex-col">
           {/* Vista toggle para desktop */}
           {loading ? (
-            <div className="flex items-center justify-center py-20">
+            <div className="flex items-center justify-center py-20 flex-1">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             </div>
           ) : productos.length === 0 ? (
-            <div className="text-center py-20">
+            <div className="text-center py-20 flex-1">
               <p className="text-neutral-500">{t('noProducts')}</p>
               <button
                 onClick={() => {
@@ -376,7 +394,64 @@ function ProductosContent() {
               </button>
             </div>
           ) : (
-            <ProductGrid productos={productos} />
+            <>
+              <ProductGrid productos={productos} />
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => handlePageChange(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {tCommon('previous')}
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                      // Show first, last, current, and surrounding pages
+                      if (
+                        p === 1 ||
+                        p === totalPages ||
+                        (p >= page - 1 && p <= page + 1)
+                      ) {
+                        return (
+                          <button
+                            key={p}
+                            onClick={() => handlePageChange(p)}
+                            className={`w-10 h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-colors ${p === page
+                                ? 'bg-primary-600 text-white'
+                                : 'text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-50'
+                              }`}
+                          >
+                            {p}
+                          </button>
+                        )
+                      } else if (
+                        (p === page - 2 && p > 1) ||
+                        (p === page + 2 && p < totalPages)
+                      ) {
+                        return (
+                          <span key={p} className="px-2 text-neutral-500">
+                            ...
+                          </span>
+                        )
+                      }
+                      return null
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {tCommon('next')}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

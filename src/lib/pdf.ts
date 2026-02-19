@@ -144,3 +144,77 @@ export function getPDFDataUrl(blob: Blob): Promise<string> {
     reader.readAsDataURL(blob)
   })
 }
+
+// ---- Image export (PNG) ----
+
+interface ExportImageOptions {
+  filename: string
+  element: HTMLElement
+}
+
+export async function exportToImage({ element }: ExportImageOptions): Promise<Blob> {
+  // Temporarily hide print:hidden elements
+  const hiddenElements = element.querySelectorAll('.print\\:hidden')
+  hiddenElements.forEach((el) => {
+    (el as HTMLElement).style.display = 'none'
+  })
+
+  const originalStyles = {
+    width: element.style.width,
+    minWidth: element.style.minWidth,
+    maxWidth: element.style.maxWidth,
+    overflow: element.style.overflow,
+  }
+  element.style.width = '800px'
+  element.style.minWidth = '800px'
+  element.style.maxWidth = '800px'
+  element.style.overflow = 'visible'
+
+  try {
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      onclone: (clonedDoc: Document) => {
+        const allElements = clonedDoc.querySelectorAll('*')
+        allElements.forEach((el) => {
+          const style = (el as HTMLElement).style
+          if (style.color && style.color.includes('oklch')) style.color = '#000000'
+          if (style.backgroundColor && style.backgroundColor.includes('oklch')) style.backgroundColor = '#ffffff'
+          if (style.borderColor && style.borderColor.includes('oklch')) style.borderColor = '#d4d4d4'
+        })
+      },
+    })
+
+    return new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob)
+        else reject(new Error('Failed to create image blob'))
+      }, 'image/png')
+    })
+  } finally {
+    element.style.width = originalStyles.width
+    element.style.minWidth = originalStyles.minWidth
+    element.style.maxWidth = originalStyles.maxWidth
+    element.style.overflow = originalStyles.overflow
+
+    hiddenElements.forEach((el) => {
+      (el as HTMLElement).style.display = ''
+    })
+  }
+}
+
+export async function downloadImage(options: ExportImageOptions): Promise<void> {
+  const blob = await exportToImage(options)
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${options.filename}.png`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+

@@ -35,7 +35,7 @@ export default function ProductosAlmacenPage() {
   const [editingStock, setEditingStock] = useState<string | null>(null)
   const [editStockValue, setEditStockValue] = useState('')
   const [pagina, setPagina] = useState(1)
-  const productosPorPagina = 25
+  const productosPorPagina = 50
   const { showToast } = useToast()
   const confirm = useConfirm()
 
@@ -509,8 +509,8 @@ export default function ProductosAlmacenPage() {
                 key={pag}
                 onClick={() => setPagina(pag)}
                 className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${pag === pagina
-                    ? 'bg-primary-600 text-white'
-                    : 'text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-50'
+                  ? 'bg-primary-600 text-white'
+                  : 'text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-50'
                   }`}
               >
                 {pag}

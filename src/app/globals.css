@@ -18,65 +18,56 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
 }
 
 @layer components {
+
   /* Botón primario corporativo */
   .btn-primary {
-    @apply bg-primary-600 text-white font-medium px-6 py-3 rounded-lg
-           transition-colors duration-200 hover:bg-primary-700
-           active:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-primary-600 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 hover:bg-primary-700 active:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /* Botón secundario */
   .btn-secondary {
-    @apply bg-white text-neutral-900 font-medium px-6 py-3 rounded-lg
-           border border-neutral-300 transition-colors duration-200
-           hover:bg-neutral-50 active:bg-neutral-100;
+    @apply bg-white text-neutral-900 font-medium px-6 py-3 rounded-lg border border-neutral-300 transition-colors duration-200 hover:bg-neutral-50 active:bg-neutral-100;
   }
 
   /* Botón outline */
   .btn-outline {
-    @apply bg-transparent text-primary-600 font-medium px-6 py-3 rounded-lg
-           border border-primary-600 transition-colors duration-200
-           hover:bg-primary-50 active:bg-primary-100;
+    @apply bg-transparent text-primary-600 font-medium px-6 py-3 rounded-lg border border-primary-600 transition-colors duration-200 hover:bg-primary-50 active:bg-primary-100;
   }
 
   /* Input base */
   .input-base {
-    @apply w-full px-4 py-3 bg-neutral-100 rounded-full
-           border border-transparent text-neutral-900
-           placeholder:text-neutral-500
-           focus:outline-none focus:border-primary-500 focus:bg-white
-           transition-all duration-200;
+    @apply w-full px-4 py-3 bg-neutral-100 rounded-full border border-transparent text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-primary-500 focus:bg-white transition-all duration-200;
   }
 
   /* Card de producto */
   .product-card {
-    @apply bg-white overflow-hidden
-           transition-transform duration-200 active:scale-[0.98];
+    @apply bg-white overflow-hidden transition-transform duration-200 active:scale-[0.98];
   }
 
   /* Badge de stock */
   .stock-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1.5
-           bg-neutral-100 rounded-full text-sm text-neutral-700;
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 rounded-full text-sm text-neutral-700;
   }
 
   /* Navegación inferior item */
   .nav-item {
-    @apply flex flex-col items-center justify-center gap-1
-           text-neutral-500 transition-colors duration-200;
+    @apply flex flex-col items-center justify-center gap-1 text-neutral-500 transition-colors duration-200;
   }
+
   .nav-item.active {
     @apply text-primary-600;
   }
 }
 
 @layer utilities {
+
   /* Padding para safe areas en móvil */
   .pb-safe {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
@@ -118,13 +109,13 @@
   [data-nextjs-dialog-overlay],
   nextjs-portal,
   [data-nextjs-toast],
-  [data-nextjs-scroll-focus-boundary] ~ div:last-child,
+  [data-nextjs-scroll-focus-boundary]~div:last-child,
   [data-next-mark],
   [class*="__next"],
   [id*="__next"]:not(#__next),
-  body > div[style*="position: fixed"],
-  body > div[style*="z-index: 9999"],
-  body > div[style*="z-index: 99999"] {
+  body>div[style*="position: fixed"],
+  body>div[style*="z-index: 9999"],
+  body>div[style*="z-index: 99999"] {
     display: none !important;
   }
 
@@ -135,15 +126,21 @@
   }
 
   /* Avoid breaking inside tables and important sections */
-  table, tr, td, th {
+  table,
+  tr,
+  td,
+  th {
     page-break-inside: avoid;
   }
 
-  /* QR print pages — fill the paper width */
+  /* QR print pages — fill paper, no borders, centered */
   .qr-print-page {
     width: 100% !important;
     max-width: 100% !important;
     padding: 2mm !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
     page-break-before: always;
     page-break-inside: avoid;
   }

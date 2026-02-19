@@ -366,58 +366,61 @@ export function ProformaDocument({
         </div>
       </div>
 
-      {/* Full-page QR codes — one per page, adapts to any paper size */}
+      {/* QR pages — one per product, no borders, centered */}
       {items.filter((item) => item.qrSlug).map((item, i) => (
         <div
           key={`qr-page-${i}`}
           data-pdf-page
           className="qr-print-page"
           style={{
-            width: '100%',
-            maxWidth: '800px',
-            fontFamily: 'Arial, Helvetica, sans-serif',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
+            width: '800px',
             margin: '0 auto',
-            padding: '8px',
+            padding: '40px 20px',
             boxSizing: 'border-box',
-            pageBreakBefore: 'always',
+            textAlign: 'center',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            background: '#ffffff',
+            border: 'none',
+            outline: 'none',
           }}
         >
           {/* Product name */}
-          <p
-            className="font-bold text-neutral-900 text-center uppercase leading-tight"
-            style={{ fontSize: 'clamp(14px, 5vw, 28px)', marginBottom: '2px', width: '100%' }}
-          >
+          <p style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            color: '#171717',
+            textTransform: 'uppercase',
+            margin: '0 0 4px 0',
+            lineHeight: '1.2',
+          }}>
             {item.descripcion}
           </p>
 
           {/* Format */}
-          <p
-            className="text-neutral-500 text-center"
-            style={{ fontSize: 'clamp(10px, 3vw, 18px)', marginBottom: 'clamp(8px, 3vw, 24px)' }}
-          >
+          <p style={{
+            fontSize: '16px',
+            color: '#737373',
+            margin: '0 0 20px 0',
+          }}>
             {item.formato}
           </p>
 
-          {/* QR Code — fills available width */}
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          {/* QR Code — large, centered */}
+          <div style={{ display: 'inline-block' }}>
             <QRCodeSVG
               value={`${baseUrl}/productos/${item.qrSlug}`}
-              size={1000}
+              size={600}
               level="M"
               includeMargin={false}
-              style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
             />
           </div>
 
           {/* Scan instruction */}
-          <p
-            className="text-neutral-600 text-center"
-            style={{ fontSize: 'clamp(8px, 2.5vw, 13px)', marginTop: 'clamp(6px, 2vw, 20px)' }}
-          >
+          <p style={{
+            fontSize: '12px',
+            color: '#525252',
+            margin: '16px 0 0 0',
+          }}>
             Escanea para ver el producto
           </p>
         </div>

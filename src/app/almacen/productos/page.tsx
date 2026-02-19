@@ -150,7 +150,7 @@ export default function ProductosAlmacenPage() {
 
   const productosConBajoStock = productos.filter((p) => p.stock_m2 < 100).length
   const totalStock = productos.reduce((sum, p) => sum + p.stock_m2, 0)
-  const series = new Set(productos.map((p) => p.serie)).size
+  const numSeries = new Set(productos.map((p) => p.serie)).size
 
   const estadoLabels: Record<string, { text: string; color: string }> = {
     NORMAL: { text: '', color: '' },

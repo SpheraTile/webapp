@@ -84,16 +84,16 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
     return (
       <Link
         href={`/productos/${producto.slug}`}
-        className={`block bg-white border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow ${className}`}
+        className={`group block bg-white border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow ${className}`}
       >
         {/* Imagen del producto - ancho completo */}
-        <div className="relative w-full aspect-[16/9] bg-neutral-100">
+        <div className="relative w-full aspect-[16/9] bg-neutral-100 overflow-hidden">
           <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
           <ProductImage
             src={producto.imagen}
             alt={producto.nombre}
             fill
-            className="object-cover rounded-none"
+            className="object-cover rounded-none group-hover:scale-105 transition-transform duration-300"
             sizes="100vw"
           />
         </div>
@@ -138,7 +138,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
   return (
     <Link
       href={`/productos/${producto.slug}`}
-      className={`product-card block bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow ${esAlargado ? 'w-full' : ''} ${className}`}
+      className={`product-card group block bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow ${esAlargado ? 'w-full' : ''} ${className}`}
     >
       {/* Imagen del producto */}
       <div
@@ -153,7 +153,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
           src={producto.imagen}
           alt={producto.nombre}
           fill
-          className="object-cover rounded-none"
+          className="object-cover rounded-none group-hover:scale-105 transition-transform duration-300"
           sizes={esAlargado ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" : "(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"}
         />
       </div>

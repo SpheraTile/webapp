@@ -74,10 +74,10 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
     <div className={`flex flex-col gap-8 py-4 ${className}`}>
       {Object.entries(productsByFormat).map(([formato, productos]) => (
         <div key={formato} className="flex flex-col gap-3">
-          {/* Header del formato */}
-          <div className="flex items-center gap-2 px-1">
+          {/* Header del formato con línea gris debajo */}
+          <div className="flex flex-col gap-2 px-1">
             <h3 className="text-sm font-semibold text-neutral-900">{formato}</h3>
-            <div className="flex-1 h-px bg-neutral-200"></div>
+            <div className="h-px bg-neutral-300"></div>
           </div>
 
           {/* Productos de este formato */}

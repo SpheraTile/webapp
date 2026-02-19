@@ -21,7 +21,7 @@ export function QRCard({ producto, baseUrl }: QRCardProps) {
 
   return (
     <div
-      className="qr-card bg-white flex flex-col items-center justify-center border-2 border-black p-[3mm]"
+      className="qr-card bg-white flex flex-col items-center justify-center border-2 border-black p-[4mm]"
       style={{
         width: `${CARD_WIDTH_MM}mm`,
         height: `${CARD_HEIGHT_MM}mm`,

@@ -34,6 +34,8 @@ export default function ProductosAlmacenPage() {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [editingStock, setEditingStock] = useState<string | null>(null)
   const [editStockValue, setEditStockValue] = useState('')
+  const [pagina, setPagina] = useState(1)
+  const productosPorPagina = 25
   const { showToast } = useToast()
   const confirm = useConfirm()
 
@@ -89,6 +91,17 @@ export default function ProductosAlmacenPage() {
       }
       return 0
     })
+
+  // Paginación
+  const totalPages = Math.ceil(filteredProductos.length / productosPorPagina)
+  const startIndex = (pagina - 1) * productosPorPagina
+  const endIndex = startIndex + productosPorPagina
+  const paginatedProductos = filteredProductos.slice(startIndex, endIndex)
+
+  // Reset a página 1 cuando cambian filtros
+  useEffect(() => {
+    setPagina(1)
+  }, [filtroSerie, filtroFormato, orden])
 
   const handleDelete = async (id: string) => {
     const confirmed = await confirm({
@@ -297,7 +310,7 @@ export default function ProductosAlmacenPage() {
           <>
             {/* Vista móvil - Cards */}
             <div className="lg:hidden divide-y divide-neutral-200">
-              {filteredProductos.map((producto) => (
+              {paginatedProductos.map((producto) => (
                 <div key={producto.id} className="p-4">
                   <div className="flex items-start gap-3">
                     <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
@@ -372,7 +385,7 @@ export default function ProductosAlmacenPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
-                  {filteredProductos.map((producto) => (
+                  {paginatedProductos.map((producto) => (
                     <tr key={producto.id} className="hover:bg-neutral-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -483,9 +496,46 @@ export default function ProductosAlmacenPage() {
         )}
       </div>
 
+      {/* Paginación */}
+      {!loading && paginatedProductos.length > 0 && totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-center gap-2">
+          <button
+            onClick={() => setPagina(p => Math.max(1, p - 1))}
+            disabled={pagina === 1}
+            className="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Anterior
+          </button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pag => (
+              <button
+                key={pag}
+                onClick={() => setPagina(pag)}
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pag === pagina
+                    ? 'bg-primary-600 text-white'
+                    : 'text-neutral-700 bg-white border border-neutral-200 hover:bg-neutral-50'
+                }`}
+              >
+                {pag}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setPagina(p => Math.min(totalPages, p + 1))}
+            disabled={pagina === totalPages}
+            className="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
+
       {/* Resumen */}
       <div className="mt-6 text-sm text-neutral-500">
-        Mostrando {productos.length} productos
+        Mostrando {startIndex + 1}-{Math.min(endIndex, filteredProductos.length)} de {filteredProductos.length} productos
       </div>
     </div>
   )

@@ -10,12 +10,14 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ productos, className = '', columnas }: ProductGridProps) {
-  // Optimizar orden de productos para minimizar huecos en el grid
+  // Filtrar productos con stock y optimizar orden
   const displayProducts = useMemo(() => {
-    if (columnas === 1) return productos // Vista lista, no optimizar
-    return optimizeGridLayout(productos)
+    const productosConStock = productos.filter(p => p.stock_m2 > 0)
+    if (columnas === 1) return productosConStock // Vista lista, no optimizar
+    return optimizeGridLayout(productosConStock)
   }, [productos, columnas])
-  if (productos.length === 0) {
+
+  if (displayProducts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4">
         <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
@@ -43,7 +45,7 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
   if (columnas === 1) {
     return (
       <div className={`space-y-4 ${className}`}>
-        {productos.map((producto) => (
+        {displayProducts.map((producto) => (
           <ProductCard key={producto.id} producto={producto} variant="list" />
         ))}
       </div>
@@ -69,7 +71,7 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
   }
 
   return (
-    <div className={`flex flex-col gap-6 ${className}`}>
+    <div className={`flex flex-col gap-8 py-4 ${className}`}>
       {Object.entries(productsByFormat).map(([formato, productos]) => (
         <div key={formato} className="flex flex-col gap-3">
           {/* Header del formato */}

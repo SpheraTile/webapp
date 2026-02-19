@@ -33,28 +33,32 @@ function isElongatedProduct(product: ApiProducto): boolean {
   return product.formato.includes('22.5') && product.formato.includes('119')
 }
 
-// Función para paginar productos agrupando por tipo (no mezclar alargados con cuadrados)
+// Función para paginar productos agrupando por formato (no mezclar formatos diferentes)
 function paginateProducts(products: ApiProducto[]): ApiProducto[][] {
-  // Separar productos en dos grupos
-  const elongatedProducts = products.filter(isElongatedProduct)
-  const normalProducts = products.filter(p => !isElongatedProduct(p))
+  // Agrupar productos por formato
+  const productsByFormat: Record<string, ApiProducto[]> = {}
+  products.forEach(product => {
+    const formato = product.formato
+    if (!productsByFormat[formato]) {
+      productsByFormat[formato] = []
+    }
+    productsByFormat[formato].push(product)
+  })
 
   const pages: ApiProducto[][] = []
 
-  // Paginar productos alargados (2 por página)
-  for (let i = 0; i < elongatedProducts.length; i += 2) {
-    pages.push(elongatedProducts.slice(i, i + 2))
-  }
+  // Paginar cada formato por separado
+  Object.entries(productsByFormat).forEach(([formato, formatProducts]) => {
+    const isElongated = formato.includes('22.5') && formato.includes('119')
+    const productsPerPage = isElongated ? 2 : 4
 
-  // Paginar productos normales (4 por página)
-  for (let i = 0; i < normalProducts.length; i += 4) {
-    pages.push(normalProducts.slice(i, i + 4))
-  }
+    for (let i = 0; i < formatProducts.length; i += productsPerPage) {
+      pages.push(formatProducts.slice(i, i + productsPerPage))
+    }
+  })
 
   return pages
 }
-
-const PRODUCTS_PER_PAGE = 4
 
 export default function CatalogoPage() {
   const [allProductos, setAllProductos] = useState<ApiProducto[]>([])

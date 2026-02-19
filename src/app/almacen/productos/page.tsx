@@ -24,7 +24,12 @@ interface Producto {
 
 export default function ProductosAlmacenPage() {
   const [busqueda, setBusqueda] = useState('')
+  const [filtroSerie, setFiltroSerie] = useState<string>('todos')
+  const [filtroFormato, setFiltroFormato] = useState<string>('todos')
+  const [orden, setOrden] = useState<string>('nombre-asc')
   const [productos, setProductos] = useState<Producto[]>([])
+  const [series, setSeries] = useState<string[]>([])
+  const [formatos, setFormatos] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [editingStock, setEditingStock] = useState<string | null>(null)
@@ -39,7 +44,15 @@ export default function ProductosAlmacenPage() {
 
       const response = await fetch(`/api/productos?${params.toString()}`)
       const data = await response.json()
-      setProductos(data.productos || [])
+      const productos = data.productos || []
+
+      // Extraer series y formatos únicos
+      const uniqueSeries = [...new Set(productos.map((p: Producto) => p.serie))] as string[]
+      const uniqueFormatos = [...new Set(productos.map((p: Producto) => p.formato))] as string[]
+
+      setSeries(uniqueSeries.sort())
+      setFormatos(uniqueFormatos.sort())
+      setProductos(productos)
     } catch (error) {
       console.error('Error fetching productos:', error)
     } finally {
@@ -53,6 +66,29 @@ export default function ProductosAlmacenPage() {
     }, 300)
     return () => clearTimeout(debounce)
   }, [busqueda])
+
+  // Filtrar y ordenar productos
+  const filteredProductos = productos
+    .filter(p => {
+      if (filtroSerie !== 'todos' && p.serie !== filtroSerie) return false
+      if (filtroFormato !== 'todos' && p.formato !== filtroFormato) return false
+      return true
+    })
+    .sort((a, b) => {
+      const [campo, direccion] = orden.split('-')
+      const multiplicador = direccion === 'asc' ? 1 : -1
+
+      if (campo === 'nombre') {
+        return a.nombre.localeCompare(b.nombre) * multiplicador
+      } else if (campo === 'referencia') {
+        return a.referencia.localeCompare(b.referencia) * multiplicador
+      } else if (campo === 'stock') {
+        return (a.stock_m2 - b.stock_m2) * multiplicador
+      } else if (campo === 'precio') {
+        return (a.precio_m2 - b.precio_m2) * multiplicador
+      }
+      return 0
+    })
 
   const handleDelete = async (id: string) => {
     const confirmed = await confirm({
@@ -186,6 +222,63 @@ export default function ProductosAlmacenPage() {
             className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
         </div>
+
+        {/* Filtros y ordenación */}
+        <div className="flex flex-wrap items-center gap-3 mt-4">
+          {/* Filtro por serie */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-neutral-700">Serie:</label>
+            <select
+              value={filtroSerie}
+              onChange={(e) => setFiltroSerie(e.target.value)}
+              className="border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="todos">Todas</option>
+              {series.map(serie => (
+                <option key={serie} value={serie}>{serie}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro por formato */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-neutral-700">Formato:</label>
+            <select
+              value={filtroFormato}
+              onChange={(e) => setFiltroFormato(e.target.value)}
+              className="border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="todos">Todos</option>
+              {formatos.map(formato => (
+                <option key={formato} value={formato}>{formato}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Ordenación */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-neutral-700">Ordenar por:</label>
+            <select
+              value={orden}
+              onChange={(e) => setOrden(e.target.value)}
+              className="border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="nombre-asc">Nombre (A-Z)</option>
+              <option value="nombre-desc">Nombre (Z-A)</option>
+              <option value="referencia-asc">Referencia (A-Z)</option>
+              <option value="referencia-desc">Referencia (Z-A)</option>
+              <option value="stock-desc">Stock (mayor a menor)</option>
+              <option value="stock-asc">Stock (menor a mayor)</option>
+              <option value="precio-asc">Precio (menor a mayor)</option>
+              <option value="precio-desc">Precio (mayor a menor)</option>
+            </select>
+          </div>
+
+          {/* Contador de resultados */}
+          <div className="ml-auto text-sm text-neutral-500">
+            {filteredProductos.length} producto{filteredProductos.length !== 1 ? 's' : ''}
+          </div>
+        </div>
       </div>
 
       {/* Lista de productos */}
@@ -196,7 +289,7 @@ export default function ProductosAlmacenPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             </div>
           </div>
-        ) : productos.length === 0 ? (
+        ) : filteredProductos.length === 0 ? (
           <div className="px-6 py-12 text-center text-neutral-500">
             No hay productos. <Link href="/almacen/productos/nuevo" className="text-primary-600 hover:underline">Crear uno</Link>
           </div>
@@ -204,7 +297,7 @@ export default function ProductosAlmacenPage() {
           <>
             {/* Vista móvil - Cards */}
             <div className="lg:hidden divide-y divide-neutral-200">
-              {productos.map((producto) => (
+              {filteredProductos.map((producto) => (
                 <div key={producto.id} className="p-4">
                   <div className="flex items-start gap-3">
                     <div className="w-16 h-16 relative rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
@@ -279,7 +372,7 @@ export default function ProductosAlmacenPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
-                  {productos.map((producto) => (
+                  {filteredProductos.map((producto) => (
                     <tr key={producto.id} className="hover:bg-neutral-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">

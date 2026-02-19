@@ -50,51 +50,60 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
     )
   }
 
-  // Separar productos por tipo para organizar en filas separadas
-  const elongatedProducts = displayProducts.filter(p =>
-    p.formato.includes('22.5') && p.formato.includes('119')
-  )
-  const normalProducts = displayProducts.filter(p =>
-    !(p.formato.includes('22.5') && p.formato.includes('119'))
-  )
+  // Agrupar productos por formato para que no se mezclen diferentes tamaños
+  const productsByFormat = useMemo(() => {
+    const groups: Record<string, Producto[]> = {}
+    displayProducts.forEach(producto => {
+      const formato = producto.formato
+      if (!groups[formato]) {
+        groups[formato] = []
+      }
+      groups[formato].push(producto)
+    })
+    return groups
+  }, [displayProducts])
+
+  // Determinar si un formato es alargado (22.5x119 o similar)
+  const isElongatedFormat = (formato: string) => {
+    return formato.includes('22.5') && formato.includes('119')
+  }
 
   return (
-    <div className={`flex flex-col gap-4 ${className}`}>
-      {/* Filas de productos alargados (2 por fila) */}
-      {elongatedProducts.length > 0 && (
-        <div className="flex flex-col gap-4">
-          {chunkArray(elongatedProducts, 2).map((row, rowIndex) => (
-            <div key={`elongated-${rowIndex}`} className="grid grid-cols-2 gap-4 justify-items-center">
-              {row.map((producto) => (
-                <div
-                  key={producto.id}
-                  className="col-span-1 break-inside-avoid page-break-inside-avoid w-full max-w-lg"
-                >
-                  <ProductCard producto={producto} esAlargado={true} />
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
+    <div className={`flex flex-col gap-6 ${className}`}>
+      {Object.entries(productsByFormat).map(([formato, productos]) => (
+        <div key={formato} className="flex flex-col gap-3">
+          {/* Header del formato */}
+          <div className="flex items-center gap-2 px-1">
+            <h3 className="text-sm font-semibold text-neutral-900">{formato}</h3>
+            <div className="flex-1 h-px bg-neutral-200"></div>
+          </div>
 
-      {/* Filas de productos normales (4 por fila en desktop) */}
-      {normalProducts.length > 0 && (
-        <div className="flex flex-col gap-4">
-          {chunkArray(normalProducts, 4).map((row, rowIndex) => (
-            <div key={`normal-${rowIndex}`} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
-              {row.map((producto) => (
-                <div
-                  key={producto.id}
-                  className="col-span-1 break-inside-avoid page-break-inside-avoid w-full max-w-xs"
-                >
-                  <ProductCard producto={producto} esAlargado={false} />
-                </div>
-              ))}
-            </div>
-          ))}
+          {/* Productos de este formato */}
+          <div className="flex flex-col gap-4">
+            {chunkArray(productos, isElongatedFormat(formato) ? 2 : 4).map((row, rowIndex) => (
+              <div
+                key={`${formato}-${rowIndex}`}
+                className={`grid gap-4 justify-items-center ${
+                  isElongatedFormat(formato)
+                    ? 'grid-cols-2'
+                    : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+                }`}
+              >
+                {row.map((producto) => (
+                  <div
+                    key={producto.id}
+                    className={`col-span-1 break-inside-avoid page-break-inside-avoid w-full ${
+                      isElongatedFormat(formato) ? 'max-w-lg' : 'max-w-xs'
+                    }`}
+                  >
+                    <ProductCard producto={producto} esAlargado={isElongatedFormat(formato)} />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      ))}
     </div>
   )
 

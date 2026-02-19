@@ -70,7 +70,7 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
     return formato.includes('22.5') && formato.includes('119')
   }
 
-  // Calcular el aspect ratio correcto basado en el formato
+  // Calcular el aspect ratio correcto basado en el formato (ancho/alto)
   const getAspectRatio = (formato: string): string | undefined => {
     const match = formato.match(/(\d+\.?\d*)\s*x\s*(\d+\.?\d*)/i)
     if (!match) return undefined
@@ -79,8 +79,14 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
     const alto = parseFloat(match[2])
 
     if (ancho > 0 && alto > 0) {
-      const ratio = Math.round((alto / ancho) * 100) / 100
-      return `${Math.round(ratio * 100)}/100`
+      // Simplificar la fracción ancho/alto
+      const gcd = (a: number, b: number): number => {
+        return b === 0 ? a : gcd(b, a % b)
+      }
+      const divisor = gcd(ancho, alto)
+      const simpleAncho = Math.round(ancho / divisor)
+      const simpleAlto = Math.round(alto / divisor)
+      return `${simpleAncho}/${simpleAlto}`
     }
 
     return undefined

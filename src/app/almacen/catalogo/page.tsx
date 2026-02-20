@@ -30,14 +30,73 @@ interface ApiProducto {
 
 // Detectar si un producto es alargado
 function isElongatedProduct(product: ApiProducto): boolean {
-  return product.formato.includes('22.5') && product.formato.includes('119')
+  return (product.formato.includes('22.5') && product.formato.includes('119')) ||
+         (product.formato.includes('23.3') && (product.formato.includes('120') || product.formato.includes('119')))
+}
+
+// Función para ordenar productos: cuadrados primero, luego 60x120, luego alargados
+function sortProducts(products: ApiProducto[]): ApiProducto[] {
+  return [...products].sort((a, b) => {
+    // Detectar si es cuadrado
+    const isSquare = (format: string) => {
+      const match = format.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i)
+      if (!match) return false
+      const parts = format.toLowerCase().split('x')
+      if (parts.length === 2) {
+        const first = parseFloat(parts[0].replace(',', '.'))
+        const second = parseFloat(parts[1].replace(',', '.'))
+        return Math.abs(first - second) < 1
+      }
+      return false
+    }
+
+    // Detectar si es 60x120
+    const is60x120 = (format: string) => {
+      const parts = format.toLowerCase().split('x')
+      if (parts.length === 2) {
+        const first = parseFloat(parts[0].replace(',', '.'))
+        const second = parseFloat(parts[1].replace(',', '.'))
+        return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
+               (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
+      }
+      return false
+    }
+
+    const aIsSquare = isSquare(a.formato)
+    const bIsSquare = isSquare(b.formato)
+    const aIs60x120 = is60x120(a.formato)
+    const bIs60x120 = is60x120(b.formato)
+    const aIsElongated = isElongatedProduct(a)
+    const bIsElongated = isElongatedProduct(b)
+
+    // Prioridad: cuadrados (0), 60x120 (1), alargados (2), otros (3)
+    const getPriority = (isSq: boolean, is60: boolean, isElong: boolean) => {
+      if (isSq) return 0
+      if (is60) return 1
+      if (isElong) return 2
+      return 3
+    }
+
+    const aPriority = getPriority(aIsSquare, aIs60x120, aIsElongated)
+    const bPriority = getPriority(bIsSquare, bIs60x120, bIsElongated)
+
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority
+    }
+
+    // Si misma prioridad, ordenar por nombre
+    return a.nombre.localeCompare(b.nombre)
+  })
 }
 
 // Función para paginar productos agrupando por formato (no mezclar formatos diferentes)
 function paginateProducts(products: ApiProducto[]): ApiProducto[][] {
+  // Primero ordenar los productos
+  const sortedProducts = sortProducts(products)
+
   // Agrupar productos por formato
   const productsByFormat: Record<string, ApiProducto[]> = {}
-  products.forEach(product => {
+  sortedProducts.forEach(product => {
     const formato = product.formato
     if (!productsByFormat[formato]) {
       productsByFormat[formato] = []
@@ -47,9 +106,62 @@ function paginateProducts(products: ApiProducto[]): ApiProducto[][] {
 
   const pages: ApiProducto[][] = []
 
-  // Paginar cada formato por separado
-  Object.entries(productsByFormat).forEach(([formato, formatProducts]) => {
-    const isElongated = formato.includes('22.5') && formato.includes('119')
+  // Ordenar los formatos por el tipo (cuadrados, 60x120, alargados, otros)
+  const sortedFormats = Object.keys(productsByFormat).sort((a, b) => {
+    const isSquare = (format: string) => {
+      const match = format.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i)
+      if (!match) return false
+      const parts = format.toLowerCase().split('x')
+      if (parts.length === 2) {
+        const first = parseFloat(parts[0].replace(',', '.'))
+        const second = parseFloat(parts[1].replace(',', '.'))
+        return Math.abs(first - second) < 1
+      }
+      return false
+    }
+
+    const is60x120 = (format: string) => {
+      const parts = format.toLowerCase().split('x')
+      if (parts.length === 2) {
+        const first = parseFloat(parts[0].replace(',', '.'))
+        const second = parseFloat(parts[1].replace(',', '.'))
+        return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
+               (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
+      }
+      return false
+    }
+
+    const aIsSquare = isSquare(a)
+    const bIsSquare = isSquare(b)
+    const aIs60x120 = is60x120(a)
+    const bIs60x120 = is60x120(b)
+    const aIsElongated = (a.includes('22.5') && a.includes('119')) ||
+                         (a.includes('23.3') && (a.includes('120') || a.includes('119')))
+    const bIsElongated = (b.includes('22.5') && b.includes('119')) ||
+                         (b.includes('23.3') && (b.includes('120') || b.includes('119')))
+
+    const getPriority = (isSq: boolean, is60: boolean, isElong: boolean) => {
+      if (isSq) return 0
+      if (is60) return 1
+      if (isElong) return 2
+      return 3
+    }
+
+    const aPriority = getPriority(aIsSquare, aIs60x120, aIsElongated)
+    const bPriority = getPriority(bIsSquare, bIs60x120, bIsElongated)
+
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority
+    }
+
+    return a.localeCompare(b)
+  })
+
+  // Paginar cada formato por separado en el orden correcto
+  sortedFormats.forEach((formato) => {
+    const formatProducts = productsByFormat[formato]
+    const isElongated = (formato.includes('22.5') && formato.includes('119')) ||
+                       (formato.includes('23.3') && (formato.includes('120') || formato.includes('119')))
     const productsPerPage = isElongated ? 2 : 4
 
     for (let i = 0; i < formatProducts.length; i += productsPerPage) {

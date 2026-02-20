@@ -75,7 +75,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
   // Para productos cuadrados, calcular dimensiones explícitas en píxeles
   // El ancho del contenedor es cardWidth menos padding (approx 340px para normal, 710px para elongated)
   const imageContainerWidth = isElongated ? 710 : 340
-  const squareSize = isSquare ? Math.round(imageContainerWidth * 0.9) : undefined // 90% para dejar margen
+  const squareSize = isSquare ? Math.round(imageContainerWidth * 0.8) : undefined // 80% para dejar más espacio para la info
   const containerPadding = isElongated ? 20 : 14
 
   return (
@@ -105,7 +105,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
       )}
 
       {/* Product info - compact, no flex grow */}
-      <div style={{ padding: isElongated ? '16px 20px 16px 20px' : '16px 14px 18px 14px', display: 'flex', flexDirection: 'column' as const }}>
+      <div style={{ padding: isElongated ? '16px 20px 16px 20px' : isSquare ? '12px 14px 12px 14px' : '16px 14px 18px 14px', display: 'flex', flexDirection: 'column' as const }}>
         {/* Name + Reference + QR */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
           <div style={{ flex: 1, minWidth: 0, paddingRight: '8px' }}>

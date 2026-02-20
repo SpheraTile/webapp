@@ -75,7 +75,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
   // Para productos cuadrados, calcular dimensiones explícitas en píxeles
   // El ancho del contenedor es cardWidth menos padding (approx 340px para normal, 710px para elongated)
   const imageContainerWidth = isElongated ? 710 : 340
-  const squareSize = isSquare ? Math.round(imageContainerWidth * 0.8) : undefined // 80% para dejar más espacio para la info
+  const squareSize = isSquare ? Math.round(imageContainerWidth * 0.7) : undefined // 70% para dejar espacio para el precio
   const containerPadding = isElongated ? 20 : 14
 
   return (

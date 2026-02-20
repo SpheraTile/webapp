@@ -77,22 +77,19 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
       {/* Product image - fills remaining space */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
         {isSquare ? (
-          // Para productos cuadrados: usar aspect-ratio para mantener proporción
-          <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <img
-              src={product.imagen}
-              alt={product.nombre}
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                maxWidth: '100%',
-                maxHeight: '100%'
-              }}
-              crossOrigin="anonymous"
-            />
-          </div>
+          // Para productos cuadrados: width controla, height auto para mantener proporción
+          <img
+            src={product.imagen}
+            alt={product.nombre}
+            style={{
+              width: '100%',
+              height: 'auto',
+              objectFit: 'contain',
+              maxWidth: '100%',
+              maxHeight: '100%'
+            }}
+            crossOrigin="anonymous"
+          />
         ) : (
           // Para productos no cuadrados: fill completamente
           <img

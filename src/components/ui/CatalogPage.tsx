@@ -165,9 +165,11 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
 }
 
 export function CatalogPage({ products, pageNumber, totalPages }: CatalogPageProps) {
-  // Detectar productos alargados (22.5x119.5 o similar)
+  // Detectar productos alargados (22.5x119.5, 23.3x120 o similar)
   const isElongated = (product: CatalogProduct) =>
-    product.formato.includes('22.5') && product.formato.includes('119')
+    (product.formato.includes('22.5') && product.formato.includes('119')) ||
+    (product.formato.includes('23.3') && product.formato.includes('120')) ||
+    (product.formato.includes('23.3') && product.formato.includes('119'))
 
   // Determinar el tipo de página según el primer producto
   const isElongatedPage = products.length > 0 && isElongated(products[0])

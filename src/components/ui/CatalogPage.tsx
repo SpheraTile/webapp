@@ -72,16 +72,21 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
     return false
   })()
 
+  // Para productos cuadrados, calcular dimensiones explícitas en píxeles
+  // El ancho del contenedor es cardWidth menos padding (approx 340px para normal, 710px para elongated)
+  const imageContainerWidth = isElongated ? 710 : 340
+  const squareSize = isSquare ? imageContainerWidth : undefined
+
   return (
     <div style={{ width: cardWidth, height: cardHeight, border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
       {/* Product image - fills remaining space */}
       {isSquare ? (
-        // Productos cuadrados: contenedor separado con aspecto 1:1
-        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', aspectRatio: '1 / 1' }}>
+        // Productos cuadrados: dimensiones explícitas en píxeles para html2canvas
+        <div style={{ width: squareSize + 'px', height: squareSize + 'px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', margin: '0 auto' }}>
           <img
             src={product.imagen}
             alt={product.nombre}
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            style={{ width: squareSize + 'px', height: squareSize + 'px', objectFit: 'contain' }}
             crossOrigin="anonymous"
           />
         </div>

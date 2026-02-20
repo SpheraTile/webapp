@@ -13,6 +13,7 @@ import {
 import { Bot } from 'lucide-react'
 import { useCesta } from '@/context/CestaContext'
 import { useChat } from '@/context/ChatContext'
+import { AddToHomeScreen } from '@/components/ui/AddToHomeScreen'
 
 export function BottomNavigation() {
   const pathname = usePathname()
@@ -73,13 +74,16 @@ export function BottomNavigation() {
             <span className="text-xs mt-1">{t('chat')}</span>
           </button>
         ) : (
-          <Link
-            href="/cuenta"
-            className={`nav-item flex-1 py-2 ${pathname.startsWith('/cuenta') ? 'active' : ''}`}
-          >
-            <IconUser size={24} />
-            <span className="text-xs mt-1">{t('account')}</span>
-          </Link>
+          <>
+            <Link
+              href="/cuenta"
+              className={`nav-item flex-1 py-2 ${pathname.startsWith('/cuenta') ? 'active' : ''}`}
+            >
+              <IconUser size={24} />
+              <span className="text-xs mt-1">{t('account')}</span>
+            </Link>
+            <AddToHomeScreen />
+          </>
         )}
       </div>
     </nav>

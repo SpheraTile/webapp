@@ -49,6 +49,60 @@ function abbreviateUso(uso: string): string {
   return uso
 }
 
+// Funciones auxiliares para clasificar productos
+function isSquareProduct(format: string): boolean {
+  const match = format.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i)
+  if (!match) return false
+
+  const parts = format.toLowerCase().split('x')
+  if (parts.length === 2) {
+    const first = parseFloat(parts[0].replace(',', '.'))
+    const second = parseFloat(parts[1].replace(',', '.'))
+    return Math.abs(first - second) < 1 // Permitir pequeña diferencia
+  }
+  return false
+}
+
+function isElongatedProduct(format: string): boolean {
+  return (format.includes('22.5') && format.includes('119')) ||
+         (format.includes('23.3') && format.includes('120')) ||
+         (format.includes('23.3') && format.includes('119'))
+}
+
+function is60x120Product(format: string): boolean {
+  return format.includes('60') && format.includes('120')
+}
+
+// Ordenar productos: cuadrados primero, luego 60x120, luego alargados, luego el resto
+function sortProducts(products: CatalogProduct[]): CatalogProduct[] {
+  return [...products].sort((a, b) => {
+    const aIsSquare = isSquareProduct(a.formato)
+    const bIsSquare = isSquareProduct(b.formato)
+    const aIs60x120 = is60x120Product(a.formato)
+    const bIs60x120 = is60x120Product(b.formato)
+    const aIsElongated = isElongatedProduct(a.formato)
+    const bIsElongated = isElongatedProduct(b.formato)
+
+    // Prioridad: cuadrados (0), 60x120 (1), alargados (2), otros (3)
+    const getPriority = (isSquare: boolean, is60x120: boolean, isElongated: boolean) => {
+      if (isSquare) return 0
+      if (is60x120) return 1
+      if (isElongated) return 2
+      return 3
+    }
+
+    const aPriority = getPriority(aIsSquare, aIs60x120, aIsElongated)
+    const bPriority = getPriority(bIsSquare, bIs60x120, bIsElongated)
+
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority
+    }
+
+    // Si misma prioridad, ordenar por nombre
+    return a.nombre.localeCompare(b.nombre)
+  })
+}
+
 function ProductCard({ product, isElongated }: { product: CatalogProduct, isElongated?: boolean }) {
   const baseUrl = typeof window !== 'undefined'
     ? window.location.origin
@@ -169,19 +223,22 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
 }
 
 export function CatalogPage({ products, pageNumber, totalPages }: CatalogPageProps) {
+  // Ordenar productos: cuadrados primero, luego 60x120, luego alargados
+  const sortedProducts = sortProducts(products)
+
   // Detectar productos alargados (22.5x119.5, 23.3x120 o similar)
   const isElongated = (product: CatalogProduct) =>
     (product.formato.includes('22.5') && product.formato.includes('119')) ||
     (product.formato.includes('23.3') && product.formato.includes('120')) ||
     (product.formato.includes('23.3') && product.formato.includes('119'))
 
-  // Determinar el tipo de página según el primer producto
-  const isElongatedPage = products.length > 0 && isElongated(products[0])
+  // Determinar el tipo de página según el primer producto ordenado
+  const isElongatedPage = sortedProducts.length > 0 && isElongated(sortedProducts[0])
 
   // Layout para página de productos alargados (2 productos, uno encima del otro)
   const elongatedLayout = (
     <>
-      {products.map((product) => (
+      {sortedProducts.map((product) => (
         <ProductCard key={product.id} product={product} isElongated={true} />
       ))}
     </>
@@ -192,13 +249,13 @@ export function CatalogPage({ products, pageNumber, totalPages }: CatalogPagePro
     <>
       {/* Fila superior */}
       <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
-        {products.slice(0, 2).map((product) => (
+        {sortedProducts.slice(0, 2).map((product) => (
           <ProductCard key={product.id} product={product} isElongated={false} />
         ))}
       </div>
       {/* Fila inferior */}
       <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
-        {products.slice(2, 4).map((product) => (
+        {sortedProducts.slice(2, 4).map((product) => (
           <ProductCard key={product.id} product={product} isElongated={false} />
         ))}
       </div>

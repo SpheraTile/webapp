@@ -76,18 +76,32 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
     <div style={{ width: cardWidth, height: cardHeight, border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
       {/* Product image - fills remaining space */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
-        <img
-          src={product.imagen}
-          alt={product.nombre}
-          style={{
-            width: isSquare ? '100%' : '100%',
-            height: isSquare ? 'auto' : '100%',
-            objectFit: isSquare ? 'contain' : 'cover',
-            maxWidth: '100%',
-            maxHeight: '100%'
-          }}
-          crossOrigin="anonymous"
-        />
+        {isSquare ? (
+          // Para productos cuadrados: usar aspect-ratio para mantener proporción
+          <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img
+              src={product.imagen}
+              alt={product.nombre}
+              style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }}
+              crossOrigin="anonymous"
+            />
+          </div>
+        ) : (
+          // Para productos no cuadrados: fill completamente
+          <img
+            src={product.imagen}
+            alt={product.nombre}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            crossOrigin="anonymous"
+          />
+        )}
       </div>
 
       {/* Product info - compact, no flex grow */}

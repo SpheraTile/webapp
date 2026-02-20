@@ -75,14 +75,16 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
   // Para productos cuadrados, calcular dimensiones explícitas en píxeles
   // El ancho del contenedor es cardWidth menos padding (approx 340px para normal, 710px para elongated)
   const imageContainerWidth = isElongated ? 710 : 340
-  const squareSize = isSquare ? imageContainerWidth : undefined
+  const squareSize = isSquare ? Math.round(imageContainerWidth * 0.9) : undefined // 90% para dejar margen
+  const containerPadding = isElongated ? 20 : 14
 
   return (
     <div style={{ width: cardWidth, height: cardHeight, border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
       {/* Product image - fills remaining space */}
       {isSquare ? (
         // Productos cuadrados: dimensiones explícitas en píxeles para html2canvas
-        <div style={{ width: squareSize + 'px', height: squareSize + 'px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', margin: '0 auto' }}>
+        // Imagen más pequeña (90%) con padding para que no se recorte
+        <div style={{ paddingTop: containerPadding + 'px', paddingBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
           <img
             src={product.imagen}
             alt={product.nombre}

@@ -6,7 +6,6 @@ import { CestaProvider } from '@/context/CestaContext'
 import { ChatProvider } from '@/context/ChatContext'
 import { SessionProvider } from '@/components/providers/SessionProvider'
 import { BottomNavigation } from '@/components/layout/BottomNavigation'
-import { AddToHomeScreen } from '@/components/ui/AddToHomeScreen'
 import Chatbot from '@/components/chat/Chatbot'
 import './globals.css'
 
@@ -53,7 +52,6 @@ export default async function RootLayout({
                 <main className="min-h-screen pb-20 lg:pb-0 lg:pt-0">{children}</main>
                 <BottomNavigation />
                 <Chatbot />
-                <AddToHomeScreen />
               </ChatProvider>
             </CestaProvider>
           </NextIntlClientProvider>

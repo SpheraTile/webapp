@@ -61,14 +61,31 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
   const cardWidth = isElongated ? '750px' : '368px'
   const cardHeight = isElongated ? '380px' : '505px'
 
+  // Detectar si el producto es cuadrado (formatos como 60x60, 45x45, etc.)
+  const isSquare = product.formato.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i) && (() => {
+    const parts = product.formato.toLowerCase().split('x')
+    if (parts.length === 2) {
+      const first = parseFloat(parts[0].replace(',', '.'))
+      const second = parseFloat(parts[1].replace(',', '.'))
+      return Math.abs(first - second) < 1 // Permitir pequeña diferencia
+    }
+    return false
+  })()
+
   return (
     <div style={{ width: cardWidth, height: cardHeight, border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
       {/* Product image - fills remaining space */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
         <img
           src={product.imagen}
           alt={product.nombre}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{
+            width: isSquare ? '100%' : '100%',
+            height: isSquare ? 'auto' : '100%',
+            objectFit: isSquare ? 'contain' : 'cover',
+            maxWidth: '100%',
+            maxHeight: '100%'
+          }}
           crossOrigin="anonymous"
         />
       </div>

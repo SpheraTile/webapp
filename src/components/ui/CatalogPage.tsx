@@ -59,7 +59,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
 
   // Productos alargados: doble ancho, altura ajustada a ~75%
   const cardWidth = isElongated ? '750px' : '368px'
-  const cardHeight = isElongated ? '380px' : '505px'
+  const cardHeight = isElongated ? '380px' : '525px' // Aumentado de 505px a 525px para productos cuadrados
 
   // Detectar si el producto es cuadrado (formatos como 60x60, 45x45, etc.)
   const isSquare = product.formato.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i) && (() => {

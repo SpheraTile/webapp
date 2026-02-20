@@ -108,13 +108,13 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
       <div style={{ padding: isElongated ? '16px 20px 16px 20px' : '16px 14px 18px 14px', display: 'flex', flexDirection: 'column' as const }}>
         {/* Name + Reference + QR */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, paddingRight: '8px' }}>
             <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.4', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
             <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
           </div>
           <QRCodeSVG
             value={`${baseUrl}/productos/${product.slug}`}
-            size={40}
+            size={50}
             level="L"
           />
         </div>

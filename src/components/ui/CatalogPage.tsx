@@ -106,9 +106,18 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
 
       {/* Product info - compact, no flex grow */}
       <div style={{ padding: isElongated ? '16px 20px 16px 20px' : '16px 14px 18px 14px', display: 'flex', flexDirection: 'column' as const }}>
-        {/* Name + Reference */}
-        <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.4', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
-        <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
+        {/* Name + Reference + QR */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.4', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
+            <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
+          </div>
+          <QRCodeSVG
+            value={`${baseUrl}/productos/${product.slug}`}
+            size={40}
+            level="L"
+          />
+        </div>
 
         {/* Stock - same size as name */}
         <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 8px 0', lineHeight: '1.2' }}>
@@ -146,19 +155,14 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
           {fmt(product.m2_caja)} m²/caja · {product.piezas_caja} pzs/caja · {product.cajas_palet} cajas/palet · {fmt(product.peso_caja_kg, 1)} kg/caja
         </p>
 
-        {/* Price (hide if 0) + QR */}
-        <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          {product.precio_m2 > 0 && (
+        {/* Price (hide if 0) */}
+        {product.precio_m2 > 0 && (
+          <div style={{ marginTop: '6px' }}>
             <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#dc2626', margin: 0, lineHeight: '1.2' }}>
               €{fmt(product.precio_m2)} <span style={{ fontSize: '8px', fontWeight: 'normal', color: '#737373' }}>/m²</span>
             </p>
-          )}
-          <QRCodeSVG
-            value={`${baseUrl}/productos/${product.slug}`}
-            size={52}
-            level="L"
-          />
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )

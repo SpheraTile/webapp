@@ -70,7 +70,16 @@ function isElongatedProduct(format: string): boolean {
 }
 
 function is60x120Product(format: string): boolean {
-  return format.includes('60') && format.includes('120')
+  // Más específico: formato que contiene 60x120 pero no es cuadrado (60x60)
+  const parts = format.toLowerCase().split('x')
+  if (parts.length === 2) {
+    const first = parseFloat(parts[0].replace(',', '.'))
+    const second = parseFloat(parts[1].replace(',', '.'))
+    // Verificar que es 60x120 (con pequeñas variaciones decimales)
+    return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
+           (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
+  }
+  return false
 }
 
 // Ordenar productos: cuadrados primero, luego 60x120, luego alargados, luego el resto

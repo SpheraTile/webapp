@@ -75,31 +75,27 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
   return (
     <div style={{ width: cardWidth, height: cardHeight, border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
       {/* Product image - fills remaining space */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
-        {isSquare ? (
-          // Para productos cuadrados: width controla, height auto para mantener proporción
+      {isSquare ? (
+        // Productos cuadrados: contenedor separado con aspecto 1:1
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', aspectRatio: '1 / 1' }}>
           <img
             src={product.imagen}
             alt={product.nombre}
-            style={{
-              width: '100%',
-              height: 'auto',
-              objectFit: 'contain',
-              maxWidth: '100%',
-              maxHeight: '100%'
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             crossOrigin="anonymous"
           />
-        ) : (
-          // Para productos no cuadrados: fill completamente
+        </div>
+      ) : (
+        // Productos no cuadrados
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
           <img
             src={product.imagen}
             alt={product.nombre}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             crossOrigin="anonymous"
           />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Product info - compact, no flex grow */}
       <div style={{ padding: isElongated ? '16px 20px 16px 20px' : '16px 14px 18px 14px', display: 'flex', flexDirection: 'column' as const }}>

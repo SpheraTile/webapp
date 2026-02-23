@@ -10,9 +10,9 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ productos, className = '', columnas }: ProductGridProps) {
-  // Filtrar productos con stock y precio > 0
+  // Filtrar productos con stock > 0 (no filtrar por precio)
   const displayProducts = useMemo(() => {
-    return productos.filter(p => p.stock_m2 > 0 && p.precio_m2 > 0)
+    return productos.filter(p => p.stock_m2 > 0)
   }, [productos])
 
   if (displayProducts.length === 0) {

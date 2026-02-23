@@ -5,6 +5,11 @@ interface PriceTagProps {
 }
 
 export function PriceTag({ precio_m2, className = '', size = 'md' }: PriceTagProps) {
+  // No mostrar nada si el precio es 0
+  if (precio_m2 === 0) {
+    return null
+  }
+
   const precioFormateado = precio_m2.toLocaleString('es-ES', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

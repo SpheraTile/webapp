@@ -129,8 +129,10 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
             {/* Badge de stock */}
             <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
 
-            {/* Precio */}
-            <PriceTag precio_m2={producto.precio_m2} size="lg" />
+            {/* Precio - solo mostrar si existe */}
+            {producto.precio_m2 > 0 && (
+              <PriceTag precio_m2={producto.precio_m2} size="lg" />
+            )}
           </div>
         </div>
       </Link>
@@ -187,8 +189,10 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
         {/* Badge de stock */}
         <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
 
-        {/* Precio */}
-        <PriceTag precio_m2={producto.precio_m2} size={formatType === 'elongated' ? 'sm' : 'md'} />
+        {/* Precio - solo mostrar si existe */}
+        {producto.precio_m2 > 0 && (
+          <PriceTag precio_m2={producto.precio_m2} size={formatType === 'elongated' ? 'sm' : 'md'} />
+        )}
       </div>
     </Link>
   )

@@ -151,7 +151,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
             : formatType === '60x120'
               ? 'aspect-[2/1] md:aspect-[2/1]' // 2 columnas de ancho, 1 de alto
               : formatType === 'square'
-                ? 'aspect-square md:aspect-[3/4]' // 1 columna, altura estándar
+                ? 'aspect-square' // 1 columna, verdadero cuadrado
                 : 'aspect-product'
           }`}
       >

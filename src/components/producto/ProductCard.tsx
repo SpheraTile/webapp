@@ -7,11 +7,13 @@ import { StockBadge } from '@/components/ui/StockBadge'
 import { PriceTag } from '@/components/ui/PriceTag'
 import { ProductImage } from '@/components/ui/ProductImage'
 
+import { GridFormatType } from '@/lib/gridOptimizer'
+
 interface ProductCardProps {
   producto: Producto
   className?: string
   variant?: 'grid' | 'list'
-  esAlargado?: boolean
+  formatType?: GridFormatType | 'other'
 }
 
 // Translation keys for product attributes
@@ -64,7 +66,7 @@ function EstadoBadge({ estado, t }: { estado: string; t: (key: string) => string
   )
 }
 
-export function ProductCard({ producto, className = '', variant = 'grid', esAlargado = false }: ProductCardProps) {
+export function ProductCard({ producto, className = '', variant = 'grid', formatType = 'other' }: ProductCardProps) {
   const t = useTranslations('filters')
 
   // Get translated labels
@@ -138,15 +140,18 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
   return (
     <Link
       href={`/productos/${producto.slug}`}
-      className={`product-card group block bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow ${esAlargado ? 'w-full' : ''} ${className}`}
+      className={`product-card group block bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow ${formatType === 'elongated' || formatType === '60x120' ? 'w-full' : ''} ${className}`}
     >
       {/* Imagen del producto */}
       <div
-        className={`relative bg-neutral-100 overflow-hidden ${
-          esAlargado
-            ? 'aspect-[8/3]'
-            : 'aspect-product'
-        }`}
+        className={`relative bg-neutral-100 overflow-hidden ${formatType === 'elongated'
+            ? 'aspect-[3/1] md:aspect-[4/1]' // "Media fila de alto" (ancho muy grande respecto al alto)
+            : formatType === '60x120'
+              ? 'aspect-[2/1] md:aspect-[2/1]' // 2 columnas de ancho, 1 de alto
+              : formatType === 'square'
+                ? 'aspect-square md:aspect-[3/4]' // 1 columna, altura estándar
+                : 'aspect-product'
+          }`}
       >
         <EstadoBadge estado={producto.estado_producto || 'normal'} t={t} />
         <ProductImage
@@ -154,19 +159,23 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
           alt={producto.nombre}
           fill
           className="object-cover rounded-none group-hover:scale-105 transition-transform duration-300"
-          sizes={esAlargado ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" : "(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"}
+          sizes={
+            formatType === 'elongated' || formatType === '60x120'
+              ? "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 50vw" // Ocupa 2 columnas en grid-cols-4 en desktop => 50vw
+              : "(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 25vw"
+          }
         />
       </div>
 
       {/* Información del producto */}
-      <div className={`p-3 ${esAlargado ? 'space-y-1' : 'space-y-2'}`}>
+      <div className={`p-3 ${formatType === 'elongated' || formatType === '60x120' ? 'space-y-1' : 'space-y-2'}`}>
         {/* Nombre */}
-        <h3 className={`font-semibold text-neutral-900 uppercase tracking-wide line-clamp-2 ${esAlargado ? 'text-xs' : 'text-sm'}`}>
+        <h3 className={`font-semibold text-neutral-900 uppercase tracking-wide line-clamp-2 ${formatType === 'elongated' ? 'text-xs' : 'text-sm'}`}>
           {producto.nombre}
         </h3>
 
         {/* Formato y tipo */}
-        <div className={`flex items-center gap-2 text-neutral-500 ${esAlargado ? 'text-xs' : 'text-sm'}`}>
+        <div className={`flex items-center gap-2 text-neutral-500 ${formatType === 'elongated' ? 'text-xs' : 'text-sm'}`}>
           <span>{producto.formato}</span>
           {tipoPiezaLabel && tipoPiezaKey !== 'base' && (
             <span className="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded">
@@ -179,7 +188,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', esAlar
         <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
 
         {/* Precio */}
-        <PriceTag precio_m2={producto.precio_m2} size={esAlargado ? 'sm' : 'md'} />
+        <PriceTag precio_m2={producto.precio_m2} size={formatType === 'elongated' ? 'sm' : 'md'} />
       </div>
     </Link>
   )

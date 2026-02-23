@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Producto } from '@/types'
 import { ProductCard } from './ProductCard'
-import { optimizeGridLayout, isElongatedFormat } from '@/lib/gridOptimizer'
+import { sortGridProducts, getGridFormatType, GridFormatType } from '@/lib/gridOptimizer'
 
 interface ProductGridProps {
   productos: Producto[]
@@ -10,9 +10,9 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ productos, className = '', columnas }: ProductGridProps) {
-  // Filtrar productos con stock
+  // Filtrar productos con stock y precio > 0
   const displayProducts = useMemo(() => {
-    return productos.filter(p => p.stock_m2 > 0)
+    return productos.filter(p => p.stock_m2 > 0 && p.precio_m2 > 0)
   }, [productos])
 
   if (displayProducts.length === 0) {
@@ -60,55 +60,70 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
       }
       groups[formato].push(producto)
     })
-    return groups
+
+    // Convertir de record a array para poder ordenarlo
+    const groupsArray = Object.entries(groups).map(([formato, list]) => ({
+      formato,
+      productos: sortGridProducts(list)
+    }))
+
+    // Ordenar los GRUPOS completos basándonos en el primer producto de cada grupo
+    // de esta manera aseguramos que los grupos 60x60 aparezcan primero, luego 60.5, etc.
+    return groupsArray.sort((a, b) => {
+      // Usamos el listado original ordenado por sortGridProducts para saber
+      // la posición global de cada formato
+      const globalSorted = sortGridProducts(displayProducts)
+      const indexA = globalSorted.findIndex(p => p.formato === a.formato)
+      const indexB = globalSorted.findIndex(p => p.formato === b.formato)
+      return indexA - indexB
+    })
   }, [displayProducts])
 
   return (
     <div className={`flex flex-col gap-8 py-4 ${className}`}>
-      {Object.entries(productsByFormat).map(([formato, productos]) => (
-        <div key={formato} className="flex flex-col gap-3">
-          {/* Header del formato con línea gris debajo */}
-          <div className="flex flex-col gap-2 px-1">
-            <h3 className="text-sm font-semibold text-neutral-900">{formato}</h3>
-            <div className="h-px bg-neutral-300"></div>
-          </div>
+      {productsByFormat.map(({ formato, productos }) => {
+        const formatType = getGridFormatType(formato)
 
-          {/* Productos de este formato */}
-          <div className="flex flex-col gap-4">
-            {chunkArray(productos, isElongatedFormat(formato) ? 2 : 4).map((row, rowIndex) => (
-              <div
-                key={`${formato}-${rowIndex}`}
-                className={`grid gap-4 justify-items-center ${isElongatedFormat(formato)
-                  ? 'grid-cols-2'
-                  : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
-                  }`}
-              >
-                {row.map((producto) => (
+        // Determinar las clases del contenedor padre del grid basándonos en el tipo principal.
+        // Base es grid-cols-2 en móvil, y md:grid-cols-4 en desktop.
+        // Esto permite que items 'col-span-2' ocupen todo el ancho en móvil y la mitad en desktop.
+        // Los items 'col-span-1' ocuparán mitad en móvil y un cuarto en desktop.
+        const gridClass = "grid grid-cols-2 md:grid-cols-4 gap-4 justify-items-center"
+
+        return (
+          <div key={formato} className="flex flex-col gap-3">
+            {/* Header del formato con línea gris debajo */}
+            <div className="flex flex-col gap-2 px-1">
+              <h3 className="text-sm font-semibold text-neutral-900">{formato}</h3>
+              <div className="h-px bg-neutral-300"></div>
+            </div>
+
+            {/* Productos de este formato */}
+            <div className={gridClass}>
+              {productos.map((producto) => {
+                // Asignar el col-span por tipo de formato.
+                // Requerimiento: alargados y 60x120 ocupan 2 columnas siempre.
+                // Resto ocupan 1 columna.
+                const colSpanClass = (formatType === 'elongated' || formatType === '60x120')
+                  ? 'col-span-2'
+                  : 'col-span-1'
+
+                return (
                   <div
                     key={producto.id}
-                    className={`col-span-1 break-inside-avoid page-break-inside-avoid w-full ${isElongatedFormat(producto.formato) ? 'max-w-lg' : 'max-w-xs'
-                      }`}
+                    className={`${colSpanClass} break-inside-avoid page-break-inside-avoid w-full`}
                   >
                     <ProductCard
                       producto={producto}
-                      esAlargado={isElongatedFormat(producto.formato)}
+                      formatType={formatType}
                     />
                   </div>
-                ))}
-              </div>
-            ))}
+                )
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
-
-  // Función auxiliar para dividir array en chunks
-  function chunkArray<T>(array: T[], size: number): T[][] {
-    const chunks: T[][] = []
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size))
-    }
-    return chunks
-  }
 }

@@ -33,6 +33,7 @@ interface CatalogPageProps {
   products: CatalogProduct[]
   pageNumber: number
   totalPages: number
+  showQR?: boolean
 }
 
 function fmt(n: number, decimals = 2): string {
@@ -65,8 +66,8 @@ function isSquareProduct(format: string): boolean {
 
 function isElongatedProduct(format: string): boolean {
   return (format.includes('22.5') && format.includes('119')) ||
-         (format.includes('23.3') && format.includes('120')) ||
-         (format.includes('23.3') && format.includes('119'))
+    (format.includes('23.3') && format.includes('120')) ||
+    (format.includes('23.3') && format.includes('119'))
 }
 
 function is60x120Product(format: string): boolean {
@@ -77,7 +78,7 @@ function is60x120Product(format: string): boolean {
     const second = parseFloat(parts[1].replace(',', '.'))
     // Verificar que es 60x120 (con pequeñas variaciones decimales)
     return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
-           (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
+      (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
   }
   return false
 }
@@ -112,7 +113,7 @@ function sortProducts(products: CatalogProduct[]): CatalogProduct[] {
   })
 }
 
-function ProductCard({ product, isElongated }: { product: CatalogProduct, isElongated?: boolean }) {
+function ProductCard({ product, isElongated, showQR = true }: { product: CatalogProduct, isElongated?: boolean, showQR?: boolean }) {
   const baseUrl = typeof window !== 'undefined'
     ? window.location.origin
     : process.env.NEXT_PUBLIC_BASE_URL || 'https://spheratile.com'
@@ -175,15 +176,17 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
             <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.4', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
             <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
           </div>
-          <QRCodeSVG
-            value={`${baseUrl}/productos/${product.slug}`}
-            size={50}
-            level="L"
-          />
+          {showQR && (
+            <QRCodeSVG
+              value={`${baseUrl}/productos/${product.slug}`}
+              size={50}
+              level="L"
+            />
+          )}
         </div>
 
         {/* Stock - same size as name */}
-        <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 8px 0', lineHeight: '1.2' }}>
+        <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#dc2626', margin: '0 0 8px 0', lineHeight: '1.2' }}>
           Stock: {fmt(product.stock_m2)} m²
         </p>
 
@@ -231,7 +234,7 @@ function ProductCard({ product, isElongated }: { product: CatalogProduct, isElon
   )
 }
 
-export function CatalogPage({ products, pageNumber, totalPages }: CatalogPageProps) {
+export function CatalogPage({ products, pageNumber, totalPages, showQR = true }: CatalogPageProps) {
   // Ordenar productos: cuadrados primero, luego 60x120, luego alargados
   const sortedProducts = sortProducts(products)
 
@@ -248,7 +251,7 @@ export function CatalogPage({ products, pageNumber, totalPages }: CatalogPagePro
   const elongatedLayout = (
     <>
       {sortedProducts.map((product) => (
-        <ProductCard key={product.id} product={product} isElongated={true} />
+        <ProductCard key={product.id} product={product} isElongated={true} showQR={showQR} />
       ))}
     </>
   )
@@ -259,13 +262,13 @@ export function CatalogPage({ products, pageNumber, totalPages }: CatalogPagePro
       {/* Fila superior */}
       <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
         {sortedProducts.slice(0, 2).map((product) => (
-          <ProductCard key={product.id} product={product} isElongated={false} />
+          <ProductCard key={product.id} product={product} isElongated={false} showQR={showQR} />
         ))}
       </div>
       {/* Fila inferior */}
       <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
         {sortedProducts.slice(2, 4).map((product) => (
-          <ProductCard key={product.id} product={product} isElongated={false} />
+          <ProductCard key={product.id} product={product} isElongated={false} showQR={showQR} />
         ))}
       </div>
     </>

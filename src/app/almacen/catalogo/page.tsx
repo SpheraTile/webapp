@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { CatalogPage, type CatalogProduct } from '@/components/ui/CatalogPage'
 import { CatalogCover } from '@/components/ui/CatalogCover'
 import { CatalogBackCover } from '@/components/ui/CatalogBackCover'
@@ -31,7 +31,7 @@ interface ApiProducto {
 // Detectar si un producto es alargado
 function isElongatedProduct(product: ApiProducto): boolean {
   return (product.formato.includes('22.5') && product.formato.includes('119')) ||
-         (product.formato.includes('23.3') && (product.formato.includes('120') || product.formato.includes('119')))
+    (product.formato.includes('23.3') && (product.formato.includes('120') || product.formato.includes('119')))
 }
 
 // Función para ordenar productos: cuadrados primero, luego 60x120, luego alargados
@@ -57,7 +57,7 @@ function sortProducts(products: ApiProducto[]): ApiProducto[] {
         const first = parseFloat(parts[0].replace(',', '.'))
         const second = parseFloat(parts[1].replace(',', '.'))
         return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
-               (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
+          (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
       }
       return false
     }
@@ -126,7 +126,7 @@ function paginateProducts(products: ApiProducto[]): ApiProducto[][] {
         const first = parseFloat(parts[0].replace(',', '.'))
         const second = parseFloat(parts[1].replace(',', '.'))
         return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
-               (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
+          (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
       }
       return false
     }
@@ -136,9 +136,9 @@ function paginateProducts(products: ApiProducto[]): ApiProducto[][] {
     const aIs60x120 = is60x120(a)
     const bIs60x120 = is60x120(b)
     const aIsElongated = (a.includes('22.5') && a.includes('119')) ||
-                         (a.includes('23.3') && (a.includes('120') || a.includes('119')))
+      (a.includes('23.3') && (a.includes('120') || a.includes('119')))
     const bIsElongated = (b.includes('22.5') && b.includes('119')) ||
-                         (b.includes('23.3') && (b.includes('120') || b.includes('119')))
+      (b.includes('23.3') && (b.includes('120') || b.includes('119')))
 
     const getPriority = (isSq: boolean, is60: boolean, isElong: boolean) => {
       if (isSq) return 0
@@ -161,7 +161,7 @@ function paginateProducts(products: ApiProducto[]): ApiProducto[][] {
   sortedFormats.forEach((formato) => {
     const formatProducts = productsByFormat[formato]
     const isElongated = (formato.includes('22.5') && formato.includes('119')) ||
-                       (formato.includes('23.3') && (formato.includes('120') || formato.includes('119')))
+      (formato.includes('23.3') && (formato.includes('120') || formato.includes('119')))
     const productsPerPage = isElongated ? 2 : 4
 
     for (let i = 0; i < formatProducts.length; i += productsPerPage) {
@@ -179,6 +179,8 @@ export default function CatalogoPage() {
   const [formatos, setFormatos] = useState<string[]>([])
   const [selectedFormatos, setSelectedFormatos] = useState<Set<string>>(new Set())
   const [soloConStock, setSoloConStock] = useState(true)
+  const [mostrarQR, setMostrarQR] = useState(true)
+  const [incluirPortada, setIncluirPortada] = useState(true)
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [generatingPDF, setGeneratingPDF] = useState(false)
@@ -266,6 +268,25 @@ export default function CatalogoPage() {
     setSelectedFormatos(new Set())
     setPreviewPage(0)
   }, [])
+
+  // Create a normalized list of pages for easier navigation
+  const previewPagesList = useMemo(() => {
+    const list: { type: 'cover' | 'product' | 'backcover', index?: number, data?: ApiProducto[] }[] = []
+
+    if (incluirPortada) {
+      list.push({ type: 'cover' })
+    }
+
+    pages.forEach((p, i) => {
+      list.push({ type: 'product', index: i, data: p })
+    })
+
+    if (backCoverImage) {
+      list.push({ type: 'backcover' })
+    }
+
+    return list
+  }, [incluirPortada, pages, backCoverImage])
 
   const handlePriceChange = useCallback((productId: string, newPrice: number) => {
     setPriceOverrides((prev) => ({ ...prev, [productId]: newPrice }))
@@ -409,11 +430,10 @@ export default function CatalogoPage() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={selectAllSeries}
-              className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
-                selectedSeries.size === 0
-                  ? 'bg-red-600 text-white border-red-600'
-                  : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
-              }`}
+              className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${selectedSeries.size === 0
+                ? 'bg-red-600 text-white border-red-600'
+                : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                }`}
             >
               Todas
             </button>
@@ -421,11 +441,10 @@ export default function CatalogoPage() {
               <button
                 key={s}
                 onClick={() => toggleSerie(s)}
-                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
-                  selectedSeries.has(s)
-                    ? 'bg-red-600 text-white border-red-600'
-                    : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
-                }`}
+                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${selectedSeries.has(s)
+                  ? 'bg-red-600 text-white border-red-600'
+                  : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                  }`}
               >
                 {s}
               </button>
@@ -439,11 +458,10 @@ export default function CatalogoPage() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={selectAllFormatos}
-              className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
-                selectedFormatos.size === 0
-                  ? 'bg-red-600 text-white border-red-600'
-                  : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
-              }`}
+              className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${selectedFormatos.size === 0
+                ? 'bg-red-600 text-white border-red-600'
+                : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                }`}
             >
               Todos
             </button>
@@ -451,11 +469,10 @@ export default function CatalogoPage() {
               <button
                 key={f}
                 onClick={() => toggleFormato(f)}
-                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
-                  selectedFormatos.has(f)
-                    ? 'bg-red-600 text-white border-red-600'
-                    : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
-                }`}
+                className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${selectedFormatos.has(f)
+                  ? 'bg-red-600 text-white border-red-600'
+                  : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+                  }`}
               >
                 {f}
               </button>
@@ -473,6 +490,28 @@ export default function CatalogoPage() {
               className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
             />
             <span className="text-sm text-neutral-700">Solo con stock</span>
+          </label>
+
+          {/* QR Code filter */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={mostrarQR}
+              onChange={(e) => { setMostrarQR(e.target.checked) }}
+              className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+            />
+            <span className="text-sm text-neutral-700">Mostrar códigos QR</span>
+          </label>
+
+          {/* Cover filter */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={incluirPortada}
+              onChange={(e) => { setIncluirPortada(e.target.checked); setPreviewPage(0) }}
+              className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+            />
+            <span className="text-sm text-neutral-700">Incluir portada</span>
           </label>
 
           {/* Reset prices */}
@@ -581,15 +620,15 @@ export default function CatalogoPage() {
               Anterior
             </button>
             <span className="text-sm text-neutral-600">
-              {previewPage === 0
-                ? 'Portada'
-                : backCoverImage && previewPage === totalPages + 1
-                  ? 'Contraportada'
-                  : `Página ${previewPage} de ${totalPages}`}
+              {previewPagesList.length > 0 && (
+                previewPagesList[previewPage].type === 'cover' ? 'Portada' :
+                  previewPagesList[previewPage].type === 'backcover' ? 'Contraportada' :
+                    `Página ${previewPagesList[previewPage].index! + 1} de ${totalPages}`
+              )}
             </span>
             <button
-              onClick={() => setPreviewPage(Math.min(totalPages + (backCoverImage ? 1 : 0), previewPage + 1))}
-              disabled={previewPage >= totalPages + (backCoverImage ? 1 : 0)}
+              onClick={() => setPreviewPage(Math.min(previewPagesList.length - 1, previewPage + 1))}
+              disabled={previewPage >= previewPagesList.length - 1}
               className="px-3 py-1.5 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 disabled:opacity-30"
             >
               Siguiente
@@ -598,7 +637,7 @@ export default function CatalogoPage() {
 
           {/* Preview content */}
           <div className="overflow-x-auto">
-            {previewPage === 0 ? (
+            {previewPagesList.length > 0 && previewPagesList[previewPage].type === 'cover' ? (
               <div className="mx-auto" style={{ width: '800px' }}>
                 <CatalogCover
                   serie={serieLabel}
@@ -607,23 +646,23 @@ export default function CatalogoPage() {
                   customImage={coverImage}
                 />
               </div>
-            ) : backCoverImage && previewPage === totalPages + 1 ? (
+            ) : previewPagesList.length > 0 && previewPagesList[previewPage].type === 'backcover' ? (
               <div className="mx-auto" style={{ width: '800px' }}>
                 <CatalogBackCover customImage={backCoverImage} />
               </div>
-            ) : (
+            ) : previewPagesList.length > 0 ? (
               <div className="mx-auto" style={{ width: '800px' }}>
                 <div style={{ width: '800px', minHeight: '400px', padding: '20px', fontFamily: 'Arial, Helvetica, sans-serif' }}>
                   {/* Layout de edición de precios - muestra todos los productos */}
                   {(() => {
-                    const pageProducts = pages[previewPage - 1] || []
+                    const pageProducts = previewPagesList[previewPage].data || []
                     const isElongatedPage = pageProducts.length > 0 && isElongatedProduct(pageProducts[0])
 
                     // Layout para productos alargados (vertical)
                     if (isElongatedPage) {
                       return (
                         <div className="flex flex-col gap-4 justify-center">
-                          {pageProducts.map((product) => (
+                          {pageProducts.map((product: ApiProducto) => (
                             <div key={product.id} className="border border-neutral-200 rounded-lg overflow-hidden mx-auto" style={{ width: '750px' }}>
                               <div className="h-32 overflow-hidden">
                                 <img
@@ -664,7 +703,7 @@ export default function CatalogoPage() {
                       <div>
                         {/* Fila superior */}
                         <div className="flex gap-4 mb-4 justify-center">
-                          {pageProducts.slice(0, 2).map((product) => (
+                          {pageProducts.slice(0, 2).map((product: ApiProducto) => (
                             <div key={product.id} className="border border-neutral-200 rounded-lg overflow-hidden" style={{ width: '368px' }}>
                               <div className="h-40 overflow-hidden">
                                 <img
@@ -700,7 +739,7 @@ export default function CatalogoPage() {
                         {/* Fila inferior */}
                         {pageProducts.slice(2).length > 0 && (
                           <div className="flex gap-4 justify-center">
-                            {pageProducts.slice(2, 4).map((product) => (
+                            {pageProducts.slice(2, 4).map((product: ApiProducto) => (
                               <div key={product.id} className="border border-neutral-200 rounded-lg overflow-hidden" style={{ width: '368px' }}>
                                 <div className="h-40 overflow-hidden">
                                   <img
@@ -727,7 +766,7 @@ export default function CatalogoPage() {
                                       onChange={(e) => handlePriceChange(product.id, parseFloat(e.target.value) || 0)}
                                       className="w-24 px-2 py-1 text-sm font-semibold text-red-600 border border-neutral-200 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
-                                    <span className="text-xs text-neutral-400 ml-auto">Stock: {product.stock_m2.toFixed(2)} m²</span>
+                                    <span className="text-xs font-bold text-red-600 ml-auto">Stock: {product.stock_m2.toFixed(2)} m²</span>
                                   </div>
                                 </div>
                               </div>
@@ -739,7 +778,7 @@ export default function CatalogoPage() {
                   })()}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       )}
@@ -747,12 +786,14 @@ export default function CatalogoPage() {
       {/* Hidden PDF render container - each child is one page */}
       <div style={{ position: 'absolute', left: '-9999px', top: 0 }} ref={pdfContainerRef}>
         {/* Cover */}
-        <CatalogCover
-          serie={serieLabel}
-          productCount={catalogProducts.length}
-          date={today}
-          customImage={coverImage}
-        />
+        {incluirPortada && (
+          <CatalogCover
+            serie={serieLabel}
+            productCount={catalogProducts.length}
+            date={today}
+            customImage={coverImage}
+          />
+        )}
         {/* Product pages */}
         {pages.map((pageProducts, i) => (
           <CatalogPage
@@ -760,6 +801,7 @@ export default function CatalogoPage() {
             products={pageProducts}
             pageNumber={i + 1}
             totalPages={totalPages}
+            showQR={mostrarQR}
           />
         ))}
         {/* Back cover */}

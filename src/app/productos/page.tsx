@@ -10,6 +10,7 @@ import { ProductGrid } from '@/components/producto/ProductGrid'
 import { FiltersDrawer } from '@/components/filtros/FiltersDrawer'
 import { IconFilter } from '@/components/ui/Icons'
 import { Producto } from '@/types'
+import { is60x60Format, is605x605Format, is60x120Format } from '@/lib/gridOptimizer'
 
 interface FiltrosActivos {
   formato: string[]
@@ -33,57 +34,28 @@ const filtrosIniciales: FiltrosActivos = {
   estado_producto: [],
 }
 
-// Función para ordenar productos: cuadrados primero, luego 60x120, luego alargados, luego resto
+// Función para ordenar productos usando la misma lógica que gridOptimizer.ts
+// Orden: 60x60 → 60.5x60.5 → 60x120 → alargados (22.5x119.5, 23.3x120) → resto
 function sortProductsByFormat(products: Producto[]): Producto[] {
   return [...products].sort((a, b) => {
-    // Detectar si es cuadrado
-    const isSquare = (format: string) => {
-      const match = format.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i)
-      if (!match) return false
-      const parts = format.toLowerCase().split('x')
-      if (parts.length === 2) {
-        const first = parseFloat(parts[0].replace(',', '.'))
-        const second = parseFloat(parts[1].replace(',', '.'))
-        return Math.abs(first - second) < 1
+    const getPriority = (formato: string) => {
+      if (is60x60Format(formato)) return 0
+      if (is605x605Format(formato)) return 1
+      if (is60x120Format(formato)) return 2
+      // Detectar alargados
+      const dims = formato.match(/(\d+[.,]?\d*)\s*[xX×]\s*(\d+[.,]?\d*)/)
+      if (dims) {
+        const num1 = parseFloat(dims[1].replace(',', '.'))
+        const num2 = parseFloat(dims[2].replace(',', '.'))
+        const alto = Math.min(num1, num2)
+        const ancho = Math.max(num1, num2)
+        if (alto < 40 && ancho > 100) return 3 // Alargados
       }
-      return false
+      return 4 // Resto
     }
 
-    // Detectar si es 60x120
-    const is60x120 = (format: string) => {
-      const parts = format.toLowerCase().split('x')
-      if (parts.length === 2) {
-        const first = parseFloat(parts[0].replace(',', '.'))
-        const second = parseFloat(parts[1].replace(',', '.'))
-        return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
-               (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
-      }
-      return false
-    }
-
-    // Detectar si es alargado
-    const isElongated = (format: string) => {
-      return (format.includes('22.5') && format.includes('119')) ||
-             (format.includes('23.3') && (format.includes('120') || format.includes('119')))
-    }
-
-    const aIsSquare = isSquare(a.formato)
-    const bIsSquare = isSquare(b.formato)
-    const aIs60x120 = is60x120(a.formato)
-    const bIs60x120 = is60x120(b.formato)
-    const aIsElongated = isElongated(a.formato)
-    const bIsElongated = isElongated(b.formato)
-
-    // Prioridad: cuadrados (0), 60x120 (1), alargados (2), otros (3)
-    const getPriority = (isSq: boolean, is60: boolean, isElong: boolean) => {
-      if (isSq) return 0
-      if (is60) return 1
-      if (isElong) return 2
-      return 3
-    }
-
-    const aPriority = getPriority(aIsSquare, aIs60x120, aIsElongated)
-    const bPriority = getPriority(bIsSquare, bIs60x120, bIsElongated)
+    const aPriority = getPriority(a.formato)
+    const bPriority = getPriority(b.formato)
 
     if (aPriority !== bPriority) {
       return aPriority - bPriority

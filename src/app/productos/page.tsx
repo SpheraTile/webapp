@@ -197,12 +197,11 @@ function ProductosContent() {
   const [filtrosActivos, setFiltrosActivos] = useState<FiltrosActivos>(filtrosIniciales)
   const [mostrarFiltros, setMostrarFiltros] = useState(false)
   const [mostrarBusqueda, setMostrarBusqueda] = useState(false)
-  const [productos, setProductos] = useState<Producto[]>([])
+  const [allProductos, setAllProductos] = useState<Producto[]>([]) // Todos los productos ordenados globalmente
   const [loading, setLoading] = useState(true)
-  const [total, setTotal] = useState(0)
   const [facets, setFacets] = useState<Facets | undefined>(undefined)
   const [page, setPage] = useState(1)
-  const limit = 50
+  const limit = 50 // Client-side pagination
 
   // Leer filtros de la URL al cargar
   useEffect(() => {
@@ -252,12 +251,7 @@ function ProductosContent() {
     setFiltrosActivos(nuevasFiltros)
   }, [searchParams])
 
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1)
-  }, [filtrosActivos, busqueda])
-
-  // Fetch productos from API
+  // Fetch ALL productos from API (sin paginación para ordenar globalmente)
   const fetchProductos = useCallback(async () => {
     setLoading(true)
     try {
@@ -265,9 +259,8 @@ function ProductosContent() {
 
       if (busqueda) params.set('busqueda', busqueda)
 
-      // Pagination
-      params.set('page', page.toString())
-      params.set('limit', limit.toString())
+      // NO usar paginación de la API - obtener todos los productos
+      params.set('limit', '10000') // Límite muy alto para obtener todos
 
       // Mapear valores a formato DB
       filtrosActivos.formato.forEach(v => params.append('formato', v))
@@ -293,11 +286,10 @@ function ProductosContent() {
         estado_producto: mapFromDBValue('estado_producto', p.estado_producto),
       }))
 
-      // Ordenar productos por formato: cuadrados → 60x120 → alargados → resto
+      // Ordenar productos GLOBALMENTE por formato: cuadrados → 60x120 → alargados → resto
       const productosOrdenados = sortProductsByFormat(productosNormalizados)
 
-      setProductos(productosOrdenados)
-      setTotal(data.pagination.total)
+      setAllProductos(productosOrdenados)
       if (data.facets) {
         setFacets(data.facets)
       }
@@ -306,14 +298,25 @@ function ProductosContent() {
     } finally {
       setLoading(false)
     }
-  }, [busqueda, filtrosActivos, page, limit])
+  }, [busqueda, filtrosActivos]) // Eliminado 'page' y 'limit' de las dependencias
 
   useEffect(() => {
     const debounce = setTimeout(() => {
       fetchProductos()
+      // Reset page to 1 when filters change
+      setPage(1)
     }, 300)
     return () => clearTimeout(debounce)
   }, [fetchProductos])
+
+  // Paginación client-side sobre productos ya ordenados
+  const productos = useMemo(() => {
+    const start = (page - 1) * limit
+    const end = start + limit
+    return allProductos.slice(start, end)
+  }, [allProductos, page, limit])
+
+  const total = allProductos.length
 
   // Contar filtros activos
   const totalFiltrosActivos =

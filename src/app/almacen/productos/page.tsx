@@ -20,6 +20,8 @@ interface Producto {
   tipo_pieza: string
   uso: string
   estado_producto: string
+  almacen: 'PRINCIPAL' | 'LOGISTICS'
+  mostrar_en_grid: boolean
 }
 
 export default function ProductosAlmacenPage() {
@@ -159,6 +161,40 @@ export default function ProductosAlmacenPage() {
       showToast('Error al actualizar stock', 'error')
     }
     setEditingStock(null)
+  }
+
+  const handleAlmacenChange = async (id: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => {
+    try {
+      const res = await fetch(`/api/productos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ almacen: nuevoAlmacen }),
+      })
+
+      if (res.ok) {
+        setProductos(productos.map((p) => p.id === id ? { ...p, almacen: nuevoAlmacen } : p))
+        showToast('Almacén actualizado', 'success')
+      }
+    } catch {
+      showToast('Error al actualizar almacén', 'error')
+    }
+  }
+
+  const handleEstadoChange = async (id: string, nuevoEstado: 'NORMAL' | 'NOVEDAD' | 'OFERTA') => {
+    try {
+      const res = await fetch(`/api/productos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado_producto: nuevoEstado }),
+      })
+
+      if (res.ok) {
+        setProductos(productos.map((p) => p.id === id ? { ...p, estado_producto: nuevoEstado } : p))
+        showToast('Estado actualizado', 'success')
+      }
+    } catch {
+      showToast('Error al actualizar estado', 'error')
+    }
   }
 
   const productosConBajoStock = productos.filter((p) => p.stock_m2 < 100).length
@@ -348,6 +384,41 @@ export default function ProductosAlmacenPage() {
                       {deleting === producto.id ? '...' : 'Eliminar'}
                     </button>
                   </div>
+                  {/* Acciones rápidas */}
+                  <div className="mt-3 p-2 bg-neutral-50 rounded-lg space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-neutral-600">Novedad</span>
+                      <button
+                        onClick={() => handleEstadoChange(producto.id, producto.estado_producto === 'NOVEDAD' ? 'NORMAL' : 'NOVEDAD')}
+                        className={`w-8 h-4 rounded-full transition-colors ${
+                          producto.estado_producto === 'NOVEDAD' ? 'bg-primary-600' : 'bg-neutral-300'
+                        }`}
+                      >
+                        <span
+                          className={`block w-3 h-3 bg-white rounded-full transition-transform ${
+                            producto.estado_producto === 'NOVEDAD' ? 'translate-x-4' : 'translate-x-0.5'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-neutral-600">
+                        {producto.almacen === 'PRINCIPAL' ? 'Principal' : 'Logistics'}
+                      </span>
+                      <button
+                        onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+                        className={`w-8 h-4 rounded-full transition-colors ${
+                          producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : 'bg-blue-500'
+                        }`}
+                      >
+                        <span
+                          className={`block w-3 h-3 bg-white rounded-full transition-transform ${
+                            producto.almacen === 'PRINCIPAL' ? 'translate-x-4' : 'translate-x-0.5'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -374,6 +445,12 @@ export default function ProductosAlmacenPage() {
                     </th>
                     <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
                       Stock
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Almacén
                     </th>
                     <th className="text-right px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
                       Acciones
@@ -455,6 +532,36 @@ export default function ProductosAlmacenPage() {
                             </div>
                           </div>
                         )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => handleEstadoChange(producto.id, producto.estado_producto === 'NOVEDAD' ? 'NORMAL' : 'NOVEDAD')}
+                          className={`w-10 h-5 rounded-full transition-colors ${
+                            producto.estado_producto === 'NOVEDAD' ? 'bg-primary-600' : 'bg-neutral-300'
+                          }`}
+                          title={producto.estado_producto === 'NOVEDAD' ? 'Novedad - Clic para quitar' : 'Normal - Clic para marcar novedad'}
+                        >
+                          <span
+                            className={`block w-4 h-4 bg-white rounded-full transition-transform ${
+                              producto.estado_producto === 'NOVEDAD' ? 'translate-x-5' : 'translate-x-0.5'
+                            }`}
+                          />
+                        </button>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+                          className={`w-10 h-5 rounded-full transition-colors ${
+                            producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : 'bg-blue-500'
+                          }`}
+                          title={producto.almacen === 'PRINCIPAL' ? 'Principal - Clic para cambiar' : 'Logistics - Clic para cambiar'}
+                        >
+                          <span
+                            className={`block w-4 h-4 bg-white rounded-full transition-transform ${
+                              producto.almacen === 'PRINCIPAL' ? 'translate-x-5' : 'translate-x-0.5'
+                            }`}
+                          />
+                        </button>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">

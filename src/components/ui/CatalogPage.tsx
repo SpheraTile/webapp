@@ -176,7 +176,19 @@ function ProductCard({ product, isElongated, showQR = true }: { product: Catalog
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
           <div style={{ flex: 1, minWidth: 0, paddingRight: '8px' }}>
             <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.4', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
-            <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2' }}>Ref: {product.referencia} · {product.serie}</p>
+            <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Ref: {product.referencia} · {product.serie}
+              {product.mostrar_en_catalogo && (
+                <span style={{
+                  display: 'inline-block',
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
+                  flexShrink: 0
+                }} />
+              )}
+            </p>
           </div>
           {showQR && (
             <QRCodeSVG
@@ -197,19 +209,7 @@ function ProductCard({ product, isElongated, showQR = true }: { product: Catalog
           <tbody>
             <tr>
               <td style={headerCell}>Formato</td>
-              <td style={{ ...cell, width: '25%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span>{product.formato}</span>
-                {product.mostrar_en_catalogo && (
-                  <span style={{
-                    display: 'inline-block',
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
-                    flexShrink: 0
-                  }} />
-                )}
-              </td>
+              <td style={{ ...cell, width: '25%' }}>{product.formato}</td>
               <td style={headerCell}>Calidad</td>
               <td style={{ ...cell, width: '25%' }}>{product.calidad}</td>
             </tr>

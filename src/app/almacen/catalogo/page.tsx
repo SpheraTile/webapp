@@ -182,6 +182,7 @@ export default function CatalogoPage() {
   const [selectedFormatos, setSelectedFormatos] = useState<Set<string>>(new Set())
   const [soloConStock, setSoloConStock] = useState(true)
   const [mostrarQR, setMostrarQR] = useState(true)
+  const [ocultarIndicadorAlmacen, setOcultarIndicadorAlmacen] = useState(false)
   const [incluirPortada, setIncluirPortada] = useState(true)
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -505,6 +506,17 @@ export default function CatalogoPage() {
             <span className="text-sm text-neutral-700">Mostrar códigos QR</span>
           </label>
 
+          {/* Warehouse indicator filter */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={ocultarIndicadorAlmacen}
+              onChange={(e) => { setOcultarIndicadorAlmacen(e.target.checked) }}
+              className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+            />
+            <span className="text-sm text-neutral-700">Ocultar puntos de almacén</span>
+          </label>
+
           {/* Cover filter */}
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -804,6 +816,7 @@ export default function CatalogoPage() {
             pageNumber={i + 1}
             totalPages={totalPages}
             showQR={mostrarQR}
+            ocultarIndicadorAlmacen={ocultarIndicadorAlmacen}
           />
         ))}
         {/* Back cover */}

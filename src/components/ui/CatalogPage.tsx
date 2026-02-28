@@ -36,6 +36,7 @@ interface CatalogPageProps {
   pageNumber: number
   totalPages: number
   showQR?: boolean
+  ocultarIndicadorAlmacen?: boolean
 }
 
 function fmt(n: number, decimals = 2): string {
@@ -115,7 +116,7 @@ function sortProducts(products: CatalogProduct[]): CatalogProduct[] {
   })
 }
 
-function ProductCard({ product, isElongated, showQR = true }: { product: CatalogProduct, isElongated?: boolean, showQR?: boolean }) {
+function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlmacen = false }: { product: CatalogProduct, isElongated?: boolean, showQR?: boolean, ocultarIndicadorAlmacen?: boolean }) {
   const baseUrl = typeof window !== 'undefined'
     ? window.location.origin
     : process.env.NEXT_PUBLIC_BASE_URL || 'https://spheratile.com'
@@ -178,7 +179,7 @@ function ProductCard({ product, isElongated, showQR = true }: { product: Catalog
             <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.4', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
             <p style={{ fontSize: '9px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.2', display: 'flex', alignItems: 'center', gap: '4px' }}>
               Ref: {product.referencia} · {product.serie}
-              {product.mostrar_en_catalogo && (
+              {product.mostrar_en_catalogo && !ocultarIndicadorAlmacen && (
                 <span style={{
                   display: 'inline-block',
                   width: '10px',
@@ -248,7 +249,7 @@ function ProductCard({ product, isElongated, showQR = true }: { product: Catalog
   )
 }
 
-export function CatalogPage({ products, pageNumber, totalPages, showQR = true }: CatalogPageProps) {
+export function CatalogPage({ products, pageNumber, totalPages, showQR = true, ocultarIndicadorAlmacen = false }: CatalogPageProps) {
   // Ordenar productos: cuadrados primero, luego 60x120, luego alargados
   const sortedProducts = sortProducts(products)
 
@@ -265,7 +266,7 @@ export function CatalogPage({ products, pageNumber, totalPages, showQR = true }:
   const elongatedLayout = (
     <>
       {sortedProducts.map((product) => (
-        <ProductCard key={product.id} product={product} isElongated={true} showQR={showQR} />
+        <ProductCard key={product.id} product={product} isElongated={true} showQR={showQR} ocultarIndicadorAlmacen={ocultarIndicadorAlmacen} />
       ))}
     </>
   )
@@ -276,13 +277,13 @@ export function CatalogPage({ products, pageNumber, totalPages, showQR = true }:
       {/* Fila superior */}
       <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
         {sortedProducts.slice(0, 2).map((product) => (
-          <ProductCard key={product.id} product={product} isElongated={false} showQR={showQR} />
+          <ProductCard key={product.id} product={product} isElongated={false} showQR={showQR} ocultarIndicadorAlmacen={ocultarIndicadorAlmacen} />
         ))}
       </div>
       {/* Fila inferior */}
       <div style={{ display: 'flex', gap: '14px', justifyContent: 'center' }}>
         {sortedProducts.slice(2, 4).map((product) => (
-          <ProductCard key={product.id} product={product} isElongated={false} showQR={showQR} />
+          <ProductCard key={product.id} product={product} isElongated={false} showQR={showQR} ocultarIndicadorAlmacen={ocultarIndicadorAlmacen} />
         ))}
       </div>
     </>

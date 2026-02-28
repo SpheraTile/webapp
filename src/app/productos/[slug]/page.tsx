@@ -69,6 +69,9 @@ function mapProductoFromDB(dbProducto: any): Producto {
     tipo_pieza: mapFromDBValue('tipo_pieza', dbProducto.tipo_pieza) as any,
     uso: mapFromDBValue('uso', dbProducto.uso) as any,
     estado_producto: mapFromDBValue('estado_producto', dbProducto.estado_producto) as any,
+    almacen: dbProducto.almacen || 'PRINCIPAL',
+    mostrar_en_grid: dbProducto.mostrar_en_grid ?? true,
+    mostrar_en_catalogo: dbProducto.mostrar_en_catalogo ?? true,
     descripcion: dbProducto.descripcion,
     m2_caja: dbProducto.m2_caja,
     piezas_caja: dbProducto.piezas_caja,
@@ -76,6 +79,9 @@ function mapProductoFromDB(dbProducto: any): Producto {
     cajas_palet: dbProducto.cajas_palet,
     peso_caja_kg: dbProducto.peso_caja_kg,
     pedido_minimo_m2: dbProducto.pedido_minimo_m2,
+    hs_code: dbProducto.hs_code,
+    createdAt: dbProducto.createdAt,
+    updatedAt: dbProducto.updatedAt,
   }
 }
 

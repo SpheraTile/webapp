@@ -6,6 +6,7 @@ import { Producto } from '@/types'
 import { StockBadge } from '@/components/ui/StockBadge'
 import { PriceTag } from '@/components/ui/PriceTag'
 import { ProductImage } from '@/components/ui/ProductImage'
+import { AlmacenIndicator } from '@/components/ui/AlmacenIndicator'
 
 import { GridFormatType } from '@/lib/gridOptimizer'
 
@@ -113,8 +114,11 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
           </p>
 
           {/* Formato y características */}
-          <div className="flex flex-wrap gap-2 text-sm text-neutral-600 mb-3">
-            <span className="px-2 py-1 bg-neutral-100 rounded">{producto.formato}</span>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-600 mb-3">
+            <span className="px-2 py-1 bg-neutral-100 rounded flex items-center gap-2">
+              {producto.formato}
+              <AlmacenIndicator almacen={producto.almacen} />
+            </span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{producto.calidad}</span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{acabadoLabel}</span>
             {tipoPiezaLabel && tipoPiezaKey !== 'base' && (
@@ -177,13 +181,16 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
         </h3>
 
         {/* Formato y tipo */}
-        <div className={`flex items-center gap-2 text-neutral-500 ${formatType === 'elongated' ? 'text-xs' : 'text-sm'}`}>
-          <span>{producto.formato}</span>
-          {tipoPiezaLabel && tipoPiezaKey !== 'base' && (
-            <span className="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded">
-              {tipoPiezaLabel}
-            </span>
-          )}
+        <div className={`flex items-center justify-between text-neutral-500 ${formatType === 'elongated' ? 'text-xs' : 'text-sm'}`}>
+          <div className="flex items-center gap-2">
+            <span>{producto.formato}</span>
+            {tipoPiezaLabel && tipoPiezaKey !== 'base' && (
+              <span className="px-1.5 py-0.5 bg-primary-100 text-primary-700 text-xs rounded">
+                {tipoPiezaLabel}
+              </span>
+            )}
+          </div>
+          <AlmacenIndicator almacen={producto.almacen} />
         </div>
 
         {/* Badge de stock */}

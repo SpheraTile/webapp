@@ -21,6 +21,7 @@ export interface CatalogProduct {
   aspecto: string
   acabado: string
   uso: string
+  almacen: string
   precio_m2: number
   stock_m2: number
   m2_caja: number
@@ -195,7 +196,17 @@ function ProductCard({ product, isElongated, showQR = true }: { product: Catalog
           <tbody>
             <tr>
               <td style={headerCell}>Formato</td>
-              <td style={{ ...cell, width: '25%' }}>{product.formato}</td>
+              <td style={{ ...cell, width: '25%', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {product.formato}
+                <span style={{
+                  display: 'inline-block',
+                  width: '3px',
+                  height: '3px',
+                  borderRadius: '50%',
+                  backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
+                  flexShrink: 0
+                }} />
+              </td>
               <td style={headerCell}>Calidad</td>
               <td style={{ ...cell, width: '25%' }}>{product.calidad}</td>
             </tr>

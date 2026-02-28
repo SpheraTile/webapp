@@ -74,34 +74,37 @@ enum FormaCobro {
 
 // ==================== PRODUCTOS ====================
 model Producto {
-  id               String         @id @default(cuid())
-  slug             String         @unique
-  referencia       String         @unique
-  nombre           String
-  serie            String
-  imagen           String
-  galeria          String[]
-  formato          String
-  precio_m2        Float
-  stock_m2         Float
-  calidad          Calidad
-  materia_prima    MateriaPrima
-  aspecto          Aspecto
-  acabado          Acabado
-  tipo_pieza       TipoPieza      @default(BASE)
-  uso              Uso            @default(PAVIMENTO)
-  estado_producto  EstadoProducto @default(NORMAL)
-  descripcion      String?
-  m2_caja          Float
-  piezas_caja      Int
-  m2_palet         Float
-  cajas_palet      Int
-  peso_caja_kg     Float
-  pedido_minimo_m2 Float
-  hs_code          String?        // Código arancelario (H.S. Code)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  items            ItemPedido[]
+  id                String         @id @default(cuid())
+  slug              String         @unique
+  referencia        String         @unique
+  nombre            String
+  serie             String
+  imagen            String
+  galeria           String[]
+  formato           String
+  precio_m2         Float
+  stock_m2          Float
+  calidad           Calidad
+  materia_prima     MateriaPrima
+  aspecto           Aspecto
+  acabado           Acabado
+  tipo_pieza        TipoPieza      @default(BASE)
+  uso               Uso            @default(PAVIMENTO)
+  estado_producto   EstadoProducto @default(NORMAL)
+  almacen           TipoAlmacen    @default(PRINCIPAL)
+  mostrar_en_grid   Boolean        @default(true)
+  mostrar_en_catalogo Boolean      @default(true)
+  descripcion       String?
+  m2_caja           Float
+  piezas_caja       Int
+  m2_palet          Float
+  cajas_palet       Int
+  peso_caja_kg      Float
+  pedido_minimo_m2  Float
+  hs_code           String?        // Código arancelario (H.S. Code)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  items             ItemPedido[]
 }
 
 enum Calidad {
@@ -150,6 +153,11 @@ enum EstadoProducto {
   NORMAL
   OFERTA
   NOVEDAD
+}
+
+enum TipoAlmacen {
+  PRINCIPAL
+  LOGISTICS
 }
 
 // ==================== PEDIDOS ====================

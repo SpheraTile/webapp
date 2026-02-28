@@ -10,6 +10,7 @@ import { PriceTag } from '@/components/ui/PriceTag'
 import { ProductImage } from '@/components/ui/ProductImage'
 import { ProductQRCode } from '@/components/ui/QRCode'
 import { AddToCartButton } from '@/components/producto/AddToCartButton'
+import { AlmacenIndicator } from '@/components/ui/AlmacenIndicator'
 import { Producto } from '@/types'
 
 // Translation keys for product attributes
@@ -208,7 +209,10 @@ function RelatedProducts({ currentProduct }: { currentProduct: Producto }) {
               <h3 className="font-semibold text-neutral-900 truncate group-hover:text-primary-600 transition-colors">
                 {producto.nombre}
               </h3>
-              <p className="text-sm text-neutral-500 mb-2">{producto.formato}</p>
+              <p className="text-sm text-neutral-500 mb-2 flex items-center gap-2">
+                {producto.formato}
+                <AlmacenIndicator almacen={producto.almacen} />
+              </p>
               {producto.precio_m2 > 0 && (
                 <p className="font-bold text-primary-600">{producto.precio_m2.toFixed(2)}€/m²</p>
               )}
@@ -276,7 +280,10 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
             <h1 className="text-2xl font-bold text-neutral-900 uppercase tracking-wide">
               {producto.nombre}
             </h1>
-            <p className="text-neutral-500 mt-1">{producto.formato}</p>
+            <p className="text-neutral-500 mt-1 flex items-center gap-2">
+              {producto.formato}
+              <AlmacenIndicator almacen={producto.almacen} />
+            </p>
           </div>
 
           {/* Stock */}
@@ -396,7 +403,10 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
               </h1>
 
               {/* Formato */}
-              <p className="text-xl text-neutral-600 mb-6">{producto.formato}</p>
+              <p className="text-xl text-neutral-600 mb-6 flex items-center gap-2">
+                {producto.formato}
+                <AlmacenIndicator almacen={producto.almacen} />
+              </p>
 
               {/* Stock badge */}
               <div className="mb-6">

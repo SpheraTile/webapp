@@ -13,6 +13,7 @@ const OPCIONES = {
   tipo_pieza: ['BASE', 'DECORADO', 'MULTISTEP'],
   uso: ['PAVIMENTO', 'REVESTIMIENTO', 'PAVIMENTO_REVESTIMIENTO'],
   estado_producto: ['NORMAL', 'OFERTA', 'NOVEDAD'],
+  almacen: ['PRINCIPAL', 'LOGISTICS'],
 }
 
 const LABELS = {
@@ -22,6 +23,7 @@ const LABELS = {
   tipo_pieza: { BASE: 'Base', DECORADO: 'Decorado', MULTISTEP: 'Multistep' },
   uso: { PAVIMENTO: 'Pavimento', REVESTIMIENTO: 'Revestimiento', PAVIMENTO_REVESTIMIENTO: 'Pavimento y Revestimiento' },
   estado_producto: { NORMAL: 'Normal', OFERTA: 'Oferta', NOVEDAD: 'Novedad' },
+  almacen: { PRINCIPAL: 'Principal', LOGISTICS: 'Logistics' },
 }
 
 export default function EditarProductoPage() {
@@ -56,6 +58,9 @@ export default function EditarProductoPage() {
     tipo_pieza: 'BASE',
     uso: 'PAVIMENTO',
     estado_producto: 'NORMAL',
+    almacen: 'PRINCIPAL' as 'PRINCIPAL' | 'LOGISTICS',
+    mostrar_en_grid: true,
+    mostrar_en_catalogo: true,
     descripcion: '',
     m2_caja: '',
     piezas_caja: '',
@@ -97,6 +102,9 @@ export default function EditarProductoPage() {
           tipo_pieza: producto.tipo_pieza || 'BASE',
           uso: producto.uso || 'PAVIMENTO',
           estado_producto: producto.estado_producto || 'NORMAL',
+          almacen: producto.almacen || 'PRINCIPAL',
+          mostrar_en_grid: producto.mostrar_en_grid ?? true,
+          mostrar_en_catalogo: producto.mostrar_en_catalogo ?? true,
           descripcion: producto.descripcion || '',
           m2_caja: producto.m2_caja?.toString() || '',
           piezas_caja: producto.piezas_caja?.toString() || '',
@@ -564,6 +572,55 @@ export default function EditarProductoPage() {
                   <option key={opt} value={opt}>{LABELS.estado_producto[opt as keyof typeof LABELS.estado_producto]}</option>
                 ))}
               </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Almacén y Visibilidad */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-neutral-900 mb-4">Almacén y Visibilidad</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Almacén</label>
+              <select
+                name="almacen"
+                value={form.almacen}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {OPCIONES.almacen.map(opt => (
+                  <option key={opt} value={opt}>{LABELS.almacen[opt as keyof typeof LABELS.almacen]}</option>
+                ))}
+              </select>
+              <p className="text-xs text-neutral-400 mt-1">
+                Principal = punto verde, Logistics = punto azul
+              </p>
+            </div>
+            <div className="flex items-center gap-2 pt-6">
+              <input
+                type="checkbox"
+                id="mostrar_en_grid"
+                name="mostrar_en_grid"
+                checked={form.mostrar_en_grid}
+                onChange={(e) => setForm({ ...form, mostrar_en_grid: e.target.checked })}
+                className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+              />
+              <label htmlFor="mostrar_en_grid" className="text-sm font-medium text-neutral-700">
+                Mostrar indicador en grid
+              </label>
+            </div>
+            <div className="flex items-center gap-2 pt-6">
+              <input
+                type="checkbox"
+                id="mostrar_en_catalogo"
+                name="mostrar_en_catalogo"
+                checked={form.mostrar_en_catalogo}
+                onChange={(e) => setForm({ ...form, mostrar_en_catalogo: e.target.checked })}
+                className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+              />
+              <label htmlFor="mostrar_en_catalogo" className="text-sm font-medium text-neutral-700">
+                Mostrar indicador en catálogo PDF
+              </label>
             </div>
           </div>
         </div>

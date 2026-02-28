@@ -2,10 +2,16 @@ import { TipoAlmacen } from '@/types'
 
 interface AlmacenIndicatorProps {
   almacen: TipoAlmacen
+  show?: boolean
   className?: string
 }
 
-export function AlmacenIndicator({ almacen, className = '' }: AlmacenIndicatorProps) {
+export function AlmacenIndicator({ almacen, show = true, className = '' }: AlmacenIndicatorProps) {
+  // Si show es false, no renderizar nada
+  if (!show) {
+    return null
+  }
+
   // PRINCIPAL = punto verde (3x3px)
   // LOGISTICS = punto azul (3x3px)
   const colorClass = almacen === 'PRINCIPAL'

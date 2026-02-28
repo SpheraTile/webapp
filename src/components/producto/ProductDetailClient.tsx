@@ -211,7 +211,7 @@ function RelatedProducts({ currentProduct }: { currentProduct: Producto }) {
               </h3>
               <p className="text-sm text-neutral-500 mb-2 flex items-center gap-2">
                 {producto.formato}
-                <AlmacenIndicator almacen={producto.almacen} />
+                <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
               </p>
               {producto.precio_m2 > 0 && (
                 <p className="font-bold text-primary-600">{producto.precio_m2.toFixed(2)}€/m²</p>
@@ -282,7 +282,7 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
             </h1>
             <p className="text-neutral-500 mt-1 flex items-center gap-2">
               {producto.formato}
-              <AlmacenIndicator almacen={producto.almacen} />
+              <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
             </p>
           </div>
 
@@ -405,7 +405,7 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
               {/* Formato */}
               <p className="text-xl text-neutral-600 mb-6 flex items-center gap-2">
                 {producto.formato}
-                <AlmacenIndicator almacen={producto.almacen} />
+                <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
               </p>
 
               {/* Stock badge */}

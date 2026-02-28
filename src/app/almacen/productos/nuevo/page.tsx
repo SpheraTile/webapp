@@ -521,7 +521,7 @@ export default function NuevoProductoPage() {
                 className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
               />
               <label htmlFor="mostrar_en_grid" className="text-sm font-medium text-neutral-700">
-                Mostrar en grid de productos
+                Mostrar indicador en grid
               </label>
             </div>
             <div className="flex items-center gap-2 pt-6">
@@ -534,7 +534,7 @@ export default function NuevoProductoPage() {
                 className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
               />
               <label htmlFor="mostrar_en_catalogo" className="text-sm font-medium text-neutral-700">
-                Mostrar en catálogo PDF
+                Mostrar indicador en catálogo PDF
               </label>
             </div>
           </div>

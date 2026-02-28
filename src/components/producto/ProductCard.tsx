@@ -117,7 +117,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
           <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-600 mb-3">
             <span className="px-2 py-1 bg-neutral-100 rounded flex items-center gap-2">
               {producto.formato}
-              <AlmacenIndicator almacen={producto.almacen} />
+              <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
             </span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{producto.calidad}</span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{acabadoLabel}</span>
@@ -190,7 +190,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
               </span>
             )}
           </div>
-          <AlmacenIndicator almacen={producto.almacen} />
+          <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
         </div>
 
         {/* Badge de stock */}

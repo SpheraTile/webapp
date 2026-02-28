@@ -177,7 +177,7 @@ function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlma
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
           <div style={{ flex: 1, minWidth: 0, paddingRight: '8px' }}>
             <p style={{ fontSize: isElongated ? '14px' : '13px', fontWeight: 'bold', color: '#171717', margin: '0 0 4px 0', lineHeight: '1.4', whiteSpace: 'nowrap' as const }}>{product.nombre}</p>
-            <p style={{ fontSize: '10px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.3', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <p style={{ fontSize: '10px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.3', display: 'flex', alignItems: 'center', gap: '8px' }}>
               Ref: {product.referencia} · {product.serie}
               {product.mostrar_en_catalogo && !ocultarIndicadorAlmacen && (
                 <span style={{
@@ -186,7 +186,9 @@ function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlma
                   height: '10px',
                   borderRadius: '50%',
                   backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  alignSelf: 'center',
+                  marginTop: '1px'
                 }} />
               )}
             </p>

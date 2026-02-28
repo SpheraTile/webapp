@@ -188,7 +188,7 @@ function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlma
                   backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
                   flexShrink: 0,
                   alignSelf: 'center',
-                  marginTop: '1px'
+                  marginTop: '3px'
                 }} />
               )}
             </p>

@@ -20,6 +20,8 @@ interface ApiProducto {
   aspecto: string
   acabado: string
   uso: string
+  almacen: string
+  mostrar_en_catalogo: boolean
   precio_m2: number
   stock_m2: number
   m2_caja: number

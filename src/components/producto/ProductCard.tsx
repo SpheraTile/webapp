@@ -17,6 +17,7 @@ interface ProductCardProps {
   variant?: 'grid' | 'list'
   formatType?: GridFormatType | 'other'
   onAlmacenChange?: (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => void
+  onEstadoChange?: (productoId: string, nuevoEstado: 'normal' | 'oferta' | 'novedad') => void
 }
 
 // Translation keys for product attributes
@@ -69,7 +70,7 @@ function EstadoBadge({ estado, t }: { estado: string; t: (key: string) => string
   )
 }
 
-export function ProductCard({ producto, className = '', variant = 'grid', formatType = 'other', onAlmacenChange }: ProductCardProps) {
+export function ProductCard({ producto, className = '', variant = 'grid', formatType = 'other', onAlmacenChange, onEstadoChange }: ProductCardProps) {
   const t = useTranslations('filters')
 
   // Get translated labels
@@ -85,15 +86,67 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
   const acabadoKey = producto.acabado ? ACABADO_KEYS[producto.acabado] : null
   const acabadoLabel = acabadoKey ? t(acabadoKey) : producto.acabado
 
-  // Handle warehouse change for "novedad" products
+  // Handle warehouse change
   const handleAlmacenToggle = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (onAlmacenChange && producto.estado_producto === 'novedad') {
+    if (onAlmacenChange) {
       const nuevoAlmacen = producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL'
       onAlmacenChange(producto.id, nuevoAlmacen)
     }
   }
+
+  // Handle estado change (novedad toggle)
+  const handleEstadoToggle = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onEstadoChange) {
+      const nuevoEstado = producto.estado_producto === 'novedad' ? 'normal' : 'novedad'
+      onEstadoChange(producto.id, nuevoEstado)
+    }
+  }
+
+  // Check if we should show quick actions
+  const showQuickActions = onAlmacenChange || onEstadoChange
+
+  // Quick actions component
+  const QuickActions = () => (
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="mt-2 p-2 bg-neutral-50 rounded-lg space-y-2"
+    >
+      {onEstadoChange && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-neutral-600">Novedad</span>
+          <button
+            onClick={handleEstadoToggle}
+            className={`w-8 h-4 rounded-full transition-colors ${
+              producto.estado_producto === 'novedad' ? 'bg-primary-600' : 'bg-neutral-300'
+            }`}
+          >
+            <span
+              className={`block w-3 h-3 bg-white rounded-full transition-transform ${
+                producto.estado_producto === 'novedad' ? 'translate-x-4' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
+      )}
+      {onAlmacenChange && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-neutral-600">
+            {producto.almacen === 'PRINCIPAL' ? 'Principal' : 'Logistics'}
+          </span>
+          <div onClick={handleAlmacenToggle} className="cursor-pointer">
+            <ToggleSwitch
+              value={producto.almacen}
+              onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )
 
   if (variant === 'list') {
     return (
@@ -129,16 +182,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
           <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-600 mb-3">
             <span className="px-2 py-1 bg-neutral-100 rounded flex items-center gap-2">
               {producto.formato}
-              {producto.estado_producto === 'novedad' && onAlmacenChange ? (
-                <div onClick={handleAlmacenToggle} className="cursor-pointer">
-                  <ToggleSwitch
-                    value={producto.almacen}
-                    onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
-                  />
-                </div>
-              ) : (
-                <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
-              )}
+              <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
             </span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{producto.calidad}</span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{acabadoLabel}</span>
@@ -149,6 +193,9 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
               <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded">{usoLabel}</span>
             )}
           </div>
+
+          {/* Acciones rápidas */}
+          {showQuickActions && <QuickActions />}
 
           <div className="flex items-center justify-between">
             {/* Badge de stock */}
@@ -211,20 +258,14 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
               </span>
             )}
           </div>
-          {producto.estado_producto === 'novedad' && onAlmacenChange ? (
-            <div onClick={handleAlmacenToggle} className="cursor-pointer">
-              <ToggleSwitch
-                value={producto.almacen}
-                onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
-              />
-            </div>
-          ) : (
-            <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
-          )}
+          <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
         </div>
 
         {/* Badge de stock */}
         <StockBadge stock_m2={producto.stock_m2} m2_caja={producto.m2_caja} />
+
+        {/* Acciones rápidas */}
+        {showQuickActions && <QuickActions />}
 
         {/* Precio - solo mostrar si existe */}
         {producto.precio_m2 > 0 && (

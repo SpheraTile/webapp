@@ -12,15 +12,15 @@ export function AlmacenIndicator({ almacen, show = true, className = '' }: Almac
     return null
   }
 
-  // PRINCIPAL = punto verde (3x3px)
-  // LOGISTICS = punto azul (3x3px)
+  // PRINCIPAL = punto verde (12x12px)
+  // LOGISTICS = punto azul (12x12px)
   const colorClass = almacen === 'PRINCIPAL'
     ? 'bg-green-500'
     : 'bg-blue-500'
 
   return (
     <span
-      className={`inline-block w-[3px] h-[3px] rounded-full ${colorClass} ${className}`}
+      className={`inline-block w-[12px] h-[12px] rounded-full ${colorClass} ${className}`}
       title={`Almacén: ${almacen === 'PRINCIPAL' ? 'Principal' : 'Logistics'}`}
     />
   )

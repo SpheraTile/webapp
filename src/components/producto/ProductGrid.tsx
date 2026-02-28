@@ -7,9 +7,10 @@ interface ProductGridProps {
   productos: Producto[]
   className?: string
   columnas?: number
+  onAlmacenChange?: (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => void
 }
 
-export function ProductGrid({ productos, className = '', columnas }: ProductGridProps) {
+export function ProductGrid({ productos, className = '', columnas, onAlmacenChange }: ProductGridProps) {
   // Filtrar productos con stock > 0 (no filtrar por precio)
   const displayProducts = useMemo(() => {
     return productos.filter(p => p.stock_m2 > 0)
@@ -44,7 +45,7 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
     return (
       <div className={`space-y-4 ${className}`}>
         {displayProducts.map((producto) => (
-          <ProductCard key={producto.id} producto={producto} variant="list" />
+          <ProductCard key={producto.id} producto={producto} variant="list" onAlmacenChange={onAlmacenChange} />
         ))}
       </div>
     )
@@ -116,6 +117,7 @@ export function ProductGrid({ productos, className = '', columnas }: ProductGrid
                     <ProductCard
                       producto={producto}
                       formatType={formatType}
+                      onAlmacenChange={onAlmacenChange}
                     />
                   </div>
                 )

@@ -308,6 +308,30 @@ function ProductosContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Handler para cambiar el almacén de un producto (solo para novedades)
+  const handleAlmacenChange = async (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => {
+    try {
+      const response = await fetch(`/api/productos/${productoId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ almacen: nuevoAlmacen })
+      })
+
+      if (response.ok) {
+        // Actualizar el producto en el estado local
+        setAllProductos(prev =>
+          prev.map(p =>
+            p.id === productoId
+              ? { ...p, almacen: nuevoAlmacen }
+              : p
+          )
+        )
+      }
+    } catch (error) {
+      console.error('Error updating almacen:', error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navegación Desktop */}
@@ -434,7 +458,7 @@ function ProductosContent() {
             </div>
           ) : (
             <>
-              <ProductGrid productos={productos} />
+              <ProductGrid productos={productos} onAlmacenChange={handleAlmacenChange} />
 
               {/* Pagination */}
               {totalPages > 1 && (

@@ -7,6 +7,7 @@ import { StockBadge } from '@/components/ui/StockBadge'
 import { PriceTag } from '@/components/ui/PriceTag'
 import { ProductImage } from '@/components/ui/ProductImage'
 import { AlmacenIndicator } from '@/components/ui/AlmacenIndicator'
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch'
 
 import { GridFormatType } from '@/lib/gridOptimizer'
 
@@ -15,6 +16,7 @@ interface ProductCardProps {
   className?: string
   variant?: 'grid' | 'list'
   formatType?: GridFormatType | 'other'
+  onAlmacenChange?: (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => void
 }
 
 // Translation keys for product attributes
@@ -67,7 +69,7 @@ function EstadoBadge({ estado, t }: { estado: string; t: (key: string) => string
   )
 }
 
-export function ProductCard({ producto, className = '', variant = 'grid', formatType = 'other' }: ProductCardProps) {
+export function ProductCard({ producto, className = '', variant = 'grid', formatType = 'other', onAlmacenChange }: ProductCardProps) {
   const t = useTranslations('filters')
 
   // Get translated labels
@@ -82,6 +84,16 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
 
   const acabadoKey = producto.acabado ? ACABADO_KEYS[producto.acabado] : null
   const acabadoLabel = acabadoKey ? t(acabadoKey) : producto.acabado
+
+  // Handle warehouse change for "novedad" products
+  const handleAlmacenToggle = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onAlmacenChange && producto.estado_producto === 'novedad') {
+      const nuevoAlmacen = producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL'
+      onAlmacenChange(producto.id, nuevoAlmacen)
+    }
+  }
 
   if (variant === 'list') {
     return (
@@ -117,7 +129,16 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
           <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-600 mb-3">
             <span className="px-2 py-1 bg-neutral-100 rounded flex items-center gap-2">
               {producto.formato}
-              <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
+              {producto.estado_producto === 'novedad' && onAlmacenChange ? (
+                <div onClick={handleAlmacenToggle} className="cursor-pointer">
+                  <ToggleSwitch
+                    value={producto.almacen}
+                    onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+                  />
+                </div>
+              ) : (
+                <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
+              )}
             </span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{producto.calidad}</span>
             <span className="px-2 py-1 bg-neutral-100 rounded">{acabadoLabel}</span>
@@ -190,7 +211,16 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
               </span>
             )}
           </div>
-          <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
+          {producto.estado_producto === 'novedad' && onAlmacenChange ? (
+            <div onClick={handleAlmacenToggle} className="cursor-pointer">
+              <ToggleSwitch
+                value={producto.almacen}
+                onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+              />
+            </div>
+          ) : (
+            <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
+          )}
         </div>
 
         {/* Badge de stock */}

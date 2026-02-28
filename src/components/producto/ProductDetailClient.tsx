@@ -280,8 +280,8 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
             <h1 className="text-2xl font-bold text-neutral-900 uppercase tracking-wide">
               {producto.nombre}
             </h1>
-            <p className="text-neutral-500 mt-1 flex items-center gap-2">
-              {producto.formato}
+            <p className="text-neutral-500 mt-1 flex items-center justify-between">
+              <span>{producto.formato}</span>
               <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
             </p>
           </div>
@@ -403,8 +403,8 @@ export function ProductDetailClient({ producto }: ProductDetailClientProps) {
               </h1>
 
               {/* Formato */}
-              <p className="text-xl text-neutral-600 mb-6 flex items-center gap-2">
-                {producto.formato}
+              <p className="text-xl text-neutral-600 mb-6 flex items-center justify-between">
+                <span>{producto.formato}</span>
                 <AlmacenIndicator almacen={producto.almacen} show={producto.mostrar_en_grid} />
               </p>
 

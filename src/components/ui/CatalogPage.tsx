@@ -197,13 +197,13 @@ function ProductCard({ product, isElongated, showQR = true }: { product: Catalog
           <tbody>
             <tr>
               <td style={headerCell}>Formato</td>
-              <td style={{ ...cell, width: '25%', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                {product.formato}
+              <td style={{ ...cell, width: '25%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>{product.formato}</span>
                 {product.mostrar_en_catalogo && (
                   <span style={{
                     display: 'inline-block',
-                    width: '3px',
-                    height: '3px',
+                    width: '12px',
+                    height: '12px',
                     borderRadius: '50%',
                     backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
                     flexShrink: 0

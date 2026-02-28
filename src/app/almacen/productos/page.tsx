@@ -386,37 +386,46 @@ export default function ProductosAlmacenPage() {
                   </div>
                   {/* Acciones rápidas */}
                   <div className="mt-3 p-2 bg-neutral-50 rounded-lg space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-neutral-600">Novedad</span>
-                      <button
-                        onClick={() => handleEstadoChange(producto.id, producto.estado_producto === 'NOVEDAD' ? 'NORMAL' : 'NOVEDAD')}
-                        className={`w-8 h-4 rounded-full transition-colors ${
-                          producto.estado_producto === 'NOVEDAD' ? 'bg-primary-600' : 'bg-neutral-300'
-                        }`}
+                    {/* Novedad - Icono de estrella */}
+                    <button
+                      onClick={() => handleEstadoChange(producto.id, producto.estado_producto === 'NOVEDAD' ? 'NORMAL' : 'NOVEDAD')}
+                      className="flex items-center gap-2 w-full"
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill={producto.estado_producto === 'NOVEDAD' ? '#fbbf24' : 'none'}
+                        stroke={producto.estado_producto === 'NOVEDAD' ? '#fbbf24' : '#9ca3af'}
+                        strokeWidth="2"
+                        className={producto.estado_producto === 'NOVEDAD' ? 'drop-shadow-[0_0_4px_rgba(251,191,36,0.6)]' : ''}
                       >
-                        <span
-                          className={`block w-3 h-3 bg-white rounded-full transition-transform ${
-                            producto.estado_producto === 'NOVEDAD' ? 'translate-x-4' : 'translate-x-0.5'
-                          }`}
-                        />
-                      </button>
-                    </div>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                      <span className={`text-xs ${producto.estado_producto === 'NOVEDAD' ? 'text-amber-500 font-medium' : 'text-neutral-500'}`}>
+                        {producto.estado_producto === 'NOVEDAD' ? 'Novedad' : 'No novedad'}
+                      </span>
+                    </button>
+                    {/* Almacén - Toggle con texto */}
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-neutral-600">
-                        {producto.almacen === 'PRINCIPAL' ? 'Principal' : 'Logistics'}
+                      <span className={`text-xs font-medium ${producto.almacen === 'PRINCIPAL' ? 'text-green-600' : 'text-blue-600'}`}>
+                        Principal
                       </span>
                       <button
                         onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
-                        className={`w-8 h-4 rounded-full transition-colors ${
+                        className={`w-12 h-6 rounded-full transition-colors relative ${
                           producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : 'bg-blue-500'
                         }`}
                       >
                         <span
-                          className={`block w-3 h-3 bg-white rounded-full transition-transform ${
-                            producto.almacen === 'PRINCIPAL' ? 'translate-x-4' : 'translate-x-0.5'
+                          className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
+                            producto.almacen === 'PRINCIPAL' ? 'left-1' : 'right-1'
                           }`}
                         />
                       </button>
+                      <span className={`text-xs font-medium ${producto.almacen === 'LOGISTICS' ? 'text-blue-600' : 'text-green-600'}`}>
+                        Logistics
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -447,7 +456,7 @@ export default function ProductosAlmacenPage() {
                       Stock
                     </th>
                     <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                      Estado
+                      NOVEDAD
                     </th>
                     <th className="text-left px-6 py-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
                       Almacén
@@ -536,32 +545,46 @@ export default function ProductosAlmacenPage() {
                       <td className="px-6 py-4">
                         <button
                           onClick={() => handleEstadoChange(producto.id, producto.estado_producto === 'NOVEDAD' ? 'NORMAL' : 'NOVEDAD')}
-                          className={`w-10 h-5 rounded-full transition-colors ${
-                            producto.estado_producto === 'NOVEDAD' ? 'bg-primary-600' : 'bg-neutral-300'
-                          }`}
+                          className="flex items-center gap-2"
                           title={producto.estado_producto === 'NOVEDAD' ? 'Novedad - Clic para quitar' : 'Normal - Clic para marcar novedad'}
                         >
-                          <span
-                            className={`block w-4 h-4 bg-white rounded-full transition-transform ${
-                              producto.estado_producto === 'NOVEDAD' ? 'translate-x-5' : 'translate-x-0.5'
-                            }`}
-                          />
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill={producto.estado_producto === 'NOVEDAD' ? '#fbbf24' : 'none'}
+                            stroke={producto.estado_producto === 'NOVEDAD' ? '#fbbf24' : '#9ca3af'}
+                            strokeWidth="2"
+                            className={producto.estado_producto === 'NOVEDAD' ? 'drop-shadow-[0_0_4px_rgba(251,191,36,0.6)]' : ''}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
+                          <span className={`text-xs ${producto.estado_producto === 'NOVEDAD' ? 'text-amber-500 font-medium' : 'text-neutral-500'}`}>
+                            {producto.estado_producto === 'NOVEDAD' ? 'Sí' : 'No'}
+                          </span>
                         </button>
                       </td>
                       <td className="px-6 py-4">
-                        <button
-                          onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
-                          className={`w-10 h-5 rounded-full transition-colors ${
-                            producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : 'bg-blue-500'
-                          }`}
-                          title={producto.almacen === 'PRINCIPAL' ? 'Principal - Clic para cambiar' : 'Logistics - Clic para cambiar'}
-                        >
-                          <span
-                            className={`block w-4 h-4 bg-white rounded-full transition-transform ${
-                              producto.almacen === 'PRINCIPAL' ? 'translate-x-5' : 'translate-x-0.5'
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-medium ${producto.almacen === 'PRINCIPAL' ? 'text-green-600' : 'text-neutral-400'}`}>
+                            Principal
+                          </span>
+                          <button
+                            onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+                            className={`w-12 h-6 rounded-full transition-colors relative ${
+                              producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : 'bg-blue-500'
                             }`}
-                          />
-                        </button>
+                          >
+                            <span
+                              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
+                                producto.almacen === 'PRINCIPAL' ? 'left-1' : 'right-1'
+                              }`}
+                            />
+                          </button>
+                          <span className={`text-xs font-medium ${producto.almacen === 'LOGISTICS' ? 'text-blue-600' : 'text-neutral-400'}`}>
+                            Logistics
+                          </span>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">

@@ -202,8 +202,8 @@ function ProductCard({ product, isElongated, showQR = true }: { product: Catalog
                 {product.mostrar_en_catalogo && (
                   <span style={{
                     display: 'inline-block',
-                    width: '12px',
-                    height: '12px',
+                    width: '10px',
+                    height: '10px',
                     borderRadius: '50%',
                     backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
                     flexShrink: 0

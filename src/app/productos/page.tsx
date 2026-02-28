@@ -308,54 +308,6 @@ function ProductosContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Handler para cambiar el almacén de un producto
-  const handleAlmacenChange = async (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => {
-    try {
-      const response = await fetch(`/api/productos/${productoId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ almacen: nuevoAlmacen })
-      })
-
-      if (response.ok) {
-        // Actualizar el producto en el estado local
-        setAllProductos(prev =>
-          prev.map(p =>
-            p.id === productoId
-              ? { ...p, almacen: nuevoAlmacen }
-              : p
-          )
-        )
-      }
-    } catch (error) {
-      console.error('Error updating almacen:', error)
-    }
-  }
-
-  // Handler para cambiar el estado de un producto (novedad/normal/oferta)
-  const handleEstadoChange = async (productoId: string, nuevoEstado: 'normal' | 'oferta' | 'novedad') => {
-    try {
-      const response = await fetch(`/api/productos/${productoId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado_producto: nuevoEstado })
-      })
-
-      if (response.ok) {
-        // Actualizar el producto en el estado local
-        setAllProductos(prev =>
-          prev.map(p =>
-            p.id === productoId
-              ? { ...p, estado_producto: nuevoEstado }
-              : p
-          )
-        )
-      }
-    } catch (error) {
-      console.error('Error updating estado:', error)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-white">
       {/* Navegación Desktop */}
@@ -482,11 +434,7 @@ function ProductosContent() {
             </div>
           ) : (
             <>
-              <ProductGrid
-                productos={productos}
-                onAlmacenChange={handleAlmacenChange}
-                onEstadoChange={handleEstadoChange}
-              />
+              <ProductGrid productos={productos} />
 
               {/* Pagination */}
               {totalPages > 1 && (

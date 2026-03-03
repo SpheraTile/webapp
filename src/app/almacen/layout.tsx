@@ -112,9 +112,9 @@ export default function AlmacenLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-neutral-100 lg:flex print:block print:bg-white">
-      {/* Desktop Sidebar - hidden on mobile and when printing */}
-      <aside className="hidden lg:flex w-64 bg-neutral-900 text-white flex-shrink-0 flex-col print:hidden">
+    <div className="min-h-screen bg-neutral-100 lg:h-screen lg:overflow-hidden print:block print:bg-white print:h-auto print:overflow-visible">
+      {/* Desktop Sidebar - fixed on desktop */}
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-neutral-900 text-white flex-col z-50 print:hidden">
         {/* Logo */}
         <div className="p-6 border-b border-neutral-800">
           <Logo size="md" href="/almacen" />
@@ -122,7 +122,7 @@ export default function AlmacenLayout({
         </div>
 
         {/* Menu */}
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto">
           <ul className="space-y-1">
             {menuItems.map((item) => {
               const isActive = pathname === item.href ||
@@ -255,8 +255,8 @@ export default function AlmacenLayout({
         </div>
       </nav>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto pt-14 pb-20 lg:pt-0 lg:pb-0">
+      {/* Main content - with independent scroll */}
+      <main className="flex-1 overflow-auto pt-14 pb-20 lg:pt-0 lg:pb-0 lg:ml-64 h-screen">
         <ToastProvider>
           <ConfirmProvider>
             {children}

@@ -8,15 +8,14 @@ interface ToggleSwitchProps {
 }
 
 export function ToggleSwitch({ value, onChange, disabled = false, className = '' }: ToggleSwitchProps) {
-  // 3 estados: PRINCIPAL -> LOGISTICS -> AMBOS -> PRINCIPAL
+  // 3 estados: PRINCIPAL (izquierda) -> AMBOS (centro) -> LOGISTICS (derecha) -> PRINCIPAL
   const getNextValue = (): TipoAlmacen => {
-    if (value === 'PRINCIPAL') return 'LOGISTICS'
-    if (value === 'LOGISTICS') return 'AMBOS'
+    if (value === 'PRINCIPAL') return 'AMBOS'
+    if (value === 'AMBOS') return 'LOGISTICS'
     return 'PRINCIPAL'
   }
 
   const isPrincipal = value === 'PRINCIPAL'
-  const isLogistics = value === 'LOGISTICS'
   const isAmbos = value === 'AMBOS'
 
   // Color de fondo según el estado
@@ -26,13 +25,13 @@ export function ToggleSwitch({ value, onChange, disabled = false, className = ''
     AMBOS: 'bg-gradient-to-r from-green-500 to-blue-500',
   }
 
-  // Posición del toggle (3 posiciones para 3 estados)
-  const togglePosition = isPrincipal ? 'translate-x-0.5' : isLogistics ? 'translate-x-2.5' : 'translate-x-5'
+  // Posición del toggle (3 posiciones: izquierda, centro, derecha)
+  const togglePosition = isPrincipal ? 'translate-x-0.5' : isAmbos ? 'translate-x-2.5' : 'translate-x-5'
 
   const titleText = {
-    PRINCIPAL: 'Principal - Click para cambiar a Logistics',
-    LOGISTICS: 'Logistics - Click para cambiar a Ambos',
-    AMBOS: 'Ambos - Click para cambiar a Principal',
+    PRINCIPAL: 'Principal - Click para cambiar a Ambos',
+    AMBOS: 'Ambos - Click para cambiar a Logistics',
+    LOGISTICS: 'Logistics - Click para cambiar a Principal',
   }
 
   return (

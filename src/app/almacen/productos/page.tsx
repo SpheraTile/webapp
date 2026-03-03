@@ -412,14 +412,14 @@ export default function ProductosAlmacenPage() {
                         Principal
                       </span>
                       <button
-                        onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : producto.almacen === 'LOGISTICS' ? 'AMBOS' : 'PRINCIPAL')}
+                        onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'AMBOS' : producto.almacen === 'AMBOS' ? 'LOGISTICS' : 'PRINCIPAL')}
                         className={`w-12 h-6 rounded-full transition-colors relative ${
-                          producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : producto.almacen === 'LOGISTICS' ? 'bg-blue-500' : 'bg-gradient-to-r from-green-500 to-blue-500'
+                          producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : producto.almacen === 'AMBOS' ? 'bg-gradient-to-r from-green-500 to-blue-500' : 'bg-blue-500'
                         }`}
                       >
                         <span
                           className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
-                            producto.almacen === 'PRINCIPAL' ? 'left-1' : producto.almacen === 'LOGISTICS' ? 'left-1/2 -translate-x-1/2' : 'right-1'
+                            producto.almacen === 'PRINCIPAL' ? 'left-1' : producto.almacen === 'AMBOS' ? 'left-1/2 -translate-x-1/2' : 'right-1'
                           }`}
                         />
                       </button>
@@ -570,14 +570,14 @@ export default function ProductosAlmacenPage() {
                             Principal
                           </span>
                           <button
-                            onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : producto.almacen === 'LOGISTICS' ? 'AMBOS' : 'PRINCIPAL')}
+                            onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'AMBOS' : producto.almacen === 'AMBOS' ? 'LOGISTICS' : 'PRINCIPAL')}
                             className={`w-12 h-6 rounded-full transition-colors relative ${
-                              producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : producto.almacen === 'LOGISTICS' ? 'bg-blue-500' : 'bg-gradient-to-r from-green-500 to-blue-500'
+                              producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : producto.almacen === 'AMBOS' ? 'bg-gradient-to-r from-green-500 to-blue-500' : 'bg-blue-500'
                             }`}
                           >
                             <span
                               className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
-                                producto.almacen === 'PRINCIPAL' ? 'left-1' : producto.almacen === 'LOGISTICS' ? 'left-1/2 -translate-x-1/2' : 'right-1'
+                                producto.almacen === 'PRINCIPAL' ? 'left-1' : producto.almacen === 'AMBOS' ? 'left-1/2 -translate-x-1/2' : 'right-1'
                               }`}
                             />
                           </button>

@@ -380,10 +380,11 @@ export default function CatalogoPage() {
           height: 1130,
         })
 
-        const imgData = canvas.toDataURL('image/png')
+        // Usar JPEG con calidad 0.75 para reducir significativamente el tamaño
+        const imgData = canvas.toDataURL('image/jpeg', 0.75)
 
         if (i > 0) pdf.addPage()
-        pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight)
+        pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight)
       }
 
       const filename = `Catalogo_SPHERA_TILE${serieLabel ? `_${serieLabel}` : ''}_${new Date().toISOString().slice(0, 10)}`

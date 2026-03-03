@@ -73,7 +73,8 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
         }
 
         const canvas = await html2canvas(pageEl, canvasOptions)
-        const imgData = canvas.toDataURL('image/png')
+        // Usar JPEG con calidad 0.75 para reducir el tamaño del PDF
+        const imgData = canvas.toDataURL('image/jpeg', 0.75)
 
         // QR pages: minimal margins, fill the page, center vertically
         // Normal pages: standard 10mm margins
@@ -87,25 +88,26 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
           ? margin + (availableHeight - imgHeight) / 2
           : margin
 
-        pdf.addImage(imgData, 'PNG', margin, yOffset, imgWidth, imgHeight)
+        pdf.addImage(imgData, 'JPEG', margin, yOffset, imgWidth, imgHeight)
       }
     } else {
       // Fallback: single continuous capture (original behavior)
       const canvas = await html2canvas(element, canvasOptions)
-      const imgData = canvas.toDataURL('image/png')
+      // Usar JPEG con calidad 0.75 para reducir el tamaño del PDF
+      const imgData = canvas.toDataURL('image/jpeg', 0.75)
       const imgWidth = pageWidth - 20
       const imgHeight = (canvas.height * imgWidth) / canvas.width
 
       let heightLeft = imgHeight
       let position = 10
 
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
+      pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight)
       heightLeft -= (pageHeight - 20)
 
       while (heightLeft > 0) {
         position = heightLeft - imgHeight + 10
         pdf.addPage()
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
+        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight)
         heightLeft -= (pageHeight - 20)
       }
     }

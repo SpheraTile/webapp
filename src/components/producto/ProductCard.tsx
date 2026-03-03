@@ -86,12 +86,12 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
   const acabadoKey = producto.acabado ? ACABADO_KEYS[producto.acabado] : null
   const acabadoLabel = acabadoKey ? t(acabadoKey) : producto.acabado
 
-  // Handle warehouse change - 3 states: PRINCIPAL -> LOGISTICS -> AMBOS -> PRINCIPAL
+  // Handle warehouse change - 3 states: PRINCIPAL (izq) -> AMBOS (centro) -> LOGISTICS (der) -> PRINCIPAL
   const handleAlmacenToggle = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     if (onAlmacenChange) {
-      const nuevoAlmacen = producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : producto.almacen === 'LOGISTICS' ? 'AMBOS' : 'PRINCIPAL'
+      const nuevoAlmacen = producto.almacen === 'PRINCIPAL' ? 'AMBOS' : producto.almacen === 'AMBOS' ? 'LOGISTICS' : 'PRINCIPAL'
       onAlmacenChange(producto.id, nuevoAlmacen)
     }
   }
@@ -140,7 +140,7 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
           <div onClick={handleAlmacenToggle} className="cursor-pointer">
             <ToggleSwitch
               value={producto.almacen}
-              onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : producto.almacen === 'LOGISTICS' ? 'AMBOS' : 'PRINCIPAL')}
+              onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'AMBOS' : producto.almacen === 'AMBOS' ? 'LOGISTICS' : 'PRINCIPAL')}
             />
           </div>
         </div>

@@ -386,7 +386,7 @@ export function ProformaDocument({
         >
           {/* Product name */}
           <p style={{
-            fontSize: '24px',
+            fontSize: '18px',
             fontWeight: 'bold',
             color: '#171717',
             textTransform: 'uppercase',
@@ -398,9 +398,9 @@ export function ProformaDocument({
 
           {/* Format */}
           <p style={{
-            fontSize: '16px',
+            fontSize: '14px',
             color: '#737373',
-            margin: '0 0 20px 0',
+            margin: '0 0 12px 0',
           }}>
             {item.formato}
           </p>
@@ -409,7 +409,7 @@ export function ProformaDocument({
           <div style={{ display: 'inline-block' }}>
             <QRCodeSVG
               value={`${baseUrl}/productos/${item.qrSlug}`}
-              size={600}
+              size={180}
               level="M"
               includeMargin={false}
             />
@@ -417,9 +417,9 @@ export function ProformaDocument({
 
           {/* Scan instruction */}
           <p style={{
-            fontSize: '12px',
+            fontSize: '11px',
             color: '#525252',
-            margin: '16px 0 0 0',
+            margin: '12px 0 0 0',
           }}>
             Escanea para ver el producto
           </p>

@@ -158,6 +158,7 @@ enum EstadoProducto {
 enum TipoAlmacen {
   PRINCIPAL
   LOGISTICS
+  AMBOS
 }
 
 // ==================== PEDIDOS ====================

@@ -20,7 +20,7 @@ interface Producto {
   tipo_pieza: string
   uso: string
   estado_producto: string
-  almacen: 'PRINCIPAL' | 'LOGISTICS'
+  almacen: 'PRINCIPAL' | 'LOGISTICS' | 'AMBOS'
   mostrar_en_grid: boolean
 }
 
@@ -163,7 +163,7 @@ export default function ProductosAlmacenPage() {
     setEditingStock(null)
   }
 
-  const handleAlmacenChange = async (id: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => {
+  const handleAlmacenChange = async (id: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS' | 'AMBOS') => {
     try {
       const res = await fetch(`/api/productos/${id}`, {
         method: 'PUT',
@@ -408,22 +408,22 @@ export default function ProductosAlmacenPage() {
                     </button>
                     {/* Almacén - Toggle con texto */}
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs font-medium ${producto.almacen === 'PRINCIPAL' ? 'text-green-600' : 'text-blue-600'}`}>
+                      <span className={`text-xs font-medium ${producto.almacen === 'PRINCIPAL' || producto.almacen === 'AMBOS' ? 'text-green-600' : 'text-neutral-400'}`}>
                         Principal
                       </span>
                       <button
-                        onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+                        onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : producto.almacen === 'LOGISTICS' ? 'AMBOS' : 'PRINCIPAL')}
                         className={`w-12 h-6 rounded-full transition-colors relative ${
-                          producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : 'bg-blue-500'
+                          producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : producto.almacen === 'LOGISTICS' ? 'bg-blue-500' : 'bg-gradient-to-r from-green-500 to-blue-500'
                         }`}
                       >
                         <span
                           className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
-                            producto.almacen === 'PRINCIPAL' ? 'left-1' : 'right-1'
+                            producto.almacen === 'PRINCIPAL' ? 'left-1' : producto.almacen === 'LOGISTICS' ? 'left-1/2 -translate-x-1/2' : 'right-1'
                           }`}
                         />
                       </button>
-                      <span className={`text-xs font-medium ${producto.almacen === 'LOGISTICS' ? 'text-blue-600' : 'text-green-600'}`}>
+                      <span className={`text-xs font-medium ${producto.almacen === 'LOGISTICS' || producto.almacen === 'AMBOS' ? 'text-blue-600' : 'text-neutral-400'}`}>
                         Logistics
                       </span>
                     </div>
@@ -566,22 +566,22 @@ export default function ProductosAlmacenPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium ${producto.almacen === 'PRINCIPAL' ? 'text-green-600' : 'text-neutral-400'}`}>
+                          <span className={`text-xs font-medium ${producto.almacen === 'PRINCIPAL' || producto.almacen === 'AMBOS' ? 'text-green-600' : 'text-neutral-400'}`}>
                             Principal
                           </span>
                           <button
-                            onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+                            onClick={() => handleAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : producto.almacen === 'LOGISTICS' ? 'AMBOS' : 'PRINCIPAL')}
                             className={`w-12 h-6 rounded-full transition-colors relative ${
-                              producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : 'bg-blue-500'
+                              producto.almacen === 'PRINCIPAL' ? 'bg-green-500' : producto.almacen === 'LOGISTICS' ? 'bg-blue-500' : 'bg-gradient-to-r from-green-500 to-blue-500'
                             }`}
                           >
                             <span
                               className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
-                                producto.almacen === 'PRINCIPAL' ? 'left-1' : 'right-1'
+                                producto.almacen === 'PRINCIPAL' ? 'left-1' : producto.almacen === 'LOGISTICS' ? 'left-1/2 -translate-x-1/2' : 'right-1'
                               }`}
                             />
                           </button>
-                          <span className={`text-xs font-medium ${producto.almacen === 'LOGISTICS' ? 'text-blue-600' : 'text-neutral-400'}`}>
+                          <span className={`text-xs font-medium ${producto.almacen === 'LOGISTICS' || producto.almacen === 'AMBOS' ? 'text-blue-600' : 'text-neutral-400'}`}>
                             Logistics
                           </span>
                         </div>

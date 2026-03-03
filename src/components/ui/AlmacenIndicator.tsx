@@ -12,6 +12,16 @@ export function AlmacenIndicator({ almacen, show = true, className = '' }: Almac
     return null
   }
 
+  // AMBOS = punto verde + punto azul juntos
+  if (almacen === 'AMBOS') {
+    return (
+      <span className={`inline-flex items-center gap-0.5 ${className}`} title="Almacén: Principal y Logistics">
+        <span className="inline-block w-[10px] h-[10px] rounded-full bg-green-500" />
+        <span className="inline-block w-[10px] h-[10px] rounded-full bg-blue-500" />
+      </span>
+    )
+  }
+
   // PRINCIPAL = punto verde (10x10px)
   // LOGISTICS = punto azul (10x10px)
   const colorClass = almacen === 'PRINCIPAL'

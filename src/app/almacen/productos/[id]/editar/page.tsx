@@ -13,7 +13,7 @@ const OPCIONES = {
   tipo_pieza: ['BASE', 'DECORADO', 'MULTISTEP'],
   uso: ['PAVIMENTO', 'REVESTIMIENTO', 'PAVIMENTO_REVESTIMIENTO'],
   estado_producto: ['NORMAL', 'OFERTA', 'NOVEDAD'],
-  almacen: ['PRINCIPAL', 'LOGISTICS'],
+  almacen: ['PRINCIPAL', 'LOGISTICS', 'AMBOS'],
 }
 
 const LABELS = {
@@ -23,7 +23,7 @@ const LABELS = {
   tipo_pieza: { BASE: 'Base', DECORADO: 'Decorado', MULTISTEP: 'Multistep' },
   uso: { PAVIMENTO: 'Pavimento', REVESTIMIENTO: 'Revestimiento', PAVIMENTO_REVESTIMIENTO: 'Pavimento y Revestimiento' },
   estado_producto: { NORMAL: 'Normal', OFERTA: 'Oferta', NOVEDAD: 'Novedad' },
-  almacen: { PRINCIPAL: 'Principal', LOGISTICS: 'Logistics' },
+  almacen: { PRINCIPAL: 'Principal', LOGISTICS: 'Logistics', AMBOS: 'Ambos' },
 }
 
 export default function EditarProductoPage() {
@@ -58,7 +58,7 @@ export default function EditarProductoPage() {
     tipo_pieza: 'BASE',
     uso: 'PAVIMENTO',
     estado_producto: 'NORMAL',
-    almacen: 'PRINCIPAL' as 'PRINCIPAL' | 'LOGISTICS',
+    almacen: 'PRINCIPAL' as 'PRINCIPAL' | 'LOGISTICS' | 'AMBOS',
     mostrar_en_grid: true,
     mostrar_en_catalogo: true,
     descripcion: '',

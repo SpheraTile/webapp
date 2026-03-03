@@ -371,7 +371,7 @@ export default function CatalogoPage() {
         setPdfProgress(`Página ${i + 1} de ${pageElements.length}...`)
 
         const canvas = await html2canvas(el, {
-          scale: 2,
+          scale: 1.5,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#ffffff',

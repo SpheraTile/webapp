@@ -180,16 +180,34 @@ function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlma
             <p style={{ fontSize: '10px', color: '#737373', margin: '0 0 6px 0', lineHeight: '1.3', display: 'flex', alignItems: 'center', gap: '8px' }}>
               Ref: {product.referencia} · {product.serie}
               {product.mostrar_en_catalogo && !ocultarIndicadorAlmacen && (
-                <span style={{
-                  display: 'inline-block',
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
-                  backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
-                  flexShrink: 0,
-                  alignSelf: 'center',
-                  marginTop: '8px'
-                }} />
+                <span style={{ display: 'flex', gap: '2px', flexShrink: 0, alignSelf: 'center' }}>
+                  {product.almacen === 'AMBOS' ? (
+                    <>
+                      <span style={{
+                        display: 'inline-block',
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        backgroundColor: '#22c55e',
+                      }} />
+                      <span style={{
+                        display: 'inline-block',
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        backgroundColor: '#3b82f6',
+                      }} />
+                    </>
+                  ) : (
+                    <span style={{
+                      display: 'inline-block',
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      backgroundColor: product.almacen === 'PRINCIPAL' ? '#22c55e' : '#3b82f6',
+                    }} />
+                  )}
+                </span>
               )}
             </p>
           </div>

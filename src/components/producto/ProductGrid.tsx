@@ -7,7 +7,7 @@ interface ProductGridProps {
   productos: Producto[]
   className?: string
   columnas?: number
-  onAlmacenChange?: (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => void
+  onAlmacenChange?: (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS' | 'AMBOS') => void
   onEstadoChange?: (productoId: string, nuevoEstado: 'normal' | 'oferta' | 'novedad') => void
 }
 

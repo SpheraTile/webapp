@@ -20,7 +20,7 @@ export type Acabado = 'Mate' | 'Pulido' | 'Satinado' | 'Texturizado' | 'Antidesl
 export type TipoPieza = 'base' | 'decorado' | 'multistep'
 export type Uso = 'pavimento' | 'revestimiento' | 'pavimento_revestimiento'
 export type EstadoProducto = 'normal' | 'oferta' | 'novedad'
-export type TipoAlmacen = 'PRINCIPAL' | 'LOGISTICS'
+export type TipoAlmacen = 'PRINCIPAL' | 'LOGISTICS' | 'AMBOS'
 
 export interface Producto {
   id: string
@@ -219,7 +219,7 @@ export const OPCIONES_ACABADO: Acabado[] = ['Mate', 'Pulido', 'Satinado', 'Textu
 export const OPCIONES_TIPO_PIEZA: TipoPieza[] = ['base', 'decorado', 'multistep']
 export const OPCIONES_USO: Uso[] = ['pavimento', 'revestimiento', 'pavimento_revestimiento']
 export const OPCIONES_ESTADO_PRODUCTO: EstadoProducto[] = ['normal', 'oferta', 'novedad']
-export const OPCIONES_TIPO_ALMACEN: TipoAlmacen[] = ['PRINCIPAL', 'LOGISTICS']
+export const OPCIONES_TIPO_ALMACEN: TipoAlmacen[] = ['PRINCIPAL', 'LOGISTICS', 'AMBOS']
 export const OPCIONES_ESTADO_PEDIDO: EstadoPedido[] = ['pendiente', 'confirmado', 'preparando', 'enviado', 'entregado', 'cancelado']
 export const OPCIONES_ESTADO_ALBARAN: EstadoAlbaran[] = ['borrador', 'emitido', 'entregado', 'anulado']
 export const OPCIONES_ESTADO_FACTURA: EstadoFactura[] = ['borrador', 'emitida', 'pagada', 'vencida', 'anulada']

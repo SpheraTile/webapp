@@ -42,7 +42,7 @@ export async function exportToPDF({ filename, element, orientation = 'portrait' 
     const pages = element.querySelectorAll('[data-pdf-page]')
 
     const canvasOptions = {
-      scale: 2,
+      scale: 1.5,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',

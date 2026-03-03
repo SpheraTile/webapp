@@ -16,7 +16,7 @@ interface ProductCardProps {
   className?: string
   variant?: 'grid' | 'list'
   formatType?: GridFormatType | 'other'
-  onAlmacenChange?: (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS') => void
+  onAlmacenChange?: (productoId: string, nuevoAlmacen: 'PRINCIPAL' | 'LOGISTICS' | 'AMBOS') => void
   onEstadoChange?: (productoId: string, nuevoEstado: 'normal' | 'oferta' | 'novedad') => void
 }
 
@@ -86,12 +86,12 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
   const acabadoKey = producto.acabado ? ACABADO_KEYS[producto.acabado] : null
   const acabadoLabel = acabadoKey ? t(acabadoKey) : producto.acabado
 
-  // Handle warehouse change
+  // Handle warehouse change - 3 states: PRINCIPAL -> LOGISTICS -> AMBOS -> PRINCIPAL
   const handleAlmacenToggle = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     if (onAlmacenChange) {
-      const nuevoAlmacen = producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL'
+      const nuevoAlmacen = producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : producto.almacen === 'LOGISTICS' ? 'AMBOS' : 'PRINCIPAL'
       onAlmacenChange(producto.id, nuevoAlmacen)
     }
   }
@@ -135,12 +135,12 @@ export function ProductCard({ producto, className = '', variant = 'grid', format
       {onAlmacenChange && (
         <div className="flex items-center justify-between">
           <span className="text-xs text-neutral-600">
-            {producto.almacen === 'PRINCIPAL' ? 'Principal' : 'Logistics'}
+            {producto.almacen === 'PRINCIPAL' ? 'Principal' : producto.almacen === 'LOGISTICS' ? 'Logistics' : 'Ambos'}
           </span>
           <div onClick={handleAlmacenToggle} className="cursor-pointer">
             <ToggleSwitch
               value={producto.almacen}
-              onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : 'PRINCIPAL')}
+              onChange={() => onAlmacenChange(producto.id, producto.almacen === 'PRINCIPAL' ? 'LOGISTICS' : producto.almacen === 'LOGISTICS' ? 'AMBOS' : 'PRINCIPAL')}
             />
           </div>
         </div>

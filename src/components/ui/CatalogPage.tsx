@@ -124,9 +124,17 @@ function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlma
   const cell = { border: '1px solid #d4d4d4', padding: '6px 8px', fontSize: '12px', wordWrap: 'break-word' as const }
   const headerCell = { ...cell, backgroundColor: '#f5f5f5', fontWeight: 'bold' as const, width: '25%' }
 
-  // Productos alargados: doble ancho, altura ajustada a ~75%
-  const cardWidth = isElongated ? '750px' : '368px'
-  const cardHeight = isElongated ? '380px' : '525px' // Aumentado de 505px a 525px para productos cuadrados
+  // Detectar si el producto es 60x120
+  const is60x120 = product.formato.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i) && (() => {
+    const parts = product.formato.toLowerCase().split('x')
+    if (parts.length === 2) {
+      const first = parseFloat(parts[0].replace(',', '.'))
+      const second = parseFloat(parts[1].replace(',', '.'))
+      return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
+        (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
+    }
+    return false
+  })()
 
   // Detectar si el producto es cuadrado (formatos como 60x60, 45x45, etc.)
   const isSquare = product.formato.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i) && (() => {
@@ -139,18 +147,20 @@ function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlma
     return false
   })()
 
+  // Productos alargados: doble ancho, altura ajustada a ~75%
+  const cardWidth = isElongated ? '750px' : '368px'
+  const cardHeight = isElongated ? '380px' : '525px'
+
   // Para productos cuadrados, calcular dimensiones explícitas en píxeles
-  // El ancho del contenedor es cardWidth menos padding (approx 340px para normal, 710px para elongated)
   const imageContainerWidth = isElongated ? 710 : 340
-  const squareSize = isSquare ? Math.round(imageContainerWidth * 0.7) : undefined // 70% para dejar espacio para el precio
+  const squareSize = isSquare && !is60x120 ? Math.round(imageContainerWidth * 0.7) : undefined
   const containerPadding = isElongated ? 20 : 14
 
   return (
     <div style={{ width: cardWidth, height: cardHeight, border: '1px solid #d4d4d4', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, backgroundColor: '#fff' }}>
       {/* Product image - fills remaining space */}
-      {isSquare ? (
+      {isSquare && !is60x120 ? (
         // Productos cuadrados: dimensiones explícitas en píxeles para html2canvas
-        // Imagen más pequeña (90%) con padding para que no se recorte
         <div style={{ paddingTop: containerPadding + 'px', paddingBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
           <img
             src={product.imagen}
@@ -159,8 +169,18 @@ function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlma
             crossOrigin="anonymous"
           />
         </div>
+      ) : is60x120 ? (
+        // Productos 60x120: ancho completo, altura con espacio arriba y abajo
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5', padding: '20px 14px' }}>
+          <img
+            src={product.imagen}
+            alt={product.nombre}
+            style={{ width: '100%', height: 'auto', maxHeight: '100%', objectFit: 'contain' }}
+            crossOrigin="anonymous"
+          />
+        </div>
       ) : (
-        // Productos no cuadrados
+        // Productos no cuadrados (alargados)
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f5f5' }}>
           <img
             src={product.imagen}

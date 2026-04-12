@@ -101,7 +101,13 @@ export function FiltersDrawer({
   // Helper to get count for a filter value
   const getCount = (category: keyof Facets, value: string): number | undefined => {
     if (!facets) return undefined
-    return facets[category]?.[value] ?? 0
+    // Try exact match first
+    if (facets[category]?.[value] !== undefined) {
+      return facets[category][value]
+    }
+    // Try uppercase for enum fields
+    const upperValue = value.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    return facets[category]?.[upperValue] ?? 0
   }
 
   const toggleFiltro = (
@@ -206,7 +212,7 @@ export function FiltersDrawer({
                 label={t(LABELS_TIPO_PIEZA[tipo])}
                 checked={filtros.tipo_pieza.includes(tipo)}
                 onChange={() => toggleFiltro('tipo_pieza', tipo)}
-                count={getCount('tipo_pieza', tipo.toUpperCase())}
+                count={getCount('tipo_pieza', tipo)}
               />
             ))}
           </FilterSection>
@@ -219,7 +225,7 @@ export function FiltersDrawer({
                 label={t(LABELS_USO[u])}
                 checked={filtros.uso.includes(u)}
                 onChange={() => toggleFiltro('uso', u)}
-                count={getCount('uso', u.toUpperCase())}
+                count={getCount('uso', u)}
               />
             ))}
           </FilterSection>
@@ -232,7 +238,7 @@ export function FiltersDrawer({
                 label={t(LABELS_ESTADO_PRODUCTO[estado])}
                 checked={filtros.estado_producto.includes(estado)}
                 onChange={() => toggleFiltro('estado_producto', estado)}
-                count={getCount('estado_producto', estado.toUpperCase())}
+                count={getCount('estado_producto', estado)}
               />
             ))}
           </FilterSection>
@@ -245,7 +251,7 @@ export function FiltersDrawer({
                 label={t(LABELS_MATERIA_PRIMA[materia])}
                 checked={filtros.materia_prima.includes(materia)}
                 onChange={() => toggleFiltro('materia_prima', materia)}
-                count={getCount('materia_prima', materia.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}
+                count={getCount('materia_prima', materia)}
               />
             ))}
           </FilterSection>
@@ -258,7 +264,7 @@ export function FiltersDrawer({
                 label={t(LABELS_ASPECTO[asp])}
                 checked={filtros.aspecto.includes(asp)}
                 onChange={() => toggleFiltro('aspecto', asp)}
-                count={getCount('aspecto', asp.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}
+                count={getCount('aspecto', asp)}
               />
             ))}
           </FilterSection>
@@ -271,7 +277,7 @@ export function FiltersDrawer({
                 label={t(LABELS_ACABADO[acab])}
                 checked={filtros.acabado.includes(acab)}
                 onChange={() => toggleFiltro('acabado', acab)}
-                count={getCount('acabado', acab.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))}
+                count={getCount('acabado', acab)}
               />
             ))}
           </FilterSection>

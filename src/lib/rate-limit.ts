@@ -1,3 +1,5 @@
+import { NextRequest } from 'next/server'
+
 // Simple in-memory rate limiting
 // For production, consider using Redis or a dedicated rate limiting service
 

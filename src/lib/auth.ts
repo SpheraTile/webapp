@@ -70,5 +70,13 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // Update session every 24 hours
   },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    // Only set to false in production if using HTTPS
+    // https://next-auth.js.org/configuration/options#jwt-encryption
+  },
+  useSecureCookies: process.env.NODE_ENV === 'production',
 }

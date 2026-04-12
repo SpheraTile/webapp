@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+import { bcrypt } from 'bcryptjs'
+import { validateBody, changePasswordSchema } from '@/lib/validations'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,21 +13,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    const { currentPassword, newPassword } = await request.json()
+    const body = await request.json()
 
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: 'Contraseña actual y nueva son requeridas' },
-        { status: 400 }
-      )
-    }
-
-    if (newPassword.length < 6) {
-      return NextResponse.json(
-        { error: 'La nueva contraseña debe tener al menos 6 caracteres' },
-        { status: 400 }
-      )
-    }
+    // Validar input con Zod
+    const { currentPassword, newPassword } = await validateBody(changePasswordSchema, body)
 
     // Obtener usuario
     const user = await prisma.user.findUnique({

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
 import { Send, X, MessageCircle, Loader2, Bot, User, Package, ShoppingCart, Phone } from 'lucide-react'
 import { useChat } from '@/context/ChatContext'
+import { formatMessageSafely } from '@/lib/sanitize'
 
 interface Message {
   id: string
@@ -149,32 +150,28 @@ export default function Chatbot() {
     setShowContactOptions(!showContactOptions)
   }
 
-  // Format message content with markdown-like parsing
+  // Format message content with SAFE markdown-like parsing (XSS prevention)
   const formatMessage = (content: string) => {
     const lines = content.split('\n')
     return lines.map((line, i) => {
+      // Sanitize the line first to prevent XSS
+      const sanitizedLine = formatMessageSafely(line)
+
       // Handle bullet points
       if (line.startsWith('• ') || line.startsWith('- ')) {
         return (
-          <li key={i} className="ml-4 list-disc">
-            {line.substring(2)}
-          </li>
+          <li key={i} className="ml-4 list-disc" dangerouslySetInnerHTML={{ __html: sanitizedLine }} />
         )
       }
-      // Handle bold text
+      // Handle bold text (already sanitized)
       if (line.includes('**')) {
-        const parts = line.split(/\*\*(.*?)\*\*/g)
         return (
-          <p key={i} className="mb-1">
-            {parts.map((part, j) =>
-              j % 2 === 1 ? <strong key={j}>{part}</strong> : part
-            )}
-          </p>
+          <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: sanitizedLine }} />
         )
       }
       // Regular line
       if (line.trim()) {
-        return <p key={i} className="mb-1">{line}</p>
+        return <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: sanitizedLine }} />
       }
       return <br key={i} />
     })

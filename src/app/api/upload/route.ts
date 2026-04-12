@@ -60,10 +60,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Error al subir archivo' }, { status: 500 })
   }
 }
-
-// Configurar límite de tamaño para Next.js
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}

@@ -101,13 +101,24 @@ export function FiltersDrawer({
   // Helper to get count for a filter value
   const getCount = (category: keyof Facets, value: string): number | undefined => {
     if (!facets) return undefined
-    // Try exact match first
+
+    // Try exact match first (works for formato, calidad)
     if (facets[category]?.[value] !== undefined) {
       return facets[category][value]
     }
-    // Try uppercase for enum fields
+
+    // Try uppercase normalized match (works for enum fields)
     const upperValue = value.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    return facets[category]?.[upperValue] ?? 0
+    if (facets[category]?.[upperValue] !== undefined) {
+      return facets[category][upperValue]
+    }
+
+    // Try with accents for MÁRMOL
+    const withAccents = upperValue
+      .replace('MARMOL', 'MÁRMOL')
+      .replace('PIEDRA', 'PIEDRA')
+
+    return facets[category]?.[withAccents] ?? 0
   }
 
   const toggleFiltro = (

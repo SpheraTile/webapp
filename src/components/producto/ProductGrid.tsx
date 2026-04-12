@@ -12,10 +12,8 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ productos, className = '', columnas, onAlmacenChange, onEstadoChange }: ProductGridProps) {
-  // Filtrar productos con stock > 0 (no filtrar por precio)
-  const displayProducts = useMemo(() => {
-    return productos.filter(p => p.stock_m2 > 0)
-  }, [productos])
+  // Ya no filtramos por stock aquí - se hace en la API para que los facets sean consistentes
+  const displayProducts = productos
 
   if (displayProducts.length === 0) {
     return (

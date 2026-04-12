@@ -234,6 +234,9 @@ function ProductosContent() {
       // NO usar paginación de la API - obtener todos los productos
       params.set('limit', '10000') // Límite muy alto para obtener todos
 
+      // IMPORTANTE: Solo mostrar productos con stock en catálogo público
+      params.set('solo_con_stock', 'true')
+
       // Mapear valores a formato DB
       filtrosActivos.formato.forEach(v => params.append('formato', v))
       filtrosActivos.calidad.forEach(v => params.append('calidad', v))

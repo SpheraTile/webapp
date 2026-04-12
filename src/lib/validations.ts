@@ -35,18 +35,10 @@ export const productoSchema = z.object({
   formato: z.string().min(1, 'El formato es requerido'),
   precio_m2: z.number().positive('El precio debe ser positivo'),
   stock_m2: z.number().nonnegative('El stock no puede ser negativo'),
-  calidad: z.enum(['PRIMERA', 'SEGUNDA', 'COM', 'PROMOCIONAL'], {
-    errorMap: () => ({ message: 'Calidad inválida' }),
-  }),
-  materia_prima: z.enum(['PORCELANICO', 'GRES', 'AZULEJO'], {
-    errorMap: () => ({ message: 'Materia prima inválida' }),
-  }),
-  aspecto: z.enum(['BLANCO', 'CEMENTO', 'COLORES', 'MADERA', 'MARMOL', 'ONYX', 'PIEDRA', 'TERRACOTA'], {
-    errorMap: () => ({ message: 'Aspecto inválido' }),
-  }),
-  acabado: z.enum(['MATE', 'PULIDO', 'SATINADO', 'TEXTURIZADO', 'ANTIDESLIZANTE'], {
-    errorMap: () => ({ message: 'Acabado inválido' }),
-  }),
+  calidad: z.enum(['PRIMERA', 'SEGUNDA', 'COM', 'PROMOCIONAL']),
+  materia_prima: z.enum(['PORCELANICO', 'GRES', 'AZULEJO']),
+  aspecto: z.enum(['BLANCO', 'CEMENTO', 'COLORES', 'MADERA', 'MARMOL', 'ONYX', 'PIEDRA', 'TERRACOTA']),
+  acabado: z.enum(['MATE', 'PULIDO', 'SATINADO', 'TEXTURIZADO', 'ANTIDESLIZANTE']),
 })
 
 // Cesta/Pedido validation schemas
@@ -68,9 +60,7 @@ export const searchSchema = z.object({
 
 // File upload validation
 export const uploadSchema = z.object({
-  folder: z.enum(['productos', 'galeria', 'documentos', 'avatars'], {
-    errorMap: () => ({ message: 'Carpeta inválida' }),
-  }),
+  folder: z.enum(['productos', 'galeria', 'documentos', 'avatars']),
 })
 
 // Helper function to validate request body
@@ -79,7 +69,7 @@ export async function validateBody<T>(schema: z.ZodSchema<T>, body: any): Promis
     return await schema.parseAsync(body)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0]
+      const firstError = error.issues[0]
       throw new Error(firstError.message)
     }
     throw error

@@ -43,6 +43,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
+              "media-src 'self' https: blob:",
               "connect-src 'self' https://*.neon.tech https://*.openai.com https://*.bunny.net https://vercel.live",
               "frame-src 'self' https://vercel.live",
               "object-src 'none'",

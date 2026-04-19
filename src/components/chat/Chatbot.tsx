@@ -198,7 +198,7 @@ export default function Chatbot() {
 
       {/* Chat window */}
       <div
-        className={`fixed bottom-20 lg:bottom-24 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-neutral-200 transition-all duration-300 ${
+        className={`fixed bottom-20 lg:bottom-24 right-4 z-50 w-[400px] max-w-[calc(100vw-2rem)] h-[600px] bg-white rounded-2xl shadow-2xl border border-neutral-200 transition-all duration-300 flex flex-col ${
           isOpen
             ? 'opacity-100 translate-y-0 pointer-events-auto'
             : 'opacity-0 translate-y-4 pointer-events-none'
@@ -278,7 +278,7 @@ export default function Chatbot() {
         )}
 
         {/* Messages */}
-        <div className="h-[350px] overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -300,13 +300,13 @@ export default function Chatbot() {
                 )}
               </div>
               <div
-                className={`max-w-[80%] p-3 rounded-2xl ${
+                className={`max-w-[85%] p-3 rounded-2xl ${
                   message.role === 'user'
                     ? 'bg-primary-600 text-white rounded-tr-md'
                     : 'bg-neutral-100 text-neutral-800 rounded-tl-md'
                 }`}
               >
-                <div className="text-sm">
+                <div className="text-sm leading-relaxed">
                   {formatMessage(message.content)}
                 </div>
               </div>
@@ -339,22 +339,23 @@ export default function Chatbot() {
         </div>
 
         {/* Quick actions */}
-        <div className="px-3 py-1.5 border-t border-neutral-100">
-          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+        <div className="px-4 py-3 border-t border-neutral-100 bg-neutral-50 rounded-b-2xl">
+          <p className="text-xs text-neutral-500 mb-2">Preguntas frecuentes:</p>
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => handleQuickAction(t('quickActionWood'))}
               disabled={isLoading}
-              className="flex-shrink-0 px-2 py-1 text-[11px] bg-neutral-100 hover:bg-neutral-200 disabled:opacity-50 rounded-full transition-colors"
+              className="flex-shrink-0 px-3 py-1.5 text-xs bg-white hover:bg-primary-50 disabled:opacity-50 rounded-full border border-neutral-200 hover:border-primary-300 transition-all shadow-sm"
             >
-              <Package className="w-3 h-3 inline mr-0.5" />
+              <Package className="w-3 h-3 inline mr-1" />
               {t('wood')}
             </button>
             <button
               type="button"
               onClick={() => handleQuickAction(t('quickActionNonSlip'))}
               disabled={isLoading}
-              className="flex-shrink-0 px-2 py-1 text-[11px] bg-neutral-100 hover:bg-neutral-200 disabled:opacity-50 rounded-full transition-colors"
+              className="flex-shrink-0 px-3 py-1.5 text-xs bg-white hover:bg-primary-50 disabled:opacity-50 rounded-full border border-neutral-200 hover:border-primary-300 transition-all shadow-sm"
             >
               {t('nonSlip')}
             </button>
@@ -362,9 +363,9 @@ export default function Chatbot() {
               type="button"
               onClick={() => handleQuickAction(t('quickActionRecommended'))}
               disabled={isLoading}
-              className="flex-shrink-0 px-2 py-1 text-[11px] bg-neutral-100 hover:bg-neutral-200 disabled:opacity-50 rounded-full transition-colors"
+              className="flex-shrink-0 px-3 py-1.5 text-xs bg-white hover:bg-primary-50 disabled:opacity-50 rounded-full border border-neutral-200 hover:border-primary-300 transition-all shadow-sm"
             >
-              <ShoppingCart className="w-3 h-3 inline mr-0.5" />
+              <ShoppingCart className="w-3 h-3 inline mr-1" />
               {t('recommended')}
             </button>
           </div>

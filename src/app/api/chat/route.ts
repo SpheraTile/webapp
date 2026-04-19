@@ -178,38 +178,65 @@ export async function POST(request: NextRequest) {
     const isUnrelated = unrelatedKeywords.some(kw => userQuery.includes(kw))
 
     if (!isUnrelated && userQuery.length > 2) {
-      // Build search filters based on query
-      const filters: Record<string, unknown> = { stock_m2: { gt: 0 } }
+      // Build search filters based on query - make them optional with OR conditions
+      const filters: Record<string, unknown>[] = []
 
-      if (userQuery.includes('madera')) filters.aspecto = 'MADERA'
-      else if (userQuery.includes('mármol') || userQuery.includes('marmol')) filters.aspecto = 'MARMOL'
-      else if (userQuery.includes('piedra')) filters.aspecto = 'PIEDRA'
-      else if (userQuery.includes('cemento')) filters.aspecto = 'CEMENTO'
-      else if (userQuery.includes('blanco')) filters.aspecto = 'BLANCO'
+      // Base filter: products with stock
+      const baseFilter = { stock_m2: { gt: 0 } }
 
-      if (userQuery.includes('antideslizante')) filters.acabado = 'ANTIDESLIZANTE'
-      else if (userQuery.includes('mate')) filters.acabado = 'MATE'
-      else if (userQuery.includes('pulido')) filters.acabado = 'PULIDO'
+      // Add optional filters for more flexible search
+      if (userQuery.includes('madera')) {
+        filters.push({ ...baseFilter, aspecto: 'MADERA' })
+      }
+      if (userQuery.includes('mármol') || userQuery.includes('marmol')) {
+        filters.push({ ...baseFilter, aspecto: 'MARMOL' })
+      }
+      if (userQuery.includes('piedra')) {
+        filters.push({ ...baseFilter, aspecto: 'PIEDRA' })
+      }
+      if (userQuery.includes('cemento')) {
+        filters.push({ ...baseFilter, aspecto: 'CEMENTO' })
+      }
+      if (userQuery.includes('blanco')) {
+        filters.push({ ...baseFilter, aspecto: 'BLANCO' })
+      }
+      if (userQuery.includes('antideslizante')) {
+        filters.push({ ...baseFilter, acabado: 'ANTIDESLIZANTE' })
+      }
+      if (userQuery.includes('mate')) {
+        filters.push({ ...baseFilter, acabado: 'MATE' })
+      }
+      if (userQuery.includes('pulido')) {
+        filters.push({ ...baseFilter, acabado: 'PULIDO' })
+      }
+      if (userQuery.includes('porcelánico') || userQuery.includes('porcelanico')) {
+        filters.push({ ...baseFilter, materia_prima: 'PORCELANICO' })
+      }
+      if (userQuery.includes('gres')) {
+        filters.push({ ...baseFilter, materia_prima: 'GRES' })
+      }
+      if (userQuery.includes('azulejo')) {
+        filters.push({ ...baseFilter, materia_prima: 'AZULEJO' })
+      }
 
-      if (userQuery.includes('porcelánico') || userQuery.includes('porcelanico')) filters.materia_prima = 'PORCELANICO'
-      else if (userQuery.includes('gres')) filters.materia_prima = 'GRES'
-      else if (userQuery.includes('azulejo')) filters.materia_prima = 'AZULEJO'
+      // If no specific filters, get all products with stock
+      const searchFilter = filters.length > 0 ? { OR: filters } : baseFilter
 
       const products = await prisma.producto.findMany({
-        where: filters,
-        take: 20,
+        where: searchFilter,
+        take: 30,
         orderBy: { stock_m2: 'desc' },
       })
 
       if (products.length > 0) {
-        productContext = '\n\n**PRODUCTOS ENCONTRADOS:**\n'
+        productContext = '\n\n**PRODUCTOS ENCONTRADOS (' + products.length + '):**\n'
         productContext += products.map(p => formatProductForPrompt(p)).join('\n\n')
       }
     }
 
     // Build system prompt
     const userInfo = userId ? 'USUARIO: ' + userName + (isAdmin ? ' (Admin)' : '') : 'VISITANTE'
-    const systemPrompt = 'Eres el asistente virtual de SPHERA TILE (cerámica en Onda, Castellón). Respondes en el idioma del usuario. Sé útil pero breve (2-3 frases máximo).\n\nREGLAS ESTRICTAS:\n1. SOLO informativo: NO puedes crear pedidos, reservar stock, procesar pagos ni hacer cambios en el sistema\n2. Para acciones (pedidos, compras), recomienda usar la web o llamar al +34 633 909 095\n3. Usa la información del contexto de productos ABAVO. NO inventes datos, precios o stock\n4. Si no hay información sobre algo en el contexto, di "No tengo esa información concreta, pero el equipo comercial puede ayudarte"\n5. Para preguntas no relacionadas con cerámica, redirige amablemente al tema de SPHERA TILE\n\nINFORMACIÓN DISPONIBLE:\n- Productos del catálogo (nombre, referencia, formato, precio, stock, material, acabado)\n- Pedidos del usuario (si está logueado)\n- Información de contacto y horarios\n\nCONTACTO COMERCIAL:\n- Tel: +34 633 909 095 | L-V 8:00-18:00\n- Email: info@spheratile.es\n- Dirección: Avda. Mediterráneo 113, 12200 Onda, Castellón\n- Web: spheratile.es\n\n' + userInfo + userContext + ordersContext + productContext
+    const systemPrompt = 'Eres el asistente virtual de SPHERA TILE, una empresa de cerámica con más de 30 años de experiencia en Onda (Castellón). Tu tono es cercano, profesional y servicial.\n\nINSTRUCCIONES DE COMUNICACIÓN:\n- Sé amable y conversacional, usa frases completas y naturales\n- Puedes usar emojis moderadamente 😊 para hacer el texto más amigable\n- Da respuestas más detalladas cuando el usuario pida información sobre productos\n- Ofrece siempre ayuda adicional al final de cada respuesta\n- Evita ser demasiado breve o seco\n\nREGLAS ESTRICTAS:\n1. SOLO informativo: NO puedes crear pedidos, reservar stock, procesar pagos\n2. Para acciones (pedidos, compras), recomienda usar la web o llamar al +34 633 909 095\n3. Usa SOLO la información del contexto de productos. NO inventes datos, precios o stock\n4. Si no tienes información sobre algo, sugiere contactar con el equipo comercial\n5. Para temas no relacionados con cerámica, redirige amablemente al tema de SPHERA TILE\n\nINFORMACIÓN DISPONIBLE:\n- Productos del catálogo (nombre, referencia, formato, precio, stock, material, acabado)\n- Pedidos del usuario (si está logueado)\n- Información de contacto y horarios\n\nCONTACTO COMERCIAL:\n- Tel: +34 633 909 095 | L-V 8:00-18:00\n- Email: info@spheratile.es\n- Dirección: Avda. Mediterráneo 113, 12200 Onda, Castellón\n- Web: spheratile.es\n\n' + userInfo + userContext + ordersContext + productContext
 
     // Filter out welcome assistant message (first message is always the bot greeting)
     const chatMessages = messages.filter((m: { role: string; id?: string }) =>
@@ -228,8 +255,8 @@ export async function POST(request: NextRequest) {
     const stream = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: openaiMessages,
-      max_tokens: 300,
-      temperature: 0.3,
+      max_tokens: 500,
+      temperature: 0.7,
       stream: true,
     })
 

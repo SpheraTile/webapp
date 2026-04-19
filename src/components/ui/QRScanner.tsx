@@ -16,27 +16,35 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
   const [error, setError] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [needsPermission, setNeedsPermission] = useState(false)
+  const [hasInteracted, setHasInteracted] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (isOpen && !isScanning) {
+    if (isOpen && !isScanning && hasInteracted) {
       startScanning()
     }
 
     return () => {
       stopScanning()
     }
-  }, [isOpen])
+  }, [isOpen, hasInteracted])
 
   const requestCameraPermission = async () => {
     try {
       setError(null)
+      console.log('📷 Solicitando permiso de cámara...')
 
       // Solicitar permiso explícitamente para Chrome móvil
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
       })
+
+      console.log('✅ Permiso concedido, stream obtenido:', stream)
 
       // Detener el stream inmediatamente (solo queríamos el permiso)
       stream.getTracks().forEach(track => track.stop())
@@ -44,14 +52,24 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
       // Ahora iniciar el escáner
       startScanning()
     } catch (err) {
-      console.error('Error requesting camera permission:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Permiso denegado'
+      console.error('❌ Error requesting camera permission:', err)
 
-      if (errorMessage.includes('Permission denied')) {
-        setError('Permiso de cámara denegado. En Chrome: Configuración del sitio → Permisos → Cámara.')
+      // Verificar el tipo de error para dar mensajes más específicos
+      if (err instanceof Error) {
+        if (err.name === 'NotAllowedError') {
+          setError('Permiso denegado. En Chrome: ajustes → Configuración del sitio → Permisos → Cámara.')
+        } else if (err.name === 'NotFoundError') {
+          setError('No se encontró cámara. Verifica que tu dispositivo tenga cámara.')
+        } else if (err.name === 'NotReadableError') {
+          setError('La cámara está siendo usada por otra app. Cierra otras apps que usen la cámara.')
+        } else {
+          setError(`Error: ${err.message}`)
+        }
       } else {
-        setError('No se pudo acceder a la cámara. Verifica los permisos del navegador.')
+        setError('No se pudo acceder a la cámara. Error desconocido.')
       }
+
+      console.log('🔍 Detalle del error:', err)
       setNeedsPermission(true)
     }
   }
@@ -187,9 +205,21 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
 
       {/* Scanner area */}
       <div className="flex-1 flex flex-col items-center justify-center px-4">
+        {!isScanning && !needsPermission && (
+          <button
+            onClick={() => {
+              setHasInteracted(true)
+              startScanning()
+            }}
+            className="px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors mb-6"
+          >
+            📷 Iniciar Escáner
+          </button>
+        )}
+
         <div
           ref={containerRef}
-          className="relative w-full max-w-sm aspect-square bg-black rounded-2xl overflow-hidden"
+          className={`relative w-full max-w-sm aspect-square bg-black rounded-2xl overflow-hidden ${!isScanning && !needsPermission ? 'opacity-50' : ''}`}
         >
           <div id="qr-reader" className="w-full h-full" />
 
@@ -204,23 +234,29 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
 
         {/* Instructions */}
         <p className="text-white/70 text-center mt-6 text-sm max-w-xs">
-          Apunta la cámara al código QR de un producto para ver sus detalles
+          {isScanning ? 'Apunta la cámara al código QR' : 'Toca el botón para iniciar el escáner'}
         </p>
 
         {/* Error message */}
-        {error && (
+        {error && !isScanning && (
           <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg max-w-xs">
-            <p className="text-red-300 text-sm text-center mb-3">{error}</p>
+            <p className="text-red-300 text-sm text-center">{error}</p>
+            <button
+              onClick={requestCameraPermission}
+              className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors w-full"
+            >
+              📷 Solicitar Permiso
+            </button>
           </div>
         )}
 
         {/* Botón para solicitar permisos manualmente (Chrome móvil) */}
-        {needsPermission && (
+        {needsPermission && !isScanning && (
           <button
             onClick={requestCameraPermission}
             className="mt-4 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
           >
-            📷 Activar Cámara
+            📷 Solicitar Permiso de Cámara
           </button>
         )}
       </div>

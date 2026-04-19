@@ -157,21 +157,31 @@ export default function Chatbot() {
       // Sanitize the line first to prevent XSS
       const sanitizedLine = formatMessageSafely(line)
 
+      // Handle markdown links: [text](url)
+      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
+      const lineWithLinks = sanitizedLine.replace(linkRegex, (match, text, url) => {
+        // Only allow links to our own domain
+        if (url.includes('spheratile.com') || url.startsWith('/')) {
+          return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 underline font-medium">${text}</a>`
+        }
+        return text // Return just the text if external link
+      })
+
       // Handle bullet points
       if (line.startsWith('• ') || line.startsWith('- ')) {
         return (
-          <li key={i} className="ml-4 list-disc" dangerouslySetInnerHTML={{ __html: sanitizedLine }} />
+          <li key={i} className="ml-4 list-disc" dangerouslySetInnerHTML={{ __html: lineWithLinks }} />
         )
       }
       // Handle bold text (already sanitized)
       if (line.includes('**')) {
         return (
-          <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: sanitizedLine }} />
+          <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: lineWithLinks }} />
         )
       }
       // Regular line
       if (line.trim()) {
-        return <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: sanitizedLine }} />
+        return <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: lineWithLinks }} />
       }
       return <br key={i} />
     })

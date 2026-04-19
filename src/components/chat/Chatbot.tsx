@@ -161,7 +161,7 @@ export default function Chatbot() {
       const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
       const lineWithLinks = sanitizedLine.replace(linkRegex, (match, text, url) => {
         // Only allow links to our own domain
-        if (url.includes('spheratile.com') || url.startsWith('/')) {
+        if (url.includes('spheratile.es') || url.includes('spheratile.com') || url.startsWith('/')) {
           return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700 underline font-medium">${text}</a>`
         }
         return text // Return just the text if external link

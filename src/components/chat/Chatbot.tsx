@@ -350,33 +350,41 @@ export default function Chatbot() {
 
         {/* Quick actions */}
         <div className="px-4 py-3 border-t border-neutral-100 bg-neutral-50 rounded-b-2xl">
-          <p className="text-xs text-neutral-500 mb-2">Preguntas frecuentes:</p>
+          <p className="text-xs text-neutral-500 mb-2">💡 Preguntas frecuentes:</p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => handleQuickAction(t('quickActionWood'))}
+              onClick={() => handleQuickAction('Muéstrame cerámicas con aspecto madera')}
               disabled={isLoading}
               className="flex-shrink-0 px-3 py-1.5 text-xs bg-white hover:bg-primary-50 disabled:opacity-50 rounded-full border border-neutral-200 hover:border-primary-300 transition-all shadow-sm"
             >
               <Package className="w-3 h-3 inline mr-1" />
-              {t('wood')}
+              Efecto madera
             </button>
             <button
               type="button"
-              onClick={() => handleQuickAction(t('quickActionNonSlip'))}
+              onClick={() => handleQuickAction('Busco cerámicas antideslizantes para exterior')}
               disabled={isLoading}
               className="flex-shrink-0 px-3 py-1.5 text-xs bg-white hover:bg-primary-50 disabled:opacity-50 rounded-full border border-neutral-200 hover:border-primary-300 transition-all shadow-sm"
             >
-              {t('nonSlip')}
+              Antideslizante
             </button>
             <button
               type="button"
-              onClick={() => handleQuickAction(t('quickActionRecommended'))}
+              onClick={() => handleQuickAction('¿Qué porcelánico me recomiendas?')}
               disabled={isLoading}
               className="flex-shrink-0 px-3 py-1.5 text-xs bg-white hover:bg-primary-50 disabled:opacity-50 rounded-full border border-neutral-200 hover:border-primary-300 transition-all shadow-sm"
             >
               <ShoppingCart className="w-3 h-3 inline mr-1" />
-              {t('recommended')}
+              Recomendados
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickAction('Muéstrame productos con acabado pulido')}
+              disabled={isLoading}
+              className="flex-shrink-0 px-3 py-1.5 text-xs bg-white hover:bg-primary-50 disabled:opacity-50 rounded-full border border-neutral-200 hover:border-primary-300 transition-all shadow-sm"
+            >
+              Acabado pulido
             </button>
           </div>
         </div>

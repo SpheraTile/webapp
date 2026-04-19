@@ -56,13 +56,16 @@ function formatProductForPrompt(product: {
   aspecto?: string
   acabado?: string
 }) {
-  return `- **${product.nombre}** (Ref: ${product.referencia})
-  Serie: ${product.serie} | Formato: ${product.formato}
-  Precio: ${product.precio_m2.toFixed(2)} €/m² | Stock: ${product.stock_m2.toFixed(2)} m²
-  ${product.calidad ? `Calidad: ${product.calidad === 'COM' ? 'Comercial' : 'Primera'}` : ''}
-  ${product.materia_prima ? `Material: ${product.materia_prima}` : ''}
-  ${product.aspecto ? `Aspecto: ${product.aspecto}` : ''}
-  ${product.acabado ? `Acabado: ${product.acabado}` : ''}`
+  let text = '- **' + product.nombre + '** (Ref: ' + product.referencia + ')\n'
+  text += '  Serie: ' + product.serie + ' | Formato: ' + product.formato + '\n'
+  text += '  Precio: ' + product.precio_m2.toFixed(2) + ' €/m² | Stock: ' + product.stock_m2.toFixed(2) + ' m²\n'
+  if (product.calidad) {
+    text += '  Calidad: ' + (product.calidad === 'COM' ? 'Comercial' : 'Primera') + '\n'
+  }
+  if (product.materia_prima) text += '  Material: ' + product.materia_prima + '\n'
+  if (product.aspecto) text += '  Aspecto: ' + product.aspecto + '\n'
+  if (product.acabado) text += '  Acabado: ' + product.acabado
+  return text
 }
 
 export async function POST(request: NextRequest) {
@@ -115,11 +118,11 @@ export async function POST(request: NextRequest) {
       })
 
       if (user) {
-        userContext = `\n**INFORMACIÓN DEL USUARIO:**
-- Nombre: ${user.nombre || userName}
-- Email: ${user.email}
-${user.empresa ? `- Empresa: ${user.empresa}` : ''}
-${user.telefono ? `- Teléfono: ${user.telefono}` : ''}`
+        userContext = '\n\n**INFORMACIÓN DEL USUARIO:**\n'
+        userContext += '- Nombre: ' + (user.nombre || userName) + '\n'
+        userContext += '- Email: ' + user.email + '\n'
+        if (user.empresa) userContext += '- Empresa: ' + user.empresa + '\n'
+        if (user.telefono) userContext += '- Teléfono: ' + user.telefono
       }
 
       // Check if user is asking about orders
@@ -143,7 +146,8 @@ ${user.telefono ? `- Teléfono: ${user.telefono}` : ''}`
         })
 
         if (orders.length > 0) {
-          ordersContext = `\n\n**PEDIDOS DEL USUARIO:**\n${orders.map(o => {
+          ordersContext = '\n\n**PEDIDOS DEL USUARIO:**\n'
+          ordersContext += orders.map(o => {
             const estadoLabel: Record<string, string> = {
               'PENDIENTE': 'Pendiente',
               'CONFIRMADO': 'Confirmado',
@@ -154,28 +158,26 @@ ${user.telefono ? `- Teléfono: ${user.telefono}` : ''}`
             }
 
             const itemsStr = o.items.slice(0, 3).map((i: { producto: { nombre: string }; cantidad_cajas: number }) =>
-              `  - ${i.producto.nombre} (${i.cantidad_cajas} cajas)`
+              '  - ' + i.producto.nombre + ' (' + i.cantidad_cajas + ' cajas)'
             ).join('\n')
 
-            return `- **Pedido #${o.numero_pedido}** (${new Date(o.createdAt).toLocaleDateString('es-ES')})
-  Estado: ${estadoLabel[o.estado] || o.estado} | Total: ${o.total_euros.toFixed(2)}€
-${itemsStr}${o.items.length > 3 ? `\n  ... y ${o.items.length - 3} productos más` : ''}`
-          }).join('\n\n')}`
+            let orderText = '- **Pedido #' + o.numero_pedido + '** (' + new Date(o.createdAt).toLocaleDateString('es-ES') + ')\n'
+            orderText += '  Estado: ' + (estadoLabel[o.estado] || o.estado) + ' | Total: ' + o.total_euros.toFixed(2) + '€\n'
+            orderText += itemsStr
+            if (o.items.length > 3) orderText += '\n  ... y ' + (o.items.length - 3) + ' productos más'
+            return orderText
+          }).join('\n\n')
         } else {
           ordersContext = '\n\n**PEDIDOS DEL USUARIO:** No tiene pedidos todavía.'
         }
       }
     }
 
-    // Search for products if query seems product-related
-    const productKeywords = ['producto', 'cerámica', 'azulejo', 'porcelánico', 'gres', 'madera',
-      'mármol', 'piedra', 'mate', 'pulido', 'antideslizante', 'suelo', 'pared', 'baño',
-      'cocina', 'exterior', 'precio', 'stock', 'busco', 'necesito', 'quiero', 'tienes',
-      'muestra', 'muéstrame', 'ver', 'disponible', 'recomienda', 'recomendación']
+    // Search for products - always search unless clearly unrelated
+    const unrelatedKeywords = ['hola', 'adios', 'gracias', 'buenos dias', 'buenas tardes', 'buenas noches']
+    const isUnrelated = unrelatedKeywords.some(kw => userQuery.includes(kw))
 
-    const wantsProducts = productKeywords.some(kw => userQuery.includes(kw))
-
-    if (wantsProducts) {
+    if (!isUnrelated && userQuery.length > 2) {
       // Build search filters based on query
       const filters: Record<string, unknown> = { stock_m2: { gt: 0 } }
 
@@ -195,42 +197,19 @@ ${itemsStr}${o.items.length > 3 ? `\n  ... y ${o.items.length - 3} productos má
 
       const products = await prisma.producto.findMany({
         where: filters,
-        take: 15,
+        take: 20,
         orderBy: { stock_m2: 'desc' },
       })
 
       if (products.length > 0) {
-        productContext = `\n\n**PRODUCTOS ENCONTRADOS:**\n${products.map(p => formatProductForPrompt(p)).join('\n\n')}`
+        productContext = '\n\n**PRODUCTOS ENCONTRADOS:**\n'
+        productContext += products.map(p => formatProductForPrompt(p)).join('\n\n')
       }
     }
 
     // Build system prompt
-    const systemPrompt = `Eres el asistente informativo de SPHERA TILE, empresa de cerámica en Onda (Castellón). Respondes en el idioma del usuario. Sé breve y directo (máximo 3-4 frases por respuesta).
-
-REGLAS ESTRICTAS - CUMPLE SIEMPRE:
-1. Eres SOLO informativo. NO puedes realizar NINGUNA acción: no puedes crear pedidos, reservar material, procesar pagos, aplicar descuentos, modificar datos ni hacer NADA en el sistema.
-2. Si el usuario pide hacer un pedido, comprar, reservar o cualquier acción, responde: "Para realizar pedidos o gestiones, por favor usa la web directamente o contacta con nuestro equipo comercial al +34 633 909 095."
-3. SOLO responde con información que tengas en el contexto de abajo. Si no tienes datos sobre algo, di "No tengo esa información, contacta con el equipo comercial."
-4. NO inventes productos, precios, stock ni datos que no estén en el contexto.
-5. NO prometas plazos de entrega, descuentos ni condiciones especiales.
-6. Para temas ajenos a cerámica/construcción, responde brevemente que solo puedes ayudar con temas de SPHERA TILE.
-
-PUEDES INFORMAR SOBRE:
-- Productos que aparezcan en el contexto (nombre, precio, stock, formato)
-- Estado de pedidos del usuario (si aparecen en el contexto)
-- Información general: contacto, horarios, dirección
-- Consejos básicos sobre cerámica (formatos, materiales, usos)
-- Cálculos simples (m² a cajas, etc.)
-
-CONTACTO:
-- Comercial: +34 633 909 095
-- Horario: L-V 8:00-18:00
-- Dirección: Avda. Mediterráneo 113, 12200 Onda, Castellón
-- Email: info@spheratile.es
-- Web: spheratile.es
-
-${userId ? `USUARIO: ${userName}${isAdmin ? ' (Admin)' : ''}` : 'VISITANTE (no logueado)'}
-${userContext}${ordersContext}${productContext}`
+    const userInfo = userId ? 'USUARIO: ' + userName + (isAdmin ? ' (Admin)' : '') : 'VISITANTE'
+    const systemPrompt = 'Eres el asistente virtual de SPHERA TILE (cerámica en Onda, Castellón). Respondes en el idioma del usuario. Sé útil pero breve (2-3 frases máximo).\n\nREGLAS ESTRICTAS:\n1. SOLO informativo: NO puedes crear pedidos, reservar stock, procesar pagos ni hacer cambios en el sistema\n2. Para acciones (pedidos, compras), recomienda usar la web o llamar al +34 633 909 095\n3. Usa la información del contexto de productos ABAVO. NO inventes datos, precios o stock\n4. Si no hay información sobre algo en el contexto, di "No tengo esa información concreta, pero el equipo comercial puede ayudarte"\n5. Para preguntas no relacionadas con cerámica, redirige amablemente al tema de SPHERA TILE\n\nINFORMACIÓN DISPONIBLE:\n- Productos del catálogo (nombre, referencia, formato, precio, stock, material, acabado)\n- Pedidos del usuario (si está logueado)\n- Información de contacto y horarios\n\nCONTACTO COMERCIAL:\n- Tel: +34 633 909 095 | L-V 8:00-18:00\n- Email: info@spheratile.es\n- Dirección: Avda. Mediterráneo 113, 12200 Onda, Castellón\n- Web: spheratile.es\n\n' + userInfo + userContext + ordersContext + productContext
 
     // Filter out welcome assistant message (first message is always the bot greeting)
     const chatMessages = messages.filter((m: { role: string; id?: string }) =>
@@ -281,6 +260,6 @@ ${userContext}${ordersContext}${productContext}`
   } catch (error) {
     console.error('Error in chat API:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    return NextResponse.json({ error: `Error: ${errorMessage}` }, { status: 500 })
+    return NextResponse.json({ error: 'Error: ' + errorMessage }, { status: 500 })
   }
 }

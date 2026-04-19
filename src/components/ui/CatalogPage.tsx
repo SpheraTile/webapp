@@ -1,6 +1,7 @@
 'use client'
 
 import { QRCodeSVG } from 'qrcode.react'
+import { isElongatedFormat, is60x120Format, isSquareFormat } from '@/lib/gridOptimizer'
 
 const COMPANY = {
   name: 'SPHERA TILE S.L.',
@@ -55,35 +56,18 @@ function abbreviateUso(uso: string): string {
 
 // Funciones auxiliares para clasificar productos
 function isSquareProduct(format: string): boolean {
-  const match = format.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i)
-  if (!match) return false
-
-  const parts = format.toLowerCase().split('x')
-  if (parts.length === 2) {
-    const first = parseFloat(parts[0].replace(',', '.'))
-    const second = parseFloat(parts[1].replace(',', '.'))
-    return Math.abs(first - second) < 1 // Permitir pequeña diferencia
-  }
-  return false
+  // Usar la lógica genérica de gridOptimizer
+  return isSquareFormat(format)
 }
 
 function isElongatedProduct(format: string): boolean {
-  return (format.includes('22.5') && format.includes('119')) ||
-    (format.includes('23.3') && format.includes('120')) ||
-    (format.includes('23.3') && format.includes('119'))
+  // Usar la lógica genérica de gridOptimizer que detecta cualquier formato alargado
+  return isElongatedFormat(format)
 }
 
 function is60x120Product(format: string): boolean {
-  // Más específico: formato que contiene 60x120 pero no es cuadrado (60x60)
-  const parts = format.toLowerCase().split('x')
-  if (parts.length === 2) {
-    const first = parseFloat(parts[0].replace(',', '.'))
-    const second = parseFloat(parts[1].replace(',', '.'))
-    // Verificar que es 60x120 (con pequeñas variaciones decimales)
-    return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
-      (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
-  }
-  return false
+  // Usar la lógica genérica de gridOptimizer
+  return is60x120Format(format)
 }
 
 // Ordenar productos: cuadrados primero, luego 60x120, luego alargados, luego el resto
@@ -124,28 +108,9 @@ function ProductCard({ product, isElongated, showQR = true, ocultarIndicadorAlma
   const cell = { border: '1px solid #d4d4d4', padding: '6px 8px', fontSize: '12px', wordWrap: 'break-word' as const }
   const headerCell = { ...cell, backgroundColor: '#f5f5f5', fontWeight: 'bold' as const, width: '25%' }
 
-  // Detectar si el producto es 60x120
-  const is60x120 = product.formato.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i) && (() => {
-    const parts = product.formato.toLowerCase().split('x')
-    if (parts.length === 2) {
-      const first = parseFloat(parts[0].replace(',', '.'))
-      const second = parseFloat(parts[1].replace(',', '.'))
-      return (Math.abs(first - 60) < 1 && Math.abs(second - 120) < 5) ||
-        (Math.abs(second - 60) < 1 && Math.abs(first - 120) < 5)
-    }
-    return false
-  })()
-
-  // Detectar si el producto es cuadrado (formatos como 60x60, 45x45, etc.)
-  const isSquare = product.formato.match(/^\d+[.,]?\d*x\d+[.,]?\d*$/i) && (() => {
-    const parts = product.formato.toLowerCase().split('x')
-    if (parts.length === 2) {
-      const first = parseFloat(parts[0].replace(',', '.'))
-      const second = parseFloat(parts[1].replace(',', '.'))
-      return Math.abs(first - second) < 1 // Permitir pequeña diferencia
-    }
-    return false
-  })()
+  // Detectar tipo de producto usando las funciones importadas de gridOptimizer
+  const is60x120 = is60x120Format(product.formato)
+  const isSquare = isSquareFormat(product.formato)
 
   // Productos alargados: doble ancho, altura ajustada a ~75%
   const cardWidth = isElongated ? '750px' : '368px'
@@ -293,11 +258,8 @@ export function CatalogPage({ products, pageNumber, totalPages, showQR = true, o
   // Ordenar productos: cuadrados primero, luego 60x120, luego alargados
   const sortedProducts = sortProducts(products)
 
-  // Detectar productos alargados (22.5x119.5, 23.3x120 o similar)
-  const isElongated = (product: CatalogProduct) =>
-    (product.formato.includes('22.5') && product.formato.includes('119')) ||
-    (product.formato.includes('23.3') && product.formato.includes('120')) ||
-    (product.formato.includes('23.3') && product.formato.includes('119'))
+  // Detectar productos alargados usando la lógica genérica
+  const isElongated = (product: CatalogProduct) => isElongatedFormat(product.formato)
 
   // Determinar el tipo de página según el primer producto ordenado
   const isElongatedPage = sortedProducts.length > 0 && isElongated(sortedProducts[0])

@@ -15,88 +15,33 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
-  const [needsPermission, setNeedsPermission] = useState(false)
-  const [hasInteracted, setHasInteracted] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (isOpen && !isScanning && hasInteracted) {
+    if (isOpen && !isScanning) {
       startScanning()
     }
 
     return () => {
       stopScanning()
     }
-  }, [isOpen, hasInteracted])
-
-  const requestCameraPermission = async () => {
-    try {
-      setError(null)
-      console.log('📷 Solicitando permiso de cámara...')
-
-      // Solicitar permiso explícitamente para Chrome móvil
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      })
-
-      console.log('✅ Permiso concedido, stream obtenido:', stream)
-
-      // Detener el stream inmediatamente (solo queríamos el permiso)
-      stream.getTracks().forEach(track => track.stop())
-
-      // Ahora iniciar el escáner
-      startScanning()
-    } catch (err) {
-      console.error('❌ Error requesting camera permission:', err)
-
-      // Verificar el tipo de error para dar mensajes más específicos
-      if (err instanceof Error) {
-        if (err.name === 'NotAllowedError') {
-          setError('Permiso denegado. En Chrome: ajustes → Configuración del sitio → Permisos → Cámara.')
-        } else if (err.name === 'NotFoundError') {
-          setError('No se encontró cámara. Verifica que tu dispositivo tenga cámara.')
-        } else if (err.name === 'NotReadableError') {
-          setError('La cámara está siendo usada por otra app. Cierra otras apps que usen la cámara.')
-        } else {
-          setError(`Error: ${err.message}`)
-        }
-      } else {
-        setError('No se pudo acceder a la cámara. Error desconocido.')
-      }
-
-      console.log('🔍 Detalle del error:', err)
-      setNeedsPermission(true)
-    }
-  }
+  }, [isOpen])
 
   const startScanning = async () => {
     try {
       setError(null)
-      setNeedsPermission(false)
       setIsScanning(true)
 
       // Verificar si estamos en HTTPS (requerido por Chrome móvil)
       if (typeof window !== 'undefined' && window.location.protocol !== 'https:' &&
           window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        throw new Error('La cámara requiere HTTPS. Asegúrate de que el sitio usa una conexión segura.')
+        throw new Error('La cámara requiere HTTPS.')
       }
 
       // Verificar soporte de getUserMedia
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Tu navegador no soporta acceso a la cámara. Intenta con la última versión de Chrome o Firefox.')
-      }
-
-      // Verificar si la cámara está disponible
-      const devices = await navigator.mediaDevices.enumerateDevices()
-      const cameras = devices.filter(device => device.kind === 'videoinput')
-
-      if (cameras.length === 0) {
-        throw new Error('No se detecta ninguna cámara en tu dispositivo.')
+        throw new Error('Tu navegador no soporta acceso a la cámara.')
       }
 
       // Wait for DOM to be ready
@@ -120,22 +65,42 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
       )
     } catch (err) {
       console.error('Error starting scanner:', err)
-      const errorMessage = err instanceof Error ? err.message : 'No se pudo acceder a la cámara'
 
-      // Mensajes específicos para Chrome
-      if (errorMessage.includes('HTTPS')) {
-        setError('Chrome requiere conexión HTTPS para acceder a la cámara.')
-      } else if (errorMessage.includes('NotAllowedError') || errorMessage.includes('Permission denied')) {
-        setError('Permiso denegado. Pulsa el botón para solicitar permiso.')
-        setNeedsPermission(true)
-      } else if (errorMessage.includes('Requested device not found')) {
-        setError('Cámara no encontrada. Verifica que tu dispositivo tenga cámara disponible.')
+      // Detectar si es un error de permiso y solicitarlo automáticamente
+      const errorMessage = err instanceof Error ? err.message : String(err)
+
+      if (
+        errorMessage.includes('NotAllowedError') ||
+        errorMessage.includes('Permission denied') ||
+        errorMessage.includes('Permission dismissed') ||
+        errorMessage.includes('NotAllowedError')
+      ) {
+        console.log('🔍 Permiso denegado, solicitando automáticamente...')
+
+        // Solicitar permiso automáticamente
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
+          })
+
+          console.log('✅ Permiso obtenido, reiniciando escáner...')
+
+          // Detener el stream
+          stream.getTracks().forEach(track => track.stop())
+
+          // Reiniciar el escáner después de obtener permiso
+          setTimeout(() => {
+            startScanning()
+          }, 500)
+        } catch (permErr) {
+          console.error('❌ Error al solicitar permiso:', permErr)
+          setError('No se pudo acceder a la cámara. Ve a Ajustes → Configuración del sitio → Permisos.')
+          setIsScanning(false)
+        }
       } else {
         setError(errorMessage)
-        setNeedsPermission(true)
+        setIsScanning(false)
       }
-
-      setIsScanning(false)
     }
   }
 
@@ -205,21 +170,9 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
 
       {/* Scanner area */}
       <div className="flex-1 flex flex-col items-center justify-center px-4">
-        {!isScanning && !needsPermission && (
-          <button
-            onClick={() => {
-              setHasInteracted(true)
-              startScanning()
-            }}
-            className="px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors mb-6"
-          >
-            📷 Iniciar Escáner
-          </button>
-        )}
-
         <div
           ref={containerRef}
-          className={`relative w-full max-w-sm aspect-square bg-black rounded-2xl overflow-hidden ${!isScanning && !needsPermission ? 'opacity-50' : ''}`}
+          className="relative w-full max-w-sm aspect-square bg-black rounded-2xl overflow-hidden"
         >
           <div id="qr-reader" className="w-full h-full" />
 
@@ -234,30 +187,14 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
 
         {/* Instructions */}
         <p className="text-white/70 text-center mt-6 text-sm max-w-xs">
-          {isScanning ? 'Apunta la cámara al código QR' : 'Toca el botón para iniciar el escáner'}
+          {isScanning ? 'Apunta la cámara al código QR' : 'Iniciando escáner...'}
         </p>
 
         {/* Error message */}
         {error && !isScanning && (
           <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg max-w-xs">
             <p className="text-red-300 text-sm text-center">{error}</p>
-            <button
-              onClick={requestCameraPermission}
-              className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors w-full"
-            >
-              📷 Solicitar Permiso
-            </button>
           </div>
-        )}
-
-        {/* Botón para solicitar permisos manualmente (Chrome móvil) */}
-        {needsPermission && !isScanning && (
-          <button
-            onClick={requestCameraPermission}
-            className="mt-4 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
-          >
-            📷 Solicitar Permiso de Cámara
-          </button>
         )}
       </div>
     </div>

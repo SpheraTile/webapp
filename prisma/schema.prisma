@@ -33,10 +33,12 @@ model User {
   referencia_mandato  String?
   idioma              String              @default("es") // es, en, ar
   activo              Boolean             @default(true)
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
   pedidos             Pedido[]
   resetTokens         ResetToken[]
+
+  @@map("users")
 }
 
 // Token para resetear contraseña
@@ -47,7 +49,9 @@ model ResetToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   used      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("reset_tokens")
 }
 
 enum Role {
@@ -102,9 +106,11 @@ model Producto {
   peso_caja_kg      Float
   pedido_minimo_m2  Float
   hs_code           String?        // Código arancelario (H.S. Code)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
   items             ItemPedido[]
+
+  @@map("productos")
 }
 
 enum Calidad {
@@ -181,8 +187,10 @@ model Pedido {
   estado          EstadoPedido @default(PENDIENTE)
   albaran         Albaran?
   factura         Factura?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  @@map("pedidos")
 }
 
 model ItemPedido {
@@ -197,6 +205,8 @@ model ItemPedido {
   cantidad_cajas      Int
   precio_m2           Float
   subtotal            Float
+
+  @@map("items_pedido")
 }
 
 enum EstadoPedido {
@@ -223,8 +233,10 @@ model Albaran {
   transportista     String?
   matricula         String?
   fecha_entrega     DateTime?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  @@map("albaranes")
 }
 
 enum EstadoAlbaran {
@@ -250,9 +262,11 @@ model Factura {
   notas                 String?
   fecha_vencimiento     DateTime
   fecha_pago            DateTime?
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
   items                 ItemFactura[]
+
+  @@map("facturas")
 }
 
 model ItemFactura {
@@ -268,6 +282,8 @@ model ItemFactura {
   cantidad_cajas      Int
   precio_m2           Float
   subtotal            Float
+
+  @@map("items_factura")
 }
 
 enum EstadoFactura {
@@ -293,5 +309,7 @@ model ConfiguracionSitio {
   valor           String
   tipo            String   @default("text") // text, image, video, json
   descripcion     String?
-  updatedAt       DateTime @updatedAt
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("configuracion_sitio")
 }

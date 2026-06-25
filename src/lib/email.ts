@@ -4,7 +4,11 @@ let resend: Resend | null = null
 
 function getResendClient() {
   if (!resend) {
-    resend = new Resend(process.env.RESEND_API_KEY)
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      console.error('❌ ERROR: RESEND_API_KEY no está configurada en las variables de entorno.')
+    }
+    resend = new Resend(apiKey)
   }
   return resend
 }
@@ -16,8 +20,15 @@ interface SendEmailParams {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailParams) {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('No se puede enviar el email porque falta la clave RESEND_API_KEY.')
+  }
+
   const client = getResendClient()
-  const fromEmail = process.env.EMAIL_FROM || 'SPHERA TILE <onboarding@resend.dev>'
+  const fromEmail = process.env.EMAIL_FROM || process.env.RESEND_FROM_EMAIL || 'SPHERA TILE <onboarding@resend.dev>'
+
+  console.log(`📧 Intentando enviar email a: ${to} (Remitente: ${fromEmail})`)
 
   try {
     const { data, error } = await client.emails.send({
@@ -28,13 +39,14 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
     })
 
     if (error) {
-      console.error('Error sending email:', error)
-      throw new Error('Error al enviar el email')
+      console.error('❌ Error de Resend al enviar email:', error)
+      throw new Error(`Error de Resend: ${error.message || JSON.stringify(error)}`)
     }
 
+    console.log(`✅ Email enviado con éxito a ${to}. ID: ${data?.id}`)
     return data
   } catch (error) {
-    console.error('Error in sendEmail:', error)
+    console.error('❌ Excepción al enviar email con Resend:', error)
     throw error
   }
 }

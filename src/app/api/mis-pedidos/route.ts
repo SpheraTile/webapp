@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { sendEmail, getOrderConfirmationEmail } from '@/lib/email'
+import { sendEmail, getOrderConfirmationEmail, getNewOrderAdminEmail } from '@/lib/email'
 
 // POST - Crear pedido desde la cesta del usuario
 export async function POST(request: NextRequest) {
@@ -148,6 +148,36 @@ export async function POST(request: NextRequest) {
       })
     } catch (emailError) {
       console.error('Error sending order confirmation email:', emailError)
+      // No fallar el pedido si el email falla
+    }
+
+    // Notificar al admin del nuevo pedido
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL || 'sales@spheratile.es'
+      const adminPedidoUrl = `https://app.spheratile.es/almacen/pedidos/${pedido.id}`
+      const totalFormatted = total_euros.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
+
+      const adminEmailContent = getNewOrderAdminEmail(
+        user.nombre,
+        user.empresa,
+        user.email,
+        numero_pedido,
+        totalFormatted,
+        pedido.items.map(item => ({
+          nombre: item.producto_nombre,
+          cantidad_m2: item.cantidad_m2,
+          cantidad_cajas: item.cantidad_cajas,
+        })),
+        adminPedidoUrl
+      )
+
+      await sendEmail({
+        to: adminEmail,
+        subject: adminEmailContent.subject,
+        html: adminEmailContent.html,
+      })
+    } catch (emailError) {
+      console.error('Error sending admin order notification email:', emailError)
       // No fallar el pedido si el email falla
     }
 

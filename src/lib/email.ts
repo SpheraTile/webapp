@@ -279,6 +279,89 @@ export function getOrderConfirmationEmail(
   }
 }
 
+export function getNewOrderAdminEmail(
+  clienteNombre: string,
+  clienteEmpresa: string | null,
+  clienteEmail: string,
+  numeroPedido: string,
+  total: string,
+  items: { nombre: string; cantidad_m2: number; cantidad_cajas: number }[],
+  pedidoUrl: string
+) {
+  const itemsRows = items.map(item => `
+    <tr>
+      <td style="padding: 8px 12px; border-bottom: 1px solid #eee; color: #333; font-size: 14px;">${item.nombre}</td>
+      <td style="padding: 8px 12px; border-bottom: 1px solid #eee; color: #666; font-size: 14px; text-align: right;">${item.cantidad_m2.toLocaleString('es-ES')} m²</td>
+      <td style="padding: 8px 12px; border-bottom: 1px solid #eee; color: #666; font-size: 14px; text-align: right;">${item.cantidad_cajas} cajas</td>
+    </tr>
+  `).join('')
+
+  return {
+    subject: `Nuevo pedido ${numeroPedido} - ${clienteEmpresa || clienteNombre}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <div style="background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 32px;">
+              <h1 style="color: #1b5e20; font-size: 28px; margin: 0;">SPHERA TILE</h1>
+            </div>
+
+            <div style="background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+              <p style="color: #1b5e20; font-weight: 600; margin: 0;">Nuevo pedido recibido</p>
+            </div>
+
+            <div style="background: #f5f5f5; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
+              <p style="margin: 0 0 8px 0; color: #999; font-size: 14px;">Número de pedido</p>
+              <p style="margin: 0 0 16px 0; color: #333; font-size: 18px; font-weight: 600;">${numeroPedido}</p>
+              <p style="margin: 0 0 8px 0; color: #999; font-size: 14px;">Cliente</p>
+              <p style="margin: 0 0 16px 0; color: #333; font-size: 16px; font-weight: 600;">${clienteNombre}${clienteEmpresa ? ` (${clienteEmpresa})` : ''}</p>
+              <p style="margin: 0 0 8px 0; color: #999; font-size: 14px;">Email</p>
+              <p style="margin: 0 0 16px 0; color: #333; font-size: 16px;">${clienteEmail}</p>
+              <p style="margin: 0 0 8px 0; color: #999; font-size: 14px;">Total (IVA incl.)</p>
+              <p style="margin: 0; color: #1b5e20; font-size: 24px; font-weight: 700;">${total}</p>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+              <thead>
+                <tr>
+                  <th style="padding: 8px 12px; border-bottom: 2px solid #1b5e20; color: #333; font-size: 13px; text-align: left;">Producto</th>
+                  <th style="padding: 8px 12px; border-bottom: 2px solid #1b5e20; color: #333; font-size: 13px; text-align: right;">m²</th>
+                  <th style="padding: 8px 12px; border-bottom: 2px solid #1b5e20; color: #333; font-size: 13px; text-align: right;">Cajas</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsRows}
+              </tbody>
+            </table>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${pedidoUrl}"
+                 style="display: inline-block; background-color: #1b5e20; color: white;
+                        padding: 16px 32px; border-radius: 8px; text-decoration: none;
+                        font-weight: 600; font-size: 16px;">
+                Ver pedido en almacén
+              </a>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+
+            <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+              © ${new Date().getFullYear()} SPHERA TILE. Todos los derechos reservados.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  }
+}
+
 export function getDataDeletionRequestEmail(
   clienteNombre: string,
   clienteEmail: string,
